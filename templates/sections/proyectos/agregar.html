@@ -1,0 +1,40 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block page %}page-info{% endblock %}
+{% block content %}
+		<section class="content">
+			<div class="btn-group" role="group" aria-label="Basic example">
+				<a class="btn btn-secondary active" href="agregar">Crear</a>
+				<a class="btn btn-secondary" href="view">Listado</a>
+				<a class="btn btn-secondary" href="papelera">Eliminados</a>
+			</div>
+			<main class="logo-content">
+				<h1 class="section-title">Proyecto</h1>
+				<form id="form-proyecto-save" action="save" autocomplete="off" method="post">
+					<div class="form-row">
+						<div class="field">
+							<label for="proyecto_name">Nombre</label>
+							<div class="input">
+								<input id="proyecto_name" name="proyecto_name" type="text" placeholder="" value="">
+							</div>
+						</div>
+					</div>
+
+					<div class="field">
+						<label for="proyecto_description">Descripción</label>
+						<textarea id="proyecto_description" name="proyecto_description" rows="8"></textarea>
+					</div>
+
+					<div class="actions">
+						<button type="submit" class="btn btn-primary" id="btn-guardar">Confirmar</button>
+					</div>
+
+					<div class="helper">
+						<span class="pill" aria-hidden="true"></span>
+						<span>Describe en lineas generales una breve descipcion de tu proyecto</span>
+					</div>
+				</form>
+			</main>
+		</section>
+<script src="{{ url_for('static', filename='scripts/proyectos.js') }}"></script>
+{% endblock %}

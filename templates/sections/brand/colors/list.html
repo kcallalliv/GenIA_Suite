@@ -1,0 +1,8 @@
+{% for lista in lista %}
+{% set myid = lista['asset_id'] %}
+{% set mycolor = lista['asset_value'] %}
+<div class="tile-photo item-color" data_id="{{myid}}" data_color="{{ mycolor }}" role="button" style='background-color: {{ mycolor }}'>
+	<div class="color-hover"><input type="text" data-coloris="" value="{{mycolor}}"></div>
+	<div class="item-close">×</div>
+</div>
+{% endfor %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Selector de Color</title>
+	<style>
+		body {
+			font-family: sans-serif;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: 100vh;
+			margin: 0;
+			background-color: #f0f0f0;
+		}
+		#colorPickerContainer {display: flex;flex-direction: column;align-items: center;gap: 20px;padding: 20px;background-color: white;border-radius: 8px;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);}
+		#colorPickerLabel {font-size: 1.2rem;color: #333;}
+		#colorPicker {width: 80px;height: 80px;border: 2px solid #ccc;border-radius: 50%;cursor: pointer;padding: 0;background-color: white;}
+		#colorPicker::-webkit-color-swatch {border: none;border-radius: 50%;padding: 0;}
+		#colorPicker::-webkit-color-swatch-wrapper {border: none;border-radius: 50%;padding: 0;}
+		#colorValue {font-family: monospace;font-size: 1rem;color: #555;background-color: #eee;padding: 5px 10px;border-radius: 4px;}
+	</style>
+</head>
+<body>
+
+	<div id="colorPickerContainer">
+		<label id="colorPickerLabel" for="colorPicker">Selecciona un color:</label>
+		<input type="color" id="colorPicker" value="#000000">
+		<p>Color seleccionado: <span id="colorValue">#000000</span></p>
+	</div>
+
+	<script>
+		// Tu código adaptado
+        const colorPickerContainer = document.getElementById('colorPicker');
+        const colorValueSpan = document.getElementById('colorValue');
+
+        const pickr = Pickr.create({
+            el: colorPickerContainer,
+            theme: 'classic', // Puedes elegir entre 'classic', 'monolith', 'nano'
+            default: '#E31616', // Color inicial, como en tu imagen
+            components: {
+                preview: true,
+                opacity: false,
+                hue: true,
+                interaction: {
+                    hex: true, // Activa la entrada HEX
+                    rgba: false,
+                    hsla: false,
+                    hsva: false,
+                    cmyk: false,
+                    input: true, // Permite al usuario escribir el valor
+                    clear: false,
+                    save: true
+                }
+            }
+        });
+
+        pickr.on('change', (color, instance) => {
+            // El objeto 'color' de pickr tiene métodos para obtener el valor
+            const selectedColor = color.toHEXA().toString();
+            
+            // Actualizar el valor en el span
+            colorValueSpan.textContent = selectedColor;
+
+            console.log('El color final seleccionado es:', selectedColor);
+        });
+	</script>
+
+</body>
+</html>

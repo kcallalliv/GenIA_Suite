@@ -1,0 +1,489 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block page %}page-info{% endblock %}
+{% block content %}
+<section class="content">
+	<div class="btn-group" role="group" aria-label="Basic example">
+		<a class="btn btn-secondary active" href="/proyectos/agregar">Crear</a>
+		<a class="btn btn-secondary" href="/proyectos">Listado</a>
+		<a class="btn btn-secondary" href="/brandkit/webscan/excluidos">Eliminados</a>
+	</div>
+	<main class="logo-content">
+		<div class="panel-header">
+			<span class="material-icons">tune</span>
+			<h2>Parámetros de Generación</h2>
+		</div>
+		<form id="form-iagenerate-save" action="/proyectos/colecciones/save" autocomplete="off" method="post">
+			<input type="hidden" id="txt_pid" name="txt_pid" value="{{proyecto_id}}">
+			<input type="hidden" id="txt_format" name="txt_format" value="blog_cover">
+			
+			<!-- Sección I: Producción Técnica -->
+			<div class="form-group">
+				<label class="form-label">Contexto Imagen</label>
+				<textarea class="form-input" id="contexto_imagen" name="contexto_imagen"></textarea>
+			</div>
+			<div class="section">
+				<div class="section-header active" onclick="toggleSection(this)">
+					<div class="section-iatitle">
+						<span class="material-icons">videocam</span>
+						<span>I. Producción Técnica</span>
+					</div>
+					<span class="material-icons toggle-icon">expand_more</span>
+				</div>
+				<div class="section-content active">
+					<div class="form-group">
+						<label class="form-label">Render Quality</label>
+						<div class="form-selectia">
+							<select class="form-select" id="estilo_artistico" name="estilo_artistico">
+								<option>cartoon</option>
+								<option>photorealistic</option>
+								<option selected>realistic</option>
+								<option>anime</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Iluminación</label>
+						<div class="form-selectia">
+							<select class="form-select" id="iluminacion_select" name="iluminacion">
+								<option selected>Luz de estudio suave</option>
+								<option>Luz natural</option>
+								<option>Luz dramática</option>
+								<option>Luz ambiental</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Ángulo de Cámara</label>
+						<div class="form-selectia">
+							<select class="form-select" id="angulo_camara_select" name="angulo_camara">
+								<option selected>Normal (Eye-level)</option>
+								<option>Plano cenital (Top view)</option>
+								<option>Contrapicado (Low angle)</option>
+								<option>Picado (High angle)</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Ratio Focal/Lente</label>
+						<div class="form-selectia">
+							<select class="form-select" id="ratio_focal_select" name="ratio_focal">
+								<option selected>Telephoto</option>
+								<option>Wide-Angle</option>
+								<option>Lente Macro</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Sección II: Composición y Escena -->
+			<div class="section">
+				<div class="section-header" onclick="toggleSection(this)">
+					<div class="section-iatitle">
+						<span class="material-icons">photo_camera</span>
+						<span>II. Composición y Escena</span>
+					</div>
+					<span class="material-icons toggle-icon">expand_more</span>
+				</div>
+				<div class="section-content">
+					<div class="form-group">
+						<label class="form-label">Elemento Dominante</label>
+						<div class="form-selectia">
+							<select class="form-select" id="elemento_dominante_select" name="elemento_dominante">
+								<option selected>Producto (Fibra Óptica)</option>
+								<option>Texto Principal</option>
+								<option>Familia/Persona</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Emoción/Tono</label>
+						<input type="text" class="form-input" id="emocion_tono" name="emocion_tono" placeholder="Velocidad y Dinamismo" value="Velocidad y Dinamismo">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Tipo de Fondo / ESCENA</label>
+						<input type="text" class="form-input" id="tipo_fondo" name="tipo_fondo" placeholder="Living moderno, Tienda Claro" value="Living de hogar moderno y cálido">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Composición</label>
+						<div class="form-selectia">
+							<select class="form-select" id="tipo_composicion_select" name="tipo_composicion">
+								<option selected>Regla de Tercios</option>
+								<option>Centrado</option>
+								<option>Simetría</option>
+								<option>Diagonal</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="slider-container">
+						<div class="slider-header">
+							<label class="form-label">Profundidad de Campo</label>
+							<span class="slider-value" id="depth-value">50</span>
+						</div>
+						<input type="range" id="profundidad_campo" name="profundidad_campo" min="0" max="100" value="50" oninput="updateSlider('depth-value', this.value)">
+					</div>
+
+					<div class="slider-container">
+						<div class="slider-header">
+							<label class="form-label">Grado de Abstracción</label>
+							<span class="slider-value" id="abstract-value">20</span>
+						</div>
+						<input type="range" id="grado_abstraccion" name="grado_abstraccion" min="0" max="100" value="20" oninput="updateSlider('abstract-value', this.value)">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Velocidad Implícita</label>
+						<input type="text" class="form-input" id="velocidad_implicita" name="velocidad_implicita" placeholder="Motion blur, Líneas de luz" value="Líneas de luz y movimiento">
+					</div>
+
+				</div>
+			</div>
+
+			<!-- Sección III: Bases y Concepto -->
+			<div class="section">
+				<div class="section-header" onclick="toggleSection(this)">
+					<div class="section-iatitle">
+						<span class="material-icons">lightbulb</span>
+						<span>III. Bases y Concepto</span>
+					</div>
+					<span class="material-icons toggle-icon">expand_more</span>
+				</div>
+				<div class="section-content">
+					<div class="form-group">
+						<label class="form-label">Producto/Servicio</label>
+						<input type="text" class="form-input" id="producto" name="producto" placeholder="Fibra Óptica Claro" value="Fibra Óptica Claro">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Estilo Visual</label>
+						<input type="text" class="form-input" id="estilo_visual" name="estilo_visual" placeholder="3D Abstracto de Alta Calidad" value="Render 8K, estilo Clean, Moderno">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Colores Principales</label>
+						<input type="text" class="form-input" id="colores_base" name="colores_base" placeholder="Rojo Claro (#E60000) y Negro" value="Rojo Claro (#E60000) y Negro, con acentos azules y blancos">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Concepto Visual Principal</label>
+						<input type="text" class="form-input" id="elementos_visuales" name="elementos_visuales" placeholder="Olas de fibra óptica" value="Olas de fibra óptica y dispositivos conectados">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Tono Local/Mercado</label>
+						<input type="text" class="form-input" id="tono_local" name="tono_local" placeholder="Estilo neutral y moderno" value="Estilo neutral y moderno para el mercado latinoamericano.">
+					</div>
+				</div>
+			</div>
+			
+			<!-- Sección IV: Texto y Marca -->
+			<div class="section">
+				<div class="section-header" onclick="toggleSection(this)">
+					<div class="section-iatitle">
+						<span class="material-icons">text_fields</span>
+						<span>IV. Texto & Marca/Personas</span>
+					</div>
+					<span class="material-icons toggle-icon">expand_more</span>
+				</div>
+				<div class="section-content">
+					<div class="form-group">
+						<label class="form-label">Texto Principal (ALL CAPS)</label>
+						<input type="text" class="form-input" id="texto_overlay_1" name="texto_overlay_1" placeholder="VELOCIDAD ILIMITADA" value="VELOCIDAD ILIMITADA">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Texto Secundario (ALL CAPS)</label>
+						<input type="text" class="form-input" id="texto_overlay_2" name="texto_overlay_2" placeholder="POTENCIA PARA TU HOGAR" value="POTENCIA PARA TU HOGAR">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Jerarquía de Texto</label>
+						<div class="form-selectia">
+							<select class="form-select" id="jerarquia_texto_select" name="jerarquia_texto">
+								<option selected>Título 1 Dominante</option>
+								<option>Título 2 Dominante</option>
+								<option>Equilibrado</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Zona Segura Texto (Inferior Central)</label>
+						<div class="form-selectia">
+							<select class="form-select" id="zona_segura_texto_select" name="zona_segura_texto">
+								<option>Superior Central</option>
+								<option selected>Inferior Central</option>
+								<option>Lateral Izquierdo</option>
+								<option>Lateral Derecho</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Sección V: Branding y Restricciones -->
+			<div class="section">
+				<div class="section-header" onclick="toggleSection(this)">
+					<div class="section-iatitle">
+						<span class="material-icons">branding_watermark</span>
+						<span>V. Branding y Restricciones</span>
+					</div>
+					<span class="material-icons toggle-icon">expand_more</span>
+				</div>
+				<div class="section-content">
+					<div class="form-group">
+						<label class="form-label">Incluir Personas</label>
+						<div class="form-selectia">
+							<select class="form-select" id="incluir_personas_select" name="incluir_personas">
+								<option>No</option>
+								<option selected>Sí (Familia Latinoamericana)</option>
+								<option>Sí (Jóvenes)</option>
+								<option>Sí (Profesionales)</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Interacción Humana</label>
+						<div class="form-selectia">
+							<select class="form-select" id="interaccion_humana_select" name="interaccion_humana">
+								<option>Uso Directo</option>
+								<option selected>Uso Indirecto</option>
+								<option>Sin interacción</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Elementos de Marca</label>
+						<input type="text" class="form-input" id="elementos_marca" name="elementos_marca" placeholder="Router Wi-Fi 6 de Claro" value="Router Wi-Fi 6 de Claro">
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Color del Fondo de Logo</label>
+						<div class="form-selectia">
+							<select id="color_fondo_logo_select" name="color_fondo_logo">
+								<option selected>White (Blanco)</option>
+								<option>Claro Red (#E60000)</option>
+								<option>Dark Gray/Black</option>
+								<option>Transparent Area</option>
+							</select>
+							<i class="dropdown-icon"></i>
+						</div>
+						
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Ubicación Logo Claro</label>
+						<div class="logo-position-grid">
+							<input type="radio" name="ubicacion_logo" id="pos-tl" value="top-left">
+							<label for="pos-tl" class="position-option" title="Superior Izquierda">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-tl">north_west</span>
+								</div>
+								<span class="position-label">Superior Izq.</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-tc" value="top-center">
+							<label for="pos-tc" class="position-option" title="Superior Centro">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-tc">north</span>
+								</div>
+								<span class="position-label">Superior Centro</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-tr" value="top-right" checked>
+							<label for="pos-tr" class="position-option" title="Superior Derecha">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-tr">north_east</span>
+								</div>
+								<span class="position-label">Superior Der.</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-ml" value="middle-left">
+							<label for="pos-ml" class="position-option" title="Centro Izquierda">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-ml">west</span>
+								</div>
+								<span class="position-label">Centro Izq.</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-mc" value="middle-center">
+							<label for="pos-mc" class="position-option" title="Centro">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-mc">radio_button_checked</span>
+								</div>
+								<span class="position-label">Centro</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-mr" value="middle-right">
+							<label for="pos-mr" class="position-option" title="Centro Derecha">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-mr">east</span>
+								</div>
+								<span class="position-label">Centro Der.</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-bl" value="bottom-left">
+							<label for="pos-bl" class="position-option" title="Inferior Izquierda">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-bl">south_west</span>
+								</div>
+								<span class="position-label">Inferior Izq.</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-bc" value="bottom-center">
+							<label for="pos-bc" class="position-option" title="Inferior Centro">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-bc">south</span>
+								</div>
+								<span class="position-label">Inferior Centro</span>
+							</label>
+
+							<input type="radio" name="ubicacion_logo" id="pos-br" value="bottom-right">
+							<label for="pos-br" class="position-option" title="Inferior Derecha">
+								<div class="position-box">
+									<span class="material-icons logo-icon arrow-br">south_east</span>
+								</div>
+								<span class="position-label">Inferior Der.</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Restricciones de Marca (Opcional)</label>
+						<textarea class="form-input" id="restricciones_marca" name="restricciones_marca" rows="3" placeholder="Ej: No usar sombras dudosas. No distorsionar logo.">No usar sombras dudosas. No distorsionar logo.</textarea>
+					</div>
+				</div>
+			</div>
+
+			<!-- Sección VI: Copy Final -->
+			<div class="section">
+				<div class="section-header" onclick="toggleSection(this)">
+					<div class="section-iatitle">
+						<span class="material-icons">rate_review</span>
+						<span>VI. Copy Final</span>
+					</div>
+					<span class="material-icons toggle-icon">expand_more</span>
+				</div>
+				<div class="section-content">
+					<div class="form-group full-width">
+						<label class="form-label">Copy Sugerido (ES)</label>
+						<textarea class="form-input" id="caption_es" name="caption_es" rows="4" placeholder="Escribe el copy final aquí...">¡Experimenta la velocidad insuperable de Claro! Descúbrelo hoy.</textarea>
+					</div>
+				</div>
+			</div>
+			
+			<div class="actions">
+				<button type="button" class="btn btn-primary" id="btn-generar">Generar</button>
+			</div>
+
+			<div class="helper">
+				<span class="pill" aria-hidden="true"></span>
+				<span>Describe en lineas generales una breve descipcion de tu proyecto</span>
+			</div>
+
+			 <!-- Panel de Preview -->
+			<div class="preview-panel">
+				<div class="preview-header">
+					<h3>Preview</h3>
+					<div class="preview-actions">
+						<button class="icon-btn" title="Descargar">
+							<span class="material-icons">download</span>
+						</button>
+						<button class="icon-btn" title="Compartir">
+							<span class="material-icons">share</span>
+						</button>
+						<button class="icon-btn" title="Favorito">
+							<span class="material-icons">star_border</span>
+						</button>
+					</div>
+				</div>
+
+				<div class="preview-area" id="preview-area">
+					<div class="preview-placeholder" id="load_generate-content">
+						<span class="material-icons">image</span>
+						<p>Ajusta los parámetros y haz clic en "Generar"</p>
+					</div>
+					<img src="" alt="Generated Image" class="preview-image" id="preview-image">
+					<div class="loading-overlay" id="loading-overlay">
+						<div class="spinner"></div>
+						<p>Generando imagen...</p>
+					</div>
+				</div>
+			</div>
+			
+		</form>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/generate.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/imageia.css') }}">
+{% endblock %}
+<script>
+	function toggleSection(header) {
+		const content = header.nextElementSibling;
+		const isActive = header.classList.contains('active');
+		
+		// Close all sections
+		document.querySelectorAll('.section-header').forEach(h => {
+			h.classList.remove('active');
+			h.nextElementSibling.classList.remove('active');
+		});
+		
+		// Open clicked section if it wasn't active
+		if (!isActive) {
+			header.classList.add('active');
+			content.classList.add('active');
+		}
+	}
+
+	function updateSlider(id, value) {
+		document.getElementById(id).textContent = value;
+	}
+
+	function generateImage() {
+		const loadingOverlay = document.getElementById('loading-overlay');
+		const previewImage = document.getElementById('preview-image');
+		const placeholder = document.querySelector('.preview-placeholder');
+		
+		// Show loading
+		loadingOverlay.classList.add('active');
+		placeholder.style.display = 'none';
+		
+		// Simulate API call
+		setTimeout(() => {
+			// Hide loading
+			loadingOverlay.classList.remove('active');
+			
+			// Show image (using placeholder for demo)
+			previewImage.src = 'https://via.placeholder.com/800x600/667eea/ffffff?text=Generated+Image';
+			previewImage.classList.add('active');
+		}, 2000);
+	}
+
+	// Preset buttons
+	document.querySelectorAll('.preset-btn').forEach(btn => {
+		btn.addEventListener('click', function() {
+			this.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+			this.classList.add('active');
+		});
+	});
+</script>

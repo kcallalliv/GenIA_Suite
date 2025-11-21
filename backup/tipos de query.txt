@@ -1,0 +1,104 @@
+		sql_query = f"""
+		UPDATE `{data_table}`
+		SET
+		  brand_name = '{brand_name}',
+		  brand_pais = '{brand_pais}',
+		  brand_subindustria = '{brand_subindustria}',
+		  brand_description = '{brand_description}',
+		  brand_estado = '{brand_estado}'
+		WHERE
+		  brand_id = '{brand_id}'
+		"""
+
+sql_query = f"""
+		MERGE INTO `{bq_table_brands}` AS T
+		USING (
+		  SELECT
+			'{brand_id}' AS brand_id,
+			'{brand_name}' AS brand_name,
+			'{brand_pais}' AS brand_pais,
+			'{brand_subindustria}' AS brand_subindustria,
+			'{brand_description}' AS brand_description,
+			'{brand_estado}' AS brand_estado
+		) AS S
+		ON T.brand_id = S.brand_id
+		WHEN MATCHED THEN
+		  UPDATE SET
+			brand_name = S.brand_name,
+			brand_pais = S.brand_pais,
+			brand_subindustria = S.brand_subindustria,
+			brand_description = S.brand_description,
+			brand_estado = S.brand_estado
+		WHEN NOT MATCHED THEN
+		  INSERT (brand_id, brand_name, brand_pais, brand_subindustria, brand_description, brand_estado)
+		  VALUES(S.brand_id, S.brand_name, S.brand_pais, S.brand_subindustria, S.brand_description, S.brand_estado)
+		"""
+
+sql_query = f"""
+		MERGE INTO `{data_table}` AS t
+		USING (SELECT '{brand_id}' AS brand_id, '{brand_name}' AS brand_name, '{brand_pais}' AS brand_pais, '{brand_subindustria}' AS brand_subindustria, '{brand_description}' AS brand_description, '{brand_estado}' AS brand_estado) AS s
+		ON t.brand_id = s.brand_id
+		WHEN MATCHED THEN
+		  UPDATE SET
+			brand_name = s.brand_name,
+			brand_pais = s.brand_pais,
+			brand_subindustria = s.brand_subindustria,
+			brand_description = s.brand_description,
+			brand_estado = s.brand_estado
+		WHEN NOT MATCHED THEN
+		  INSERT (brand_id, brand_name, brand_pais, brand_subindustria, brand_description, brand_estado)
+		  VALUES (s.brand_id, s.brand_name, s.brand_pais, s.brand_subindustria, s.brand_description, s.brand_estado)
+		"""
+sql_query = f"""
+		MERGE INTO `{bq_table_brands}` AS T
+		USING (
+		  SELECT
+			'{brand_id}' AS brand_id,
+			'{brand_name}' AS brand_name,
+			'{brand_pais}' AS brand_pais,
+			'{brand_subindustria}' AS brand_subindustria,
+			'{brand_description}' AS brand_description,
+			'{brand_estado}' AS brand_estado
+		) AS S
+		ON T.brand_id = S.brand_id
+		WHEN MATCHED THEN
+		  UPDATE SET
+		  brand_name = S.brand_name,
+		  brand_pais = S.brand_pais,
+		  brand_subindustria = S.brand_subindustria,
+		  brand_description = S.brand_description,
+		  brand_estado = S.brand_estado
+		WHEN NOT MATCHED THEN
+		  INSERT (brand_id, brand_name, brand_pais, brand_subindustria, brand_description, brand_estado)
+		  VALUES(S.brand_id, S.brand_name, S.brand_pais, S.brand_subindustria, S.brand_description, S.brand_estado)
+		"""
+
+
+"""
+#===User Save===
+@bkbrands_bp.route("/brandkit/brands/save", methods=["GET", "POST"])
+def bkbrand_save():
+	brand_name = "claro cuarto"
+	brand_pais = "peru"
+	brand_subindustria = "telecomunicaciones"
+	brand_description = "es una empresa de telecomunicaciones"
+	brand_estado = "1"
+
+	try:
+		# La consulta MERGE para insertar una fila
+		sql_query = f"""
+		MERGE INTO `{data_table}` AS t
+		USING (SELECT '{brand_id}' AS brand_id) AS s
+		ON t.brand_id = s.brand_id
+		WHEN NOT MATCHED THEN
+		  INSERT (brand_id, brand_name, brand_pais, brand_subindustria, brand_description, brand_estado)
+		  VALUES ('{brand_id}', '{brand_name}', '{brand_pais}', '{brand_subindustria}', '{brand_description}', '{brand_estado}')
+		"""
+		# Ejecuta la consulta
+		query_job = bq_client.query(sql_query)
+		query_job.result()
+		return {"status": "success", "message": "El registro se subió exitosamente."}
+	except Exception as e:
+		# Retorna un diccionario con un estado de error
+		return {"status": "error", "message": f"Hubo un error al subir el registro: {e}"}
+"""

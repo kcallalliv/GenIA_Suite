@@ -1,0 +1,161 @@
+<div class="container">
+	<!-- Seleccionar todo -->
+	<div class="card-social-checkboxs">
+		<input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+		<label for="selectAll">Seleccionar todo</label>
+	</div>
+
+	<!-- Categoría: Social -->
+	<!--<div class="card-social-category">
+		<div class="category-header">
+			<input type="checkbox" id="social" class="category-checkbox" onchange="toggleCategory('social', this)">
+			<label for="social" class="category-label">Social</label>
+		</div>
+
+		<div class="card-social-grid">
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #1877f2;">facebook</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="social">
+					<label class="card-label">Facebook post</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #e4405f;">photo_camera</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="social">
+					<label class="card-label">Instagram post</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #1da1f2;">tag</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="social">
+					<label class="card-label">Twitter post</label>
+				</div>
+			</div>
+		</div>
+	</div>-->
+
+	<!-- Categoría: Contenido -->
+	<div class="card-social-category">
+		<div class="category-header">
+			<input type="checkbox" id="contenido" class="category-checkbox" onchange="toggleCategory('contenido', this)">
+			<label for="contenido" class="category-label">Contenido</label>
+		</div>
+
+		<div class="card-social-grid">
+			<a href="/proyectos/colecciones/image-article?pid={{ proyecto_id }}">
+				<div class="card-social" onclick="toggleCard(this)">
+					
+						<div class="card-image">
+							<span class="material-icons" style="font-size: 48px; color: #666;">article</span>
+						</div>
+						<div class="card-footer">
+							<input type="checkbox" class="card-checkbox" data-category="contenido">
+							<label class="card-label">Artículo</label>
+						</div>
+					
+				</div>
+			</a>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #666;">video_library</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="contenido">
+					<label class="card-label">Video</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #666;">image</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="contenido">
+					<label class="card-label">Imagen</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #666;">description</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="contenido">
+					<label class="card-label">Documento</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Categoría: Display -->
+	<div class="card-social-category">
+		<div class="category-header">
+			<input type="checkbox" id="display" class="category-checkbox" onchange="toggleCategory('display', this)">
+			<label for="display" class="category-label">Display</label>
+		</div>
+
+		<div class="card-social-grid">
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #9c27b0;">crop_portrait</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="display">
+					<label class="card-label">Display 300×600</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #9c27b0;">crop_landscape</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="display">
+					<label class="card-label">Display 300×250</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #9c27b0;">crop_square</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="display">
+					<label class="card-label">Display 250×250</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #9c27b0;">crop_portrait</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="display">
+					<label class="card-label">Display 160×600</label>
+				</div>
+			</div>
+
+			<div class="card-social" onclick="toggleCard(this)">
+				<div class="card-image">
+					<span class="material-icons" style="font-size: 48px; color: #9c27b0;">crop_landscape</span>
+				</div>
+				<div class="card-footer">
+					<input type="checkbox" class="card-checkbox" data-category="display">
+					<label class="card-label">Display 728×90</label>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>

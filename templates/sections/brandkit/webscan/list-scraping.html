@@ -1,0 +1,70 @@
+<table class="data-table">
+	<thead>
+		<tr>
+			<th width="10" style="text-align:center;"><span class="spacing">#</span></th>
+			<th width="auto"><span class="spacing">URL</span></th>
+			<th width="200"><span class="spacing">Última Actualización</span></th>
+			<th width="200"><span class="spacing">Estado</span></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for lista in lista %}
+		{% set myid = lista['site_id'] %}
+		{% set myestado = lista['site_estado'] %}
+		{% set mystatus = verEstado(myestado) %}
+		{% set myfecha = lista['site_fecha'] %}
+		{% set myurl = lista['site_url'] %}
+		<tr>
+			<td style="text-align:center;"><label>{{ loop.index }}</label></td>
+			<td><label>{{ myurl }}</label></label></td>
+			<td><label>{{ myfecha }}</label></td>
+			<td>
+				<div class="progress-container">
+					<div class="progress-bar" data-url="{{ myurl }}" id="myProgressBar_{{ loop.index }}"></div>
+				</div>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<script>
+function getScraping() {
+	$('.progress-bar').each(function() {
+		const progressBar = $(this);
+		const id = progressBar.attr('id');
+		const url = progressBar.data('url');
+
+		// Solo si el elemento tiene un ID y una URL de datos
+		if (id && url) {
+			$.ajax({
+				url: '/brandkit/webscan/scraping',
+				type: 'GET',
+				data: {
+					site: url,
+				},
+				beforeSend: function() {
+					// Muestra el contenedor y la barra de progreso
+					progressBar.parent().show();
+					progressBar.css('width', '50%');
+				},
+				success: function(data) {
+					// Llenar la barra al 100% y ocultar el contenedor
+					progressBar.css('width', '100%');
+					/*setTimeout(() => {
+						progressBar.parent().fadeOut(500);
+					}, 1000);*/
+				},
+				error: function(xhr, status, error) {
+					console.error('Error:', error);
+					// Llenar al 100% incluso con error
+					progressBar.css('width', '100%');
+					setTimeout(() => {
+						progressBar.parent().fadeOut(500);
+					}, 1000);
+				}
+			});
+		}
+	});
+}
+getScraping();
+</script>

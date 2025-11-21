@@ -1,0 +1,26 @@
+<table class="data-table">
+	<thead>
+		<tr>
+			<th width="10" style="text-align:center;"><span class="spacing">#</span></th>
+			<th width="auto"><span class="spacing">Nombre</span></th>
+			<th width="auto"><span class="spacing">Descripción</span></th>
+			<th width="370"><span class="spacing"></span></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for lista in lista %}
+		{% set myid = lista['proyecto_id'] %}
+		{% set myname = lista['proyecto_name'] %}
+		{% set mydesc = lista['proyecto_name'] %}
+		{% set myestado = lista['proyecto_estado'] %}
+		<tr>
+			<td style="text-align:center;"><label for="checkbox_url_{{ loop.index }}">{{ loop.index }}</label></td>
+			<td><label for="checkbox_url_{{ loop.index }}">{{ myname }}</label></label></td>
+			<td><label for="checkbox_url_{{ loop.index }}">{{ mydesc }}</label></label></td>
+			<td style="text-align:center;">
+				<a href="/proyectos/recovery?id={{myid}}" class="btn btn-success" style="width:60px;">Restaurar</a>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

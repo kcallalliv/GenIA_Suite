@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Variantes</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 24px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-confirm {
+            background: #5d5e70;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #4a4b5c;
+        }
+
+        .material-icons {
+            font-size: 18px;
+        }
+
+        .main-content {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .keyword-section {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background: #5d5e70;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tabs-section {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            padding: 0 16px;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            color: #333;
+        }
+
+        .tab.active {
+            color: #333;
+            border-bottom-color: #5d5e70;
+        }
+
+        .tab-new {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #5d5e70;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        .tab-new:hover {
+            background: #f8f8f8;
+        }
+
+        .content-section {
+            padding: 24px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .blog-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 24px;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+        }
+
+        .preview-area {
+            background: #9ca3af;
+            border-radius: 12px;
+            width: 200px;
+            height: 200px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #5d5e70;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .ai-button:hover {
+            background: #4a4b5c;
+            transform: scale(1.05);
+        }
+
+        .form-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #5d5e70;
+        }
+
+        .form-textarea {
+            min-height: 300px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .ai-button-field {
+            position: absolute;
+            top: 32px;
+            right: 12px;
+            background: #5d5e70;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .ai-button-field:hover {
+            background: #4a4b5c;
+            transform: scale(1.05);
+        }
+
+        .generate-button {
+            background: #5d5e70;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            width: fit-content;
+        }
+
+        .generate-button:hover {
+            background: #4a4b5c;
+        }
+
+        @media (max-width: 1024px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Editar</h1>
+        <div class="header-actions">
+            <button class="btn btn-cancel">
+                <span>Cancelar</span>
+                <span class="material-icons">close</span>
+            </button>
+            <button class="btn btn-confirm">
+                <span>Confirmar</span>
+                <span class="material-icons">check_circle</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="keyword-section">
+            <span class="keyword-tag">palabra clave</span>
+        </div>
+
+        <div class="tabs-section">
+            <div class="tabs-header">
+                <div class="tab active">Variante 1</div>
+                <div class="tab">Variante 2</div>
+                <div class="tab">Variante 3</div>
+                <div class="tab tab-new">
+                    <span>Nueva variante</span>
+                    <span class="material-icons">add_circle</span>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-label">Contenido</div>
+                
+                <div class="blog-title">Blog</div>
+
+                <div class="editor-layout">
+                    <div class="preview-area">
+                        <button class="ai-button">
+                            <span class="material-icons">auto_awesome</span>
+                        </button>
+                    </div>
+
+                    <div class="form-area">
+                        <div class="form-group">
+                            <label class="form-label">Título</label>
+                            <input 
+                                type="text" 
+                                class="form-input" 
+                                placeholder="Lorem ipsum dolor sit amet"
+                                value="Lorem ipsum dolor sit amet"
+                            >
+                            <button class="ai-button-field">
+                                <span class="material-icons">auto_awesome</span>
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Content</label>
+                            <textarea class="form-input form-textarea" placeholder="Escribe aquí...">Paragraphs
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada erat ut turpis.
+
+Suspendisse urna nibh viverra non semper suscipit posuere a pede. Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis.
+
+Morbi in sem quis dui placerat ornare. Pellentesque odio nisi euismod in pharetra a ultricies in diam. Sed arcu. Cras consequat.</textarea>
+                            <button class="ai-button-field">
+                                <span class="material-icons">auto_awesome</span>
+                            </button>
+                        </div>
+
+                        <button class="generate-button">
+                            <span>Generar nueva versión</span>
+                            <span class="material-icons">auto_awesome</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

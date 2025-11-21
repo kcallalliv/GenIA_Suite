@@ -1,0 +1,6 @@
+<select class="dropdown" id="cbo_tipo_articulo" name="cbo_tipo_articulo">
+	<option value="">Selecciona una palabra</option>
+	{% for item in tipo_contenido %}
+	<option value="{{ item.nombre_tipo }}">{{ item.nombre_tipo }}</option>
+	{% endfor %}
+</select>

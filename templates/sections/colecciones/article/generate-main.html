@@ -1,0 +1,180 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<main class="main-content">
+		<!-- Estructura del Popup -->
+		<div id="popup-article" class="popup-overlay">
+			<div class="popup-container">
+				<!-- Header -->
+				<div class="popup-header">
+					<h3 class="popup-title">
+						<span class="material-icons">article</span>
+						Preview del Artículo
+					</h3>
+					<button class="popup-close" onclick="closePopup()">
+						<span class="material-icons">close</span>
+					</button>
+				</div>
+
+				<!-- Contenido -->
+				<div class="popup-content">
+					<article class="article-container" id="article-container">
+						<!-- El contenido se cargará aquí dinámicamente -->
+					</article>
+				</div>
+
+				<!-- Footer -->
+				<div class="popup-footer">
+					<div class="popup-footer-left">
+						<button class="popup-button popup-button-outline" onclick="copyArticle()">
+							<span class="material-icons">content_copy</span>
+							Copiar
+						</button>
+					</div>
+					<div class="popup-footer-right">
+						<button class="popup-button popup-button-secondary" onclick="closePopup()">
+							Cerrar
+						</button>
+						<button class="popup-button popup-button-success" id="btn-descargar">
+							<span class="material-icons">publish</span>
+							Publicar
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Popup Galería -->
+		<div id="popup-gallery" class="popup-overlay">
+			<div class="popup-container">
+				<!-- Header -->
+				<div class="popup-header">
+					<h3 class="popup-title">
+						<span class="material-icons">photo_library</span>
+						Galería de Imágenes
+					</h3>
+					<button class="popup-close" onclick="closeGallery()">
+						<span class="material-icons">close</span>
+					</button>
+				</div>
+
+				<!-- Search Bar -->
+				<!--<div class="search-bar">
+					<input type="text" class="search-input" id="search-input" placeholder="Buscar imágenes... (ej: paisaje, tecnología, personas)">
+					<button class="search-button" onclick="searchImages()">
+						<span class="material-icons">search</span>
+						<span>Buscar</span>
+					</button>
+				</div>-->
+
+				<!-- Content -->
+				<div class="popup-content">
+					<div class="gallery-grid" id="gallery-grid">
+						<!-- Loading state -->
+						<div class="loading-state" id="loading-state">
+							<img src="https://plus.unsplash.com/premium_photo-1711031505781-2a45c879ceac?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=715" onclick="closeGalleryItem()">
+						</div>
+					</div>
+				</div>
+
+				<!-- Footer -->
+				<div class="popup-footer">
+					<div class="selected-count">
+						<strong id="selected-count">0</strong> imagen(es) seleccionada(s)
+					</div>
+					<div class="popup-footer-buttons">
+						<button class="popup-button popup-button-primary" onclick="closeGallery()">
+							Cancelar
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="tabs-section">
+			<!--<div class="tabs-header">
+				<div class="tab">palabra clave</div>
+				<div class="tab tab-new popup-btn-open" onclick="openPopup()">
+					<span>Ver preview</span>
+					<span class="material-icons">visibility</span>
+				</div>
+			</div>-->
+
+			<div class="content-section">
+				<div class="section-label">Contenido</div>
+				
+				<div class="blog-title">Blog</div>
+				<input type="hidden" id="txt_pid" name="txt_pid" value="{{pid}}">
+				<input type="hidden" id="txt_photo" name="txt_photo">
+				<input type="hidden" id="txt_image" name="txt_image">
+				<div class="editor-layout">
+					<div class="preview-area" id="ia_img">
+						<button class="ai-button" onclick="openGallery()">
+							<span class="material-icons">search</span>
+						</button>
+					</div>
+
+					<div class="form-area">
+						<div class="form-group">
+							<label class="form-label">Keyword</label>
+							<div class="form-input-ia">
+								<input type="text" id="txt_keyword" placeholder="" value="{{data.keyword_name}}" readonly>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Tipo de contenido</label>
+							<div class="form-select">
+								<div id="select-tipo-articulo">
+									<select id="cbo_keyword" name="cbo_keyword">
+										<option value="">Selecciona una palabra</option>							
+									</select>
+								</div>
+								<i class="dropdown-icon"></i>
+							</div>							
+						</div>
+						<div class="form-group">
+							<label class="form-label">Tema</label>
+							<div id="select-keyword" class="form-input-ia">
+								<input type="text" id="txt_tema" placeholder="" value="">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Título</label>
+							<div id="load-titulo" class="form-input-ia">
+								<input type="text" id="txt_titulo" placeholder="" value="">
+							</div>
+							<button class="ai-button-field" id="btn-generar-title">
+								<span class="material-icons">auto_awesome</span>
+							</button>
+						</div>
+						<div class="button-container">
+							<button class="generate-button" id="btn-generar">
+								<span>Generar Contenido</span>
+								<span class="material-icons">auto_awesome</span>
+							</button>
+							
+							<button class="preview-button popup-btn-open" onclick="openPopup()">
+								<span>Ver preview</span>
+								<span class="material-icons">visibility</span>
+							</button>
+
+							<button class="preview-button">
+								<span>Guardar</span>
+								<span class="material-icons">save</span>
+							</button>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Contenindo Generado</label>
+							<div id="load-content" class="form-textarea-ia">
+								<textarea id="txt_content"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+</section>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/article.css') }}">
+<script src="{{ url_for('static', filename='scripts/article.js') }}"></script>
+{% endblock %}

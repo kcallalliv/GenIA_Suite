@@ -1,0 +1,54 @@
+<div class="header">
+	<p>Explora más palabras clave y genera contenido automáticamente</p>
+	<div class="controls">
+		<div class="field">
+			<div class="field-label">Fuente para tus palabras clave</div>
+			<div class="dropdown-wrapper">
+				<select class="dropdown" id="cbo_fuente" name="cbo_fuente">
+					<option value="semrush">Semrush</option>
+					<option value="search-console">Seach Console</option>
+					</select>
+				<i class="fas fa-chevron-down dropdown-icon"></i>
+			</div>
+		</div>
+		<div class="field">
+			<div class="field-label">Palabra clave</div>
+			<div class="dropdown-wrapper">
+				<div id="select-keyword">
+					<select class="dropdown" id="cbo_keyword" name="cbo_keyword"></select>
+				</div>
+				<i class="fas fa-chevron-down dropdown-icon"></i>
+			</div>
+		</div>
+		<div class="field-checkbox">
+			<div class="field-checklabel"><input type="checkbox" id="chk_custom_keyword_toggle" name="chk_custom_keyword_toggle">
+				<label for="chk_custom_keyword_toggle">Escribe tu propia palabra clave</label>
+			</div>
+			<div class="textbox"><input type="text" id="txt_custom_keyword" name="txt_custom_keyword" placeholder="(Opcional)" disabled></div>
+		</div>
+		<div class="field">
+			<div class="field-label">Tipo de artículo a generar</div>
+			<div class="dropdown-wrapper">
+				<div id="select-tipo-articulo">
+					<select class="dropdown" id="cbo_tipo_articulo" name="cbo_tipo_articulo"></select>
+				</div>
+				<i class="fas fa-chevron-down dropdown-icon"></i>
+			</div>
+		</div>
+		<div class="field">
+			<div class="field-label">Tema concreto para el artículo (ej. 'Beneficios de tener fibra óptica')</div>
+			<input type="text" id="txt_article" name="txt_article" placeholder="(Opcional)">
+		</div>
+		<div class="field-all">
+			<button id="btn-generate-content" class="generate-button">
+				<i class="ico-varita"></i>
+				Generar contenido
+			</button>
+		</div>
+	</div>
+</div>
+<div class="resultado">
+	<!--<div class="subtitle">Keywords de SEMrush (Posición 5-10)</div>-->
+	<div class="table" id="genia-table"></div>
+</div>
+<!--<script src="{{ url_for('static', filename='scripts/geniatext-slider-filter.js') }}"></script>-->

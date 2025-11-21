@@ -1,0 +1,122 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block page %}page-info{% endblock %}
+{% block content %}
+<section class="content">
+	<main class="logo-content">
+		<div class="panel-header">
+			<span class="material-icons">tune</span>
+			<h2>Integraciones disponibles</h2>
+		</div>
+		<p class="page-subtitle">Conecta tus herramientas favoritas para obtener datos y métricas</p>
+			<input type="hidden" id="txt_pid" name="txt_pid" value="{{pid}}">
+			
+			<!-- Fuentes de datos -->
+			<div class="section">
+				{% set myjson = json_integra %}
+				<div class="integration-list">
+					{% for lista in config %}
+					{% set myname = lista['conf_name'] %}
+					{% set myvalue = lista['conf_value'] %}
+					{% set mysymbol = lista['conf_symbol'] %}
+					{% set mystatus = integrationStatus(myjson,myvalue) %}
+					{% set mycheck = integrationStatusCheck(myjson,myvalue) %}
+					<!-- Semrush -->
+					<div class="integration-item">
+						<div class="integration-left">
+							<div class="integration-icon icon-{{myvalue}}">
+								<span class="material-icons">{{mysymbol}}</span>
+							</div>
+							<div class="integration-info">
+								<div class="integration-name">{{myname}}</div>
+								<div class="integration-status">
+									<span class="status-badge {{mystatus}}">
+										<span class="material-icons">circle</span>
+										{{mystatus}}
+									</span>
+									<span>·</span>
+								</div>
+							</div>
+						</div>
+						<div class="integration-right">
+							<label class="toggle-switch">
+								<input type="checkbox" name="integrations[]" value="{{myvalue}}" {{mycheck}} data-integration="{{myname}}" onchange="toggleIntegration(this)">
+								<span class="toggle-slider"></span>
+							</label>
+						</div>
+					</div>
+					{% endfor %}
+
+				</div>
+			</div>
+
+			<div class="buttons-container">
+				<button class="preview-button" id="btn-guardar">
+					<span>Guardar</span>
+					<span class="material-icons">save</span>
+				</button>
+			</div>
+
+			<div class="helper">
+				<span class="pill" aria-hidden="true"></span>
+				<span id="lbl_mensaje"></span>
+			</div>
+	</main>
+</section>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/integracion.css') }}">
+<script>
+function toggleIntegration(checkbox) {
+	const item = $(checkbox).closest('.integration-item');
+	const statusBadge = item.find('.status-badge');
+	const statusIcon = statusBadge.find('.material-icons');
+	// Target the specific span for the text
+	const statusTextLabel = item.find('.status-label'); 
+	console.log(checkbox.checked);
+	if (checkbox.checked) {
+		statusBadge.removeClass('inactive').addClass('active');
+		statusIcon.text('check_circle');
+		statusTextLabel.text('Activo'); // Simple text update
+	} else {
+		statusBadge.removeClass('active').addClass('inactive');
+		statusIcon.text('circle');
+		statusTextLabel.text('Inactivo'); // Simple text update
+	}
+}
+function saveData() {
+	const button = $(this);
+	const projectId = $('#txt_pid').val();
+	// Obtener todas las integraciones seleccionadas
+	const integrations = [];
+	$('input[name="integrations[]"]:checked').each(function() {
+		integrations.push({
+			name: $(this).data('integration'),
+			value: $(this).val(),
+			status: 'active'
+		});
+	});
+
+	// Deshabilitar botón durante el envío
+	button.prop('disabled', true);
+	button.html('<span>Guardando...</span><span class="material-icons">hourglass_empty</span>');
+
+	// Enviar datos via AJAX
+	$.ajax({
+		url: 'save', // Cambia esta URL
+		method: 'POST',
+		data: {
+			pid: projectId,
+			integrations: integrations
+		},
+		success: function(data) {
+			document.getElementById("lbl_mensaje").textContent = "Respuesta: "+data.message;
+		},
+		error: function(xhr, status, error) {
+			console.error('Error:', error);
+		}
+	});
+}
+// Guardar integraciones
+$('#btn-guardar').on('click', saveData);
+//$('input[name="integrations[]"]').on('change', toggleIntegration);
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<section class="dashboard-controls">
+		<input type="hidden" id="txt_pid" name="txt_pid" value="{{proyecto_id}}">
+		<div class="filters">
+			<label>Fuentes disponibles</label>
+			<label class="source-tag">
+				<input type="checkbox" checked>
+				<span>Social</span>
+			</label>
+			<label class="source-tag">
+				<input type="checkbox" checked>
+				<span>Contenido</span>
+			</label>
+			<label class="source-tag">
+				<input type="checkbox" checked>
+				<span>Display</span>
+			</label>
+		</div>
+	</section>
+	<div id="lst-colecciones"></div>
+</section>
+<script src="{{ url_for('static', filename='scripts/colecciones.js') }}"></script>
+{% endblock %}

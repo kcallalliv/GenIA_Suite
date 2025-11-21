@@ -1,0 +1,282 @@
+.dashboard-container {
+	max-width: 1600px;
+	margin: 0 auto;
+	height: 100%;
+}
+
+/* Top Controls */
+.top-controls {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	margin-bottom: 24px;
+	flex-wrap: wrap;
+}
+
+.search-input {
+	flex: 0 0 340px;
+	padding: 14px 18px;
+	border: 1px solid #d0d5dd;
+	border-radius: 8px;
+	font-size: 15px;
+	font-family: inherit;
+	transition: all 0.2s;
+}
+
+.search-input:focus {
+	outline: none;
+	border-color: #007bff;
+	box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.add-button {
+	padding: 14px 24px;
+	background: #4a5568;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	transition: all 0.2s;
+}
+
+.add-button:hover {
+	background: #2d3748;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.add-button .material-icons {
+	font-size: 20px;
+}
+
+/* Source Toggles */
+.source-toggles {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	margin-left: auto;
+}
+
+.source-toggle {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.source-toggle span {
+	font-size: 14px;
+	color: #4a5568;
+	font-weight: 500;
+}
+
+.toggle-switch {
+	position: relative;
+	width: 44px;
+	height: 24px;
+	display: inline-block;
+}
+
+.toggle-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.toggle-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #cbd5e1;
+	transition: 0.3s;
+	border-radius: 34px;
+}
+
+.toggle-slider:before {
+	position: absolute;
+	content: "";
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: 0.3s;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+	background-color: #4a5568;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+	transform: translateX(20px);
+}
+
+/* Second Row */
+.filter-row {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	margin-bottom: 24px;
+}
+
+.time-selector {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 16px;
+	background: white;
+	border: 1px solid #d0d5dd;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.time-selector span {
+	font-size: 14px;
+	color: #4a5568;
+}
+
+.time-selector .material-icons {
+	font-size: 20px;
+	color: #6b7280;
+}
+
+/* Table Container */
+.table-container-view {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	height: calc(100vh - 390px);
+	overflow-y: scroll;
+}
+.table-container-view a{text-decoration: none;color: inherit;}
+.table-container-view a.boton{background-color:#e6e7eb;}
+.table-container-view a.boton .texto{margin-left: 5px;}
+.table-wrapper {
+	overflow-x: auto;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+thead {
+	background: #f9fafb;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+	padding: 16px;
+	text-align: left;
+	font-size: 13px;
+	font-weight: 600;
+	color: #6b7280;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+th .header-content {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+th .material-icons {
+	font-size: 16px;
+	color: #9ca3af;
+}
+
+tbody tr {
+	border-bottom: 1px solid #f3f4f6;
+	transition: background 0.2s;
+}
+
+tbody tr:hover {
+	background: #f9fafb;
+}
+
+td {
+	padding: 20px 16px;
+	font-size: 14px;
+	color: #374151;
+}
+
+.keyword-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 14px;
+	background: #4a5568;
+	color: white;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.keyword-tag .material-icons {
+	font-size: 16px;
+	cursor: pointer;
+	opacity: 0.8;
+	transition: opacity 0.2s;
+}
+
+.keyword-tag .material-icons:hover {
+	opacity: 1;
+}
+
+.related-count {
+	font-weight: 600;
+	color: #1f2937;
+}
+
+.metric-cell {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.metric-value {
+	font-weight: 600;
+	color: #1f2937;
+	font-size: 16px;
+}
+
+.mini-chart {
+	width: 80px;
+	height: 30px;
+}
+
+.mini-chart svg {
+	width: 100%;
+	height: 100%;
+}
+
+.arrow-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	transition: background 0.2s;
+}
+
+.arrow-button:hover {
+	background: #f3f4f6;
+}
+
+.arrow-button .material-icons {
+	font-size: 24px;
+	color: #6b7280;
+}

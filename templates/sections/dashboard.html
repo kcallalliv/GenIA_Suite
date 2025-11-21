@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>GenIA</title>
+	<link rel="icon" href="{{ url_for('static', filename='ico-genia_brain.ico') }}" type="image/x-icon" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/logo.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/dashboard.css') }}">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</head>
+<body class="{% block page %}{% endblock %}" id="main">
+	<div class="loading-overlay" style="display: none;">
+		<div class="loading-animation"></div>
+		<span>Cargando...</span>
+	</div>
+	<header class="topbar">
+		<div class="topbar__brand">
+			<div class="logo"><img src="{{ url_for('static', filename='images/logo-genia-whitev3.svg') }}"></div>
+		</div>
+		<div class="topbar__perfil">
+			<a href="/perfil" class="topbar__link">
+				<span class="material-icons">person</span>
+				<span>Perfil</span>
+			</a>
+			<a href="/logout" class="topbar__link topbar__link--logout">
+				<span class="material-icons">logout</span>
+				<span>Cerrar Sesión</span>
+			</a>
+		</div>
+	</header>
+
+	<main class="layout">
+		<section class="dashboard-content">
+			<main class="brand-content">
+				<h1 class="section-title">Dashboard</h1>
+				<div class="brands-container">
+					{% for lista in lista %}
+					{% set myid = lista['brand_id'] %}
+					{% set myname = lista['brand_name'] %}
+					{% set myindustria = lista['brand_subindustria'] %}
+					<!-- Tarjeta 1: Claro Perú -->
+					<div class="brand-card" data-id="1">
+						<a href="/brand/{{myid}}/info/">
+							<div class="brand-card-content">
+								<div class="card-header">
+									<img src="https://placehold.co/48x48/E4002B/ffffff?text=C" alt="Logo de Claro Perú" class="card-logo">
+									<button class="card-edit-btn">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+										</svg>
+									</button>
+								</div>
+								<h3 class="card-title">{{myname}}</h3>
+								<p class="card-subtitle">{{myindustria}}</p>
+								<div class="card-metrics">
+									<span class="metric-item">
+										<svg fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7z" /></svg>
+										n proyectos
+									</span>
+									<!--<span class="update-info">
+										Actualizado: 2024-06-15
+									</span>-->
+								</div>
+							</div>
+						</a>
+					</div>
+					{% endfor %}
+
+				</div>
+
+			</main>
+		</section>
+	</main>
+</body>
+</html>

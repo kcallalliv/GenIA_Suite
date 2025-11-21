@@ -1,0 +1,55 @@
+{% extends "sections/template-dashboard.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<main class="logo-content">
+		<h1 class="section-title">Mi Perfil</h1>
+		
+		<form id="form-usuario-perfil" action="/perfil/update" autocomplete="off" method="post">
+			<input type="hidden" class="form-control" id="usu_id" name="usu_id" value="{{ data['user_id'] }}">
+			<div class="form-row">
+				<div class="field">
+					<label for="brand_name">Nombre</label>
+					<div class="input">
+						<input type="text" class="form-control" placeholder="Nombre" id="usu_usuario" name="usu_usuario" autocomplete="new" value="{{ data['user_name'] }}">
+					</div>
+				</div>
+				<div class="field">
+					<label for="pais">Email Cuenta</label>
+					<div class="input" id="load_pais">
+						<input type="text" class='form-control' placeholder="Email" id="usu_email" name="usu_email" autocomplete="off" value="{{ data['user_email'] }}">
+					</div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="field">
+					<label for="brand_name">Número Telefónico</label>
+					<div class="input">
+						<input type="text" class="form-control" placeholder="Número Telefónico" id="usu_phone" name="usu_phone" autocomplete="off" value="{{ data['user_phone'] }}">
+					</div>
+				</div>
+				<div class="field">
+					<label for="brand_name">Password (Si esta vacio, no se actualiza)</label>
+					<div class="input">
+						<input type="password" class="form-control" placeholder="Password" id="usu_password" name="usu_password" autocomplete="new-password" />
+					</div>
+				</div>
+			</div>
+			<div class="actions">
+				<button type="submit" class="btn btn-primary" id="btn-guardar">Guardar</button>
+			</div>
+		</form>
+
+		<div class="helper">
+			<span class="pill" aria-hidden="true"></span>
+			<span id="lbl_mensaje">
+				{% if 'mensaje' in session %}
+					{{ session['mensaje'] }}
+					{% set _ = session.pop('mensaje', None) %}
+				{% endif %}
+			</span>
+		</div>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/sys-usuarios.js') }}"></script>
+{% endblock %}

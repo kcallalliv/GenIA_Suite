@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Carga de Archivos - Claro GenIA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos generales del cuerpo para centrar el módulo y darle un fondo */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5; /* Fondo gris claro similar al de la imagen de Claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Altura mínima para que ocupe toda la ventana */
+            padding: 20px; /* Pequeño padding en caso de pantallas pequeñas */
+            box-sizing: border-box; /* Asegura que el padding no cause desbordamiento */
+        }
+
+        /* Contenedor principal del módulo de carga */
+        .upload-module {
+            background-color: #fff; /* Fondo blanco para el módulo */
+            border-radius: 8px; /* Bordes ligeramente redondeados */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para un efecto 3D */
+            width: 90%; /* Ancho responsivo */
+            max-width: 600px; /* Ancho máximo para que no sea demasiado grande en pantallas amplias */
+            padding: 30px; /* Espaciado interno */
+            box-sizing: border-box; /* Incluye padding y borde en el ancho/alto total */
+            border-top: 4px solid #E62A29; /* Línea roja superior, imitando la línea de Claro */
+        }
+
+        /* Título del módulo */
+        .upload-module h2 {
+            color: #333; /* Color de texto oscuro */
+            font-size: 24px; /* Tamaño de fuente del título */
+            margin-bottom: 20px; /* Espacio debajo del título */
+            text-align: center; /* Centrar el texto del título */
+        }
+
+        /* Área de drag and drop */
+        .drop-zone {
+            border: 2px dashed #ccc; /* Borde punteado gris */
+            border-radius: 8px; /* Bordes redondeados */
+            padding: 40px 20px; /* Espaciado interno */
+            text-align: center; /* Centrar el contenido */
+            color: #666; /* Color de texto por defecto */
+            cursor: pointer; /* Cambiar cursor para indicar interactividad */
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Transiciones suaves */
+            margin-bottom: 20px; /* Espacio debajo de la zona */
+            background-color: #f8f8f8; /* Fondo ligeramente gris para la zona */
+        }
+
+        /* Estilo cuando se arrastra un archivo sobre la zona de drop */
+        .drop-zone.drag-over {
+            background-color: #ffebeb; /* Fondo rosa claro */
+            border-color: #E62A29; /* Borde rojo de Claro */
+            color: #E62A29; /* Texto y contenido en rojo */
+        }
+
+        /* Icono SVG dentro de la zona de drop */
+        .drop-zone svg {
+            width: 48px; /* Ancho del icono */
+            height: 48px; /* Alto del icono */
+            margin-bottom: 15px; /* Espacio debajo del icono */
+            color: #E62A29; /* Color rojo de Claro */
+        }
+
+        /* Párrafo principal de texto en la zona de drop */
+        .drop-zone p {
+            margin: 0; /* Eliminar margen por defecto */
+            font-size: 18px; /* Tamaño de fuente */
+            font-weight: 500; /* Negrita media */
+        }
+
+        /* Texto secundario en la zona de drop */
+        .drop-zone span {
+            font-size: 14px; /* Tamaño de fuente más pequeño */
+            color: #999; /* Color de texto más claro */
+        }
+
+        /* Lista de archivos subidos */
+        #file-list {
+            margin-top: 20px; /* Espacio superior */
+            border-top: 1px solid #eee; /* Línea separadora superior */
+            padding-top: 15px; /* Espaciado superior */
+        }
+
+        /* Estilo para cada elemento de archivo en la lista */
+        .file-item {
+            display: flex; /* Usar flexbox para alinear elementos */
+            justify-content: space-between; /* Espaciar el nombre y el botón */
+            align-items: center; /* Alinear verticalmente al centro */
+            background-color: #f9f9f9; /* Fondo ligeramente gris para el item */
+            border: 1px solid #eee; /* Borde sutil */
+            border-radius: 6px; /* Bordes redondeados */
+            padding: 10px 15px; /* Espaciado interno */
+            margin-bottom: 10px; /* Espacio entre items */
+            font-size: 15px; /* Tamaño de fuente */
+            color: #555; /* Color de texto */
+        }
+
+        /* Nombre del archivo dentro del item */
+        .file-item .file-name {
+            flex-grow: 1; /* Ocupar el espacio disponible */
+            margin-right: 10px; /* Espacio a la derecha del nombre */
+            overflow: hidden; /* Ocultar el texto que se desborda */
+            text-overflow: ellipsis; /* Mostrar puntos suspensivos si el texto es muy largo */
+            white-space: nowrap; /* Evitar que el texto se rompa en varias líneas */
+        }
+
+        /* Botón para remover un archivo */
+        .file-item .remove-file {
+            background: none; /* Sin fondo */
+            border: none; /* Sin borde */
+            color: #E62A29; /* Color rojo de Claro */
+            font-size: 18px; /* Tamaño de fuente de la "X" */
+            cursor: pointer; /* Cambiar cursor */
+            padding: 0 5px; /* Pequeño padding */
+            line-height: 1; /* Altura de línea para alinear la "X" */
+            transition: color 0.2s ease; /* Transición suave del color */
+        }
+
+        .file-item .remove-file:hover {
+            color: #cc2222; /* Rojo más oscuro al pasar el mouse */
+        }
+
+        /* Botón principal de "Subir Archivos" */
+        .upload-button {
+            background-color: #E62A29; /* Color rojo de Claro */
+            color: white; /* Texto blanco */
+            padding: 12px 25px; /* Espaciado interno */
+            border: none; /* Sin borde */
+            border-radius: 6px; /* Bordes redondeados */
+            font-size: 16px; /* Tamaño de fuente */
+            font-weight: 500; /* Negrita media */
+            cursor: pointer; /* Cambiar cursor */
+            transition: background-color 0.3s ease; /* Transición suave del fondo */
+            width: 100%; /* Ocupar todo el ancho disponible */
+            margin-top: 20px; /* Espacio superior */
+        }
+
+        .upload-button:hover {
+            background-color: #cc2222; /* Tono más oscuro al pasar el mouse */
+        }
+
+        /* Ocultar el input de archivo real (se activará al hacer clic en la drop-zone) */
+        #file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-module">
+        <h2>Subir Archivos</h2>
+
+        <div class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" multiple>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.784 10.364l-4.243-4.243c-.78-.78-2.047-.78-2.828 0s-.78 2.047 0 2.828l1.414 1.414H8c-2.209 0-4 1.791-4 4v4h2v-4c0-1.103.897-2 2-2h5.172l-1.414 1.414c-.78.78-.78 2.047 0 2.828s2.047.78 2.828 0l4.243-4.243c.78-.78.78-2.047 0-2.828zM12 4V2a1 1 0 011-1h1a1 1 0 011 1v2h2V2a3 3 0 00-3-3h-1a3 3 0 00-3 3v2h2z"/>
+            </svg>
+            <p>Arrastra y suelta tus archivos aquí</p>
+            <span>o haz clic para seleccionar</span>
+        </div>
+
+        <div id="file-list">
+            </div>
+
+        <button class="upload-button">Subir Archivos</button>
+    </div>
+
+    <script>
+        // Obtener referencias a los elementos del DOM
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        // Array para almacenar los archivos que el usuario ha seleccionado/arrastrado
+        let filesToUpload = [];
+
+        // Prevenir el comportamiento por defecto del navegador para drag and drop
+        // Esto es crucial para que el navegador no abra el archivo al soltarlo
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Evita que se abra el archivo
+            dropZone.classList.add('drag-over'); // Añade clase para cambiar el estilo visual
+        });
+
+        // Quitar el estilo de "drag-over" cuando el archivo sale de la zona
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        // Manejar los archivos cuando se sueltan en la zona
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); // Evita el comportamiento por defecto
+            dropZone.classList.remove('drag-over'); // Quita el estilo de "drag-over"
+            handleFiles(e.dataTransfer.files); // Procesa los archivos transferidos
+        });
+
+        // Abrir el selector de archivos nativo al hacer clic en la zona de drop
+        dropZone.addEventListener('click', () => {
+            fileInput.click(); // Simula un click en el input de tipo file oculto
+        });
+
+        // Manejar los archivos cuando se seleccionan a través del input de archivo
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files); // Procesa los archivos seleccionados
+        });
+
+        // Función para procesar y añadir archivos a la lista
+        function handleFiles(files) {
+            for (const file of files) {
+                // Comprobar si el archivo ya está en la lista (por nombre y tamaño) para evitar duplicados
+                if (!filesToUpload.some(f => f.name === file.name && f.size === file.size)) {
+                    filesToUpload.push(file); // Añadir el archivo al array
+                }
+            }
+            renderFileList(); // Actualizar la vista de la lista de archivos
+        }
+
+        // Función para renderizar (dibujar) la lista de archivos en el DOM
+        function renderFileList() {
+            fileList.innerHTML = ''; // Limpiar la lista actual antes de volver a dibujarla
+            filesToUpload.forEach((file, index) => {
+                const fileItem = document.createElement('div'); // Crear un nuevo div para cada archivo
+                fileItem.classList.add('file-item'); // Añadir clase CSS
+                fileItem.innerHTML = `
+                    <span class="file-name">${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    <button class="remove-file" data-index="${index}">&times;</button>
+                `;
+                fileList.appendChild(fileItem); // Añadir el item a la lista de archivos
+            });
+
+            // Añadir event listeners a los botones de eliminar (ya que son dinámicos)
+            document.querySelectorAll('.remove-file').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Obtener el índice del archivo a eliminar desde el atributo data-index
+                    const indexToRemove = parseInt(e.target.dataset.index);
+                    // Eliminar el archivo del array filesToUpload
+                    filesToUpload.splice(indexToRemove, 1);
+                    renderFileList(); // Volver a renderizar la lista para reflejar el cambio
+                });
+            });
+        }
+
+        // Simular la acción de "subir" los archivos
+        document.querySelector('.upload-button').addEventListener('click', () => {
+            if (filesToUpload.length > 0) {
+                // Mensaje de alerta con los nombres de los archivos "subidos"
+                alert(`Simulando subida de ${filesToUpload.length} archivo(s):\n${filesToUpload.map(f => f.name).join('\n')}`);
+                
+                // Aquí es donde integrarías tu lógica real de subida (ej. usando FormData y fetch API)
+                /*
+                const formData = new FormData();
+                filesToUpload.forEach(file => {
+                    formData.append('files[]', file); // 'files[]' para enviar múltiples archivos
+                });
+                
+                fetch('/tu-endpoint-de-subida', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Subida exitosa:', data);
+                    // Limpiar la lista después de una subida exitosa
+                    filesToUpload = []; 
+                    renderFileList();
+                })
+                .catch(error => {
+                    console.error('Error durante la subida:', error);
+                    alert('Hubo un error al subir los archivos.');
+                });
+                */
+
+                // Si no hay una subida real, solo limpiar la lista y resetear el array
+                filesToUpload = []; 
+                renderFileList();
+            } else {
+                alert('No hay archivos para subir.');
+            }
+        });
+    </script>
+</body>
+</html>

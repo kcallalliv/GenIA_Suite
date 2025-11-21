@@ -1,0 +1,57 @@
+{
+	"Informativo / Explicativo": {
+		"intencion": "Saber qué es algo",
+		"descripcion": "Define o explica un concepto, producto o servicio en profundidad, abordando sus características y funcionamiento.",
+		"ejemplo": "¿Qué es un plan postpago? Beneficios, cómo funciona."
+	},
+	"Comparativo": {
+		"intencion": "Comparar opciones",
+		"descripcion": "Enfrenta dos o más opciones, productos o servicios para ayudar al usuario a decidir cuál se ajusta mejor a sus necesidades, destacando diferencias y similitudes.",
+		"ejemplo": "Postpago vs. prepago: ¿Cuál te conviene más?"
+	},
+	"Educativo / Guía": {
+		"intencion": "Aprender a hacer algo",
+		"descripcion": "Enseña cómo realizar una tarea o proceso paso a paso, a menudo en formato de tutorial o guía práctica.",
+		"ejemplo": "Cómo activar tu chip postpago en Claro"
+	},
+	"Transaccional / Comercial": {
+		"intencion": "Comprar o contratar",
+		"descripcion": "Contenido directamente orientado a la acción de compra, suscripción o contratación de un servicio o producto, destacando los pasos para hacerlo.",
+		"ejemplo": "Contrata tu plan postpago Claro desde aquí"
+	},
+	"Reseña / Evaluación": {
+		"intencion": "Evaluar antes de comprar",
+		"descripcion": "Ofrece opiniones, análisis detallados o valoraciones sobre un producto, servicio o plan, ayudando al usuario a formarse un criterio antes de decidir.",
+		"ejemplo": "Opiniones sobre planes postpago Claro"
+	},
+	"Preguntas Frecuentes (FAQ)": {
+		"intencion": "Resolver dudas comunes",
+		"descripcion": "Compila y responde de forma concisa las preguntas más habituales sobre un tema específico, producto o servicio.",
+		"ejemplo": "FAQ sobre postpago: cobros, portabilidad, etc."
+	},
+	"Contenido de Soporte / Ayuda": {
+		"intencion": "Resolver un problema",
+		"descripcion": "Proporciona instrucciones técnicas, soluciones a problemas comunes o guías de servicio al cliente para asistir al usuario con dificultades.",
+		"ejemplo": "¿Por qué no funciona mi plan postpago Claro?"
+	},
+	"Casos de uso / Escenarios": {
+		"intencion": "Entender para qué sirve algo",
+		"descripcion": "Explica situaciones o contextos reales en los que un servicio, producto o concepto es particularmente útil o aplicable.",
+		"ejemplo": "¿Cuándo conviene tener un plan postpago?"
+	},
+	"Contenido de Marca / Autoridad": {
+		"intencion": "Reforzar posicionamiento",
+		"descripcion": "Destaca el liderazgo, la trayectoria o el valor diferencial de la marca en un sector o categoría específica, construyendo confianza y autoridad.",
+		"ejemplo": "Claro, líder en cobertura postpago en Perú"
+	},
+	"Contenido Localizado": {
+		"intencion": "Buscar opciones cercanas",
+		"descripcion": "Responde a búsquedas con intención geográfica, ofreciendo información relevante para una ubicación específica.",
+		"ejemplo": "Planes postpago Claro en Arequipa"
+	},
+	"Contenido Evergreen": {
+		"intencion": "Atraer tráfico constante",
+		"descripcion": "Proporciona información atemporal que sigue siendo relevante y útil para los usuarios a lo largo del tiempo, generando tráfico orgánico consistente.",
+		"ejemplo": "Los beneficios de la fibra óptica en el hogar"
+	}
+}

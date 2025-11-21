@@ -1,0 +1,49 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<div class="btn-group" role="group" aria-label="Basic example">
+		<a class="btn btn-secondary" href="../links/">Listado</a>
+		<a class="btn btn-secondary" href="papelera">Papelera</a>
+		<a class="btn btn-secondary" href="agregar">Nuevo</a>
+	</div>
+	<main class="logo-content">
+		<h1 class="section-title">Links (Editar)</h1>
+		
+		<form id="form-link-update" action="update" autocomplete="off" method="post">
+			<input type="hidden" class="form-control" id="txt_pid" name="txt_pid" value="{{ pid }}">
+			<input type="hidden" class="form-control" id="link_id" name="link_id" value="{{ data['link_id'] }}">
+			<div class="form-row-full">
+				<div class="field">
+					<label for="brand_name">Nombre</label>
+					<div class="input">
+						<input type="text" class="form-control" placeholder="Nombre" id="link_name" name="link_name" autocomplete="new" value="{{ data['link_name'] }}">
+					</div>
+				</div>
+			</div>
+			<div class="form-row-full">
+				<div class="field">
+					<label for="brand_name">URL</label>
+					<div class="input">
+						<input type="text" class="form-control" placeholder="url" id="link_url" name="link_url" autocomplete="off" value="{{ data['link_url'] }}">
+					</div>
+				</div>
+			</div>
+			<div class="actions">
+				<button type="submit" class="btn btn-primary" id="btn-guardar">Guardar</button>
+			</div>
+		</form>
+
+		<div class="helper">
+			<span class="pill" aria-hidden="true"></span>
+			<span id="lbl_mensaje">
+				{% if 'mensaje' in session %}
+					{{ session['mensaje'] }}
+					{% set _ = session.pop('mensaje', None) %}
+				{% endif %}
+			</span>
+		</div>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/links.js') }}"></script>
+{% endblock %}

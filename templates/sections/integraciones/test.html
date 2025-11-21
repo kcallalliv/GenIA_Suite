@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Integraciones Disponibles</title>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+			background: #f5f7fa;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.page-header {
+			margin-bottom: 32px;
+		}
+
+		.page-title {
+			font-size: 24px;
+			font-weight: 600;
+			color: #1a1a1a;
+			margin-bottom: 8px;
+		}
+
+		.page-subtitle {
+			font-size: 14px;
+			color: #6b7280;
+		}
+
+		.section {
+			background: white;
+			border-radius: 12px;
+			padding: 24px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+			margin-bottom: 24px;
+		}
+
+		.section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			padding-bottom: 16px;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		.section-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #374151;
+		}
+
+		.add-button {
+			padding: 8px 16px;
+			background: #da291c;
+			color: white;
+			border: none;
+			border-radius: 6px;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			transition: all 0.2s;
+		}
+
+		.add-button:hover {
+			background: #b8221a;
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(218, 41, 28, 0.3);
+		}
+
+		.add-button .material-icons {
+			font-size: 18px;
+		}
+
+		/* Integration Items */
+		.integration-list {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		.integration-item {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 16px 20px;
+			background: #f8f9fa;
+			border-radius: 8px;
+			transition: all 0.2s;
+		}
+
+		.integration-item:hover {
+			background: #f3f4f6;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+
+		.integration-left {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			flex: 1;
+		}
+
+		.integration-icon {
+			width: 40px;
+			height: 40px;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 20px;
+			color: white;
+		}
+
+		.icon-semrush {
+			background: #0B3B66;
+		}
+
+		.icon-google {
+			background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+		}
+
+		.icon-trends {
+			background: linear-gradient(135deg, #DB4437 0%, #F4B400 100%);
+		}
+
+		.integration-info {
+			flex: 1;
+		}
+
+		.integration-name {
+			font-size: 15px;
+			font-weight: 600;
+			color: #1a1a1a;
+			margin-bottom: 4px;
+		}
+
+		.integration-status {
+			font-size: 13px;
+			color: #6b7280;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.status-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+			padding: 2px 8px;
+			border-radius: 12px;
+			font-size: 11px;
+			font-weight: 500;
+		}
+
+		.status-badge.active {
+			background: #d1fae5;
+			color: #065f46;
+		}
+
+		.status-badge.inactive {
+			background: #fee2e2;
+			color: #991b1b;
+		}
+
+		.status-badge .material-icons {
+			font-size: 14px;
+		}
+
+		.integration-right {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		/* Toggle Switch */
+		.toggle-switch {
+			position: relative;
+			width: 48px;
+			height: 26px;
+			display: inline-block;
+		}
+
+		.toggle-switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+
+		.toggle-slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #cbd5e1;
+			transition: 0.3s;
+			border-radius: 34px;
+		}
+
+		.toggle-slider:before {
+			position: absolute;
+			content: "";
+			height: 20px;
+			width: 20px;
+			left: 3px;
+			bottom: 3px;
+			background-color: white;
+			transition: 0.3s;
+			border-radius: 50%;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		}
+
+		.toggle-switch input:checked + .toggle-slider {
+			background-color: #4a5568;
+		}
+
+		.toggle-switch input:checked + .toggle-slider:before {
+			transform: translateX(22px);
+		}
+
+		/* Edit Button */
+		.edit-button {
+			padding: 8px 16px;
+			background: white;
+			color: #4a5568;
+			border: 1px solid #d0d5dd;
+			border-radius: 6px;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			transition: all 0.2s;
+		}
+
+		.edit-button:hover {
+			background: #f9fafb;
+			border-color: #9ca3af;
+		}
+
+		.edit-button .material-icons {
+			font-size: 18px;
+		}
+
+		/* Empty State */
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #9ca3af;
+		}
+
+		.empty-state .material-icons {
+			font-size: 64px;
+			color: #d1d5db;
+			margin-bottom: 16px;
+		}
+
+		.empty-state p {
+			font-size: 15px;
+			margin-bottom: 20px;
+		}
+
+		/* Responsive */
+		@media (max-width: 768px) {
+			.integration-item {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 12px;
+			}
+
+			.integration-right {
+				width: 100%;
+				justify-content: space-between;
+			}
+
+			.edit-button {
+				flex: 1;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="page-header">
+			<h1 class="page-title">Integraciones disponibles</h1>
+			<p class="page-subtitle">Conecta tus herramientas favoritas para obtener datos y métricas</p>
+		</div>
+
+		<!-- Fuentes de datos -->
+		<div class="section">
+			<div class="section-header">
+				<h2 class="section-title">Fuentes de datos</h2>
+				<button class="add-button">
+					<span class="material-icons">add</span>
+					<span>Agregar</span>
+				</button>
+			</div>
+
+			<div class="integration-list">
+				<!-- Semrush -->
+				<div class="integration-item">
+					<div class="integration-left">
+						<div class="integration-icon icon-semrush">
+							<span class="material-icons">analytics</span>
+						</div>
+						<div class="integration-info">
+							<div class="integration-name">Semrush</div>
+							<div class="integration-status">
+								<span class="status-badge inactive">
+									<span class="material-icons">circle</span>
+									Inactivo
+								</span>
+								<span>·</span>
+								<span>SEO & Marketing Analytics</span>
+							</div>
+						</div>
+					</div>
+					<div class="integration-right">
+						<label class="toggle-switch">
+							<input type="checkbox" onchange="toggleIntegration(this, 'Semrush')">
+							<span class="toggle-slider"></span>
+						</label>
+						<button class="edit-button" onclick="editIntegration('Semrush')">
+							<span>Editar</span>
+							<span class="material-icons">edit</span>
+						</button>
+					</div>
+				</div>
+
+				<!-- Google Search -->
+				<div class="integration-item">
+					<div class="integration-left">
+						<div class="integration-icon icon-google">
+							<span class="material-icons">search</span>
+						</div>
+						<div class="integration-info">
+							<div class="integration-name">Google Search</div>
+							<div class="integration-status">
+								<span class="status-badge inactive">
+									<span class="material-icons">circle</span>
+									Inactivo
+								</span>
+								<span>·</span>
+								<span>Search Volume & Rankings</span>
+							</div>
+						</div>
+					</div>
+					<div class="integration-right">
+						<label class="toggle-switch">
+							<input type="checkbox" onchange="toggleIntegration(this, 'Google Search')">
+							<span class="toggle-slider"></span>
+						</label>
+						<button class="edit-button" onclick="editIntegration('Google Search')">
+							<span>Editar</span>
+							<span class="material-icons">edit</span>
+						</button>
+					</div>
+				</div>
+
+				<!-- Google Trends -->
+				<div class="integration-item">
+					<div class="integration-left">
+						<div class="integration-icon icon-trends">
+							<span class="material-icons">trending_up</span>
+						</div>
+						<div class="integration-info">
+							<div class="integration-name">Google Trends</div>
+							<div class="integration-status">
+								<span class="status-badge active">
+									<span class="material-icons">check_circle</span>
+									Activo
+								</span>
+								<span>·</span>
+								<span>Tendencias de búsqueda</span>
+							</div>
+						</div>
+					</div>
+					<div class="integration-right">
+						<label class="toggle-switch">
+							<input type="checkbox" checked onchange="toggleIntegration(this, 'Google Trends')">
+							<span class="toggle-slider"></span>
+						</label>
+						<button class="edit-button" onclick="editIntegration('Google Trends')">
+							<span>Editar</span>
+							<span class="material-icons">edit</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Otras integraciones (ejemplo vacío) -->
+		<div class="section">
+			<div class="section-header">
+				<h2 class="section-title">Herramientas de automatización</h2>
+				<button class="add-button">
+					<span class="material-icons">add</span>
+					<span>Agregar</span>
+				</button>
+			</div>
+
+			<div class="empty-state">
+				<span class="material-icons">integration_instructions</span>
+				<p>No hay integraciones configuradas</p>
+				<button class="add-button" style="margin: 0 auto;">
+					<span class="material-icons">add</span>
+					<span>Agregar integración</span>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function toggleIntegration(checkbox, name) {
+			const item = checkbox.closest('.integration-item');
+			const statusBadge = item.querySelector('.status-badge');
+			const statusIcon = statusBadge.querySelector('.material-icons');
+			const statusText = statusBadge.childNodes[2];
+
+			if (checkbox.checked) {
+				statusBadge.classList.remove('inactive');
+				statusBadge.classList.add('active');
+				statusIcon.textContent = 'check_circle';
+				statusText.textContent = 'Activo';
+				console.log(`${name} activado`);
+			} else {
+				statusBadge.classList.remove('active');
+				statusBadge.classList.add('inactive');
+				statusIcon.textContent = 'circle';
+				statusText.textContent = 'Inactivo';
+				console.log(`${name} desactivado`);
+			}
+		}
+
+		function editIntegration(name) {
+			alert(`Editando configuración de ${name}`);
+		}
+	</script>
+</body>
+</html>

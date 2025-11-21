@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tabla de Datos</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f8f9fa;
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+			min-height: 100vh;
+			margin: 20px;
+			box-sizing: border-box;
+		}
+
+		.table-container {background-color: #fff;border-radius: 8px;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);overflow: hidden;width: 100%;max-width: 900px;}
+		table {width: 100%;border-collapse: collapse;table-layout: fixed;}
+		th, td {padding: 12px 15px;text-align: left;border-bottom: 1px solid #e0e0e0;font-size: 0.95em;color: #333;}
+		thead th {font-weight: bold;color: #666;text-transform: capitalize;padding-top: 15px;padding-bottom: 15px;position: relative;}
+		thead th:first-child {width: 50px;text-align: center;}
+		.sortable {align-items: center;gap: 5px;cursor: pointer;user-select: none;}
+		.sortable .fas {font-size: 0.8em;color: #888;margin-left: 0.5em;order: 1;}
+		th:not(.asc):not(.desc) .fas {display: none;}
+		th.asc .fas {transform: rotate(0deg);}
+		th.desc .fas {transform: rotate(360deg);}
+		.numeric {text-align: right;}
+		tbody tr:last-child td {border-bottom: none;}
+		tbody tr:hover {background-color: #f5f5f5;}
+		tbody td:first-child {text-align: center;font-weight: bold;color: #777;background-color: #fdfdfd;}
+		.pagination-container {display: flex;justify-content: flex-end;align-items: center;padding: 15px;border-top: 1px solid #e0e0e0;background-color: #fff;border-bottom-left-radius: 8px;border-bottom-right-radius: 8px;font-size: 0.9em;color: #555;flex-wrap: wrap;}
+		.pagination-controls {display: flex;align-items: center;gap: 10px;}
+		.pagination-controls select {padding: 6px 10px;border: 1px solid #ccc;border-radius: 4px;background-color: #fff;font-size: 0.9em;cursor: pointer;outline: none;-webkit-appearance: none;-moz-appearance: none;appearance: none;background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13%205.7l-118.3%20118.3L36.2%2075.1a17.6%2017.6%200%200%200-24.7%200%2017.6%2017.6%200%200%200%200%2024.7l130.4%20130.4c6.9%206.9%2017.6%206.9%2024.7%200l130.4-130.4a17.6%2017.6%200%200%200%200-24.7c-6.9-6.9-17.7-6.9-24.7%200z%22%2F%3E%3C%2Fsvg%3E');background-repeat: no-repeat;background-position: right 8px center;background-size: 12px;padding-right: 25px;}
+		.pagination-text {margin-right: 15px;}
+		.pagination-buttons button {background-color: transparent;border: 1px solid #e0e0e0;border-radius: 4px;padding: 8px 12px;cursor: pointer;color: #777;font-size: 0.9em;margin: 0 3px;transition: background-color 0.2s ease, border-color 0.2s ease;}
+		.pagination-buttons button:hover:not(:disabled) {background-color: #f0f0f0;border-color: #ccc;}
+		.pagination-buttons button:disabled {cursor: not-allowed;opacity: 0.5;}
+	</style>
+</head>
+<body>
+	<div class="table-container">
+		<table id="myTable">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th data-column="keyword" class="sortable">
+						Keyword <i class="fas fa-arrow-up"></i>
+					</th>
+					<th data-column="search_volume" class="sortable numeric">
+						Search Volume <i class="fas fa-arrow-up"></i>
+					</th>
+					<th data-column="position" class="sortable numeric">
+						Posición <i class="fas fa-arrow-up"></i>
+					</th>
+					<th data-column="intent" class="sortable">
+						Intención <i class="fas fa-arrow-up"></i>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr><td>1</td><td>Medidor de velocidad</td><td class="numeric">22200</td><td class="numeric">9</td><td>Informativa</td></tr>
+				<tr><td>2</td><td>Marcas de celulares</td><td class="numeric">540</td><td class="numeric">10</td><td>Transaccional</td></tr>
+				<tr><td>3</td><td>Television por cable</td><td class="numeric">346</td><td class="numeric">5</td><td>Informativa</td></tr>
+				<tr><td>4</td><td>Repetidores wifi</td><td class="numeric">213</td><td class="numeric">6</td><td>Informativa</td></tr>
+				<tr><td>5</td><td>portabilidad</td><td class="numeric">256</td><td class="numeric">7</td><td>Informativa</td></tr>
+				<tr><td>6</td><td>red 5g</td><td class="numeric">5654</td><td class="numeric">8</td><td>Informativa</td></tr>
+				<tr><td>7</td><td>Samsung s 24</td><td class="numeric">8754</td><td class="numeric">2</td><td>Informativa</td></tr>
+				<tr><td>8</td><td>Samsung Sa precio</td><td class="numeric">223</td><td class="numeric">4</td><td>Informativa</td></tr>
+				<tr><td>9</td><td>router inalambrico</td><td class="numeric">1232</td><td class="numeric">9</td><td>Informativa</td></tr>
+				<tr><td>10</td><td>telefono fijo</td><td class="numeric">124</td><td class="numeric">10</td><td>Informativa</td></tr>
+			</tbody>
+		</table>
+		<div class="pagination-container">
+			<div class="pagination-controls">
+				<span>Elementos por página</span>
+				<select id="itemsPerPage">
+					<option value="5">5</option>
+					<option value="10" selected>10</option>
+					<option value="20">20</option>
+					<option value="50">50</option>
+				</select>
+			</div>
+			<div class="pagination-info">
+				<span id="paginationStatus">1 - 10 of 10</span>
+			</div>
+			<div class="pagination-buttons">
+				<button id="prevPage" disabled>&lt;</button>
+				<button id="nextPage" disabled>&gt;</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const table = document.getElementById('myTable');
+		const tbody = table.querySelector('tbody');
+		// Seleccionamos los th.sortable para los event listeners.
+		// Importante que el HTML de los THs tenga el icono <i> inicial.
+		const ths = table.querySelectorAll('th.sortable'); 
+		const itemsPerPageSelect = document.getElementById('itemsPerPage');
+		const prevPageBtn = document.getElementById('prevPage');
+		const nextPageBtn = document.getElementById('nextPage');
+		const paginationStatus = document.getElementById('paginationStatus');
+		let currentPage = 1;
+		let itemsPerPage = parseInt(itemsPerPageSelect.value);
+		let originalRows = Array.from(tbody.querySelectorAll('tr'));
+		let currentSortColumnIndex = -1;
+		let currentSortDirection = 'asc'; // 'asc' or 'desc'
+
+		const getCellValue = (tr, idx) => {
+			const cell = tr.children[idx];
+			return cell ? cell.innerText || cell.textContent : '';
+		};
+
+		const comparer = (idx, asc) => (a, b) => {
+			const v1 = getCellValue(asc ? a : b, idx);
+			const v2 = getCellValue(asc ? b : a, idx);
+			// Intenta convertir a número si es posible (ignorando comas para Search Volume)
+			const isNumericCol = table.querySelector('thead th:nth-child(' + (idx + 1) + ')').classList.contains('numeric');
+			if (isNumericCol) {
+				const num1 = parseFloat(v1.replace(/,/g, ''));
+				const num2 = parseFloat(v2.replace(/,/g, ''));
+				if (!isNaN(num1) && !isNaN(num2)) {
+					return num1 - num2;
+				}
+			}
+			return v1.toString().localeCompare(v2.toString());
+		};
+
+		function updatePaginationStatus() {
+			const totalItems = originalRows.length;
+			const startIndex = (currentPage - 1) * itemsPerPage + 1;
+			const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
+			paginationStatus.textContent = `${startIndex} - ${endIndex} of ${totalItems}`;
+			prevPageBtn.disabled = currentPage === 1;
+			nextPageBtn.disabled = currentPage * itemsPerPage >= totalItems;
+		}
+
+		function renderTable() {
+			tbody.innerHTML = ''; // Limpiar el cuerpo de la tabla
+			const sortedRows = [...originalRows]; // Crear una copia para ordenar
+			if (currentSortColumnIndex !== -1) {
+				sortedRows.sort(comparer(currentSortColumnIndex, currentSortDirection === 'asc'));
+			}
+			const startIndex = (currentPage - 1) * itemsPerPage;
+			const endIndex = startIndex + itemsPerPage;
+			const paginatedRows = sortedRows.slice(startIndex, endIndex);
+			paginatedRows.forEach((row, index) => {
+				// Actualizar el número de ID en la primera columna visible
+				row.children[0].textContent = startIndex + index + 1;
+				tbody.appendChild(row);
+			});
+
+			updatePaginationStatus();
+		}
+
+		ths.forEach((th, index) => {
+			th.addEventListener('click', () => {
+				const headerRow = th.parentNode;
+				const columnIndex = Array.from(headerRow.children).indexOf(th);
+				const currentIcon = th.querySelector('.fas'); // Obtener el icono existente (fa-arrow-up o fa-arrow-down)
+
+				// Determinar la nueva dirección de ordenamiento
+				let newSortDirection = 'asc';
+				if (currentSortColumnIndex === columnIndex) {
+					newSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+				}
+
+				// Limpiar clases de ordenamiento y restablecer iconos de todos los encabezados sortable
+				ths.forEach(otherTh => {
+					otherTh.classList.remove('asc', 'desc');
+					const otherIcon = otherTh.querySelector('.fas');
+					if (otherIcon) {
+						// Resetear el icono a su estado por defecto (flecha hacia arriba, oculto por CSS)
+						otherIcon.className = 'fas fa-arrow-up';
+					}
+				});
+
+				// Añadir la clase de ordenamiento al encabezado clickeado
+				th.classList.add(newSortDirection);
+
+				// Actualizar la clase del icono del encabezado clickeado
+				if (currentIcon) {
+					currentIcon.className = `fas ${newSortDirection === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'}`;
+				}
+
+				currentSortColumnIndex = columnIndex;
+				currentSortDirection = newSortDirection;
+				currentPage = 1; // Volver a la primera página después de ordenar
+				renderTable();
+			});
+		});
+
+		itemsPerPageSelect.addEventListener('change', function() {
+			itemsPerPage = parseInt(this.value);
+			currentPage = 1;
+			renderTable();
+		});
+
+		prevPageBtn.addEventListener('click', function() {
+			if (currentPage > 1) {
+				currentPage--;
+				renderTable();
+			}
+		});
+
+		nextPageBtn.addEventListener('click', function() {
+			const totalPages = Math.ceil(originalRows.length / itemsPerPage);
+			if (currentPage < totalPages) {
+				currentPage++;
+				renderTable();
+			}
+		});
+		const initialSortColumn = document.querySelector('th[data-column="keyword"]');
+		if (initialSortColumn) {
+			initialSortColumn.click();
+		} else {
+			renderTable();
+		}
+	});
+	</script>
+</body>
+</html>

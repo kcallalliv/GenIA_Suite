@@ -1,0 +1,68 @@
+{% extends "sections/template-dashboard.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<div class="btn-group" role="group" aria-label="Basic example">
+		<a class="btn btn-secondary" href="/sistema/users">Listado</a>
+		<a class="btn btn-secondary" href="/sistema/users/papelera">Papelera</a>
+		<a class="btn btn-secondary" href="/sistema/users/agregar">Nuevo</a>
+	</div>
+	<main class="logo-content">
+		<h1 class="section-title">Usuarios (Nuevo)</h1>
+		
+		<form id="form-usuario-save" action="save" autocomplete="off" method="post">
+			<div class="form-row">
+				<div class="field">
+					<label for="brand_name">Nombre</label>
+					<div class="input">
+						<input type="text" class="form-control" placeholder="Nombre" id="usu_usuario" name="usu_usuario" autocomplete="new" value="">
+					</div>
+				</div>
+				<div class="field">
+					<label for="pais">Permiso</label>
+					<div class='select' id="load_pais">
+						{% set select_permiso = selectPermiso() %}
+						{{select_permiso | safe}}
+					</div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="field">
+					<label for="brand_name">Número Telefónico</label>
+					<div class="input">
+						<input type="text" class="form-control" placeholder="Número Telefónico" id="usu_phone" name="usu_phone" maxlength="9" autocomplete="off" value="">
+					</div>
+				</div>
+				<div class="field">
+					<label for="pais">Email Cuenta</label>
+					<div class="input" id="load_pais">
+						<input type="text" class='form-control' placeholder="Email" id="usu_email" name="usu_email" autocomplete="off" value="">
+					</div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="field">
+					<label for="brand_name">Password (Si esta vacio, no se actualiza)</label>
+					<div class="input">
+						<input type="password" class="form-control" placeholder="Password" id="usu_password" name="usu_password" autocomplete="new-password" />
+					</div>
+				</div>
+			</div>
+			<div class="actions">
+				<button type="submit" class="btn btn-primary" id="btn-guardar">Guardar</button>
+			</div>
+		</form>
+
+		<div class="helper">
+			<span class="pill" aria-hidden="true"></span>
+			<span id="lbl_mensaje">
+				{% if 'mensaje' in session %}
+					{{ session['mensaje'] }}
+					{% set _ = session.pop('mensaje', None) %}
+				{% endif %}
+			</span>
+		</div>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/sys-usuarios.js') }}"></script>
+{% endblock %}

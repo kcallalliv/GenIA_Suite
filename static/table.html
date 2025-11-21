@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Datos Ordenable</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa; /* Un fondo gris muy claro */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinea al inicio verticalmente */
+    min-height: 100vh;
+    margin: 20px; /* Margen general para la tabla */
+    box-sizing: border-box;
+}
+
+.table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra suave para el efecto de "card" */
+    overflow: hidden; /* Asegura que los bordes redondeados se apliquen bien al contenido */
+    width: 100%;
+    max-width: 800px; /* Ancho máximo para la tabla */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina el espacio entre celdas */
+    table-layout: fixed; /* Ayuda a controlar el ancho de las columnas */
+}
+
+th, td {
+    padding: 12px 15px; /* Espaciado interno de las celdas */
+    text-align: left; /* Alineación por defecto */
+    border-bottom: 1px solid #e0e0e0; /* Borde inferior para las filas */
+    font-size: 0.95em;
+    color: #333;
+}
+
+thead th {
+    background-color: #f2f2f2; /* Fondo ligeramente gris para el encabezado */
+    font-weight: bold;
+    color: #666;
+    text-transform: lowercase; /* Convertir a minúsculas como en la imagen */
+    padding-top: 15px;
+    padding-bottom: 15px;
+    position: relative; /* Para posicionar el icono de ordenación */
+}
+
+/* Estilo específico para las columnas del encabezado */
+thead th:first-child {
+    width: 50px; /* Ancho para la columna de numeración */
+    text-align: center; /* Centrar el número si hay alguno */
+}
+
+.sortable {
+    align-items: center;
+    gap: 5px; /* Espacio entre el icono y el texto */
+    cursor: pointer;
+    text-align: left; /* Asegurar alineación a la izquierda */
+    font-weight: bold;
+    user-select: none; /* Evita que el texto se seleccione al hacer clic rápido */
+}
+
+.sortable .fas {
+    font-size: 0.8em; /* Tamaño del icono de flecha */
+    color: #888;
+    order: -1; /* Mueve el icono al principio del flex item */
+}
+
+/* Clase para ocultar el icono por defecto y mostrarlo solo cuando se ordena */
+th:not(.asc):not(.desc) .fas {
+    display: none;
+}
+
+
+/* Alineación de texto para celdas numéricas */
+.numeric {
+    text-align: right;
+    width: 150px; /* Ancho fijo para las columnas numéricas si es necesario */
+}
+
+tbody tr:last-child td {
+    border-bottom: none; /* Elimina el borde de la última fila */
+}
+
+/* Efecto hover en las filas */
+tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Estilo para las celdas de número de fila */
+tbody td:first-child {
+    text-align: center;
+    font-weight: bold;
+    color: #777;
+    background-color: #fdfdfd; /* Un color ligeramente diferente para la primera columna */
+}
+</style>
+</head>
+<body>
+    <div class="table-container">
+        <table id="myTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th data-column="query" class="sortable">
+                        <i class="fas fa-arrow-up"></i> query
+                    </th>
+                    <th data-column="total_impressions" class="sortable numeric">total_impressions</th>
+                    <th data-column="avg_position_int" class="sortable numeric">avg_position_int</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>america movil peru</td>
+                    <td class="numeric">3070</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>america movil peru s.a.c</td>
+                    <td class="numeric">1899</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>chip postpago</td>
+                    <td class="numeric">774</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>internet chiclayo</td>
+                    <td class="numeric">764</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>internet olo</td>
+                    <td class="numeric">541</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>internet peru</td>
+                    <td class="numeric">3349</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>internet piura</td>
+                    <td class="numeric">599</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>internet y telefono</td>
+                    <td class="numeric">613</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>internet y telefono fijo</td>
+                    <td class="numeric">579</td>
+                    <td class="numeric">10</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>plan postpago</td>
+                    <td class="numeric">885</td>
+                    <td class="numeric">10</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+
+            const comparer = (idx, asc) => (a, b) => {
+                const v1 = getCellValue(asc ? a : b, idx);
+                const v2 = getCellValue(asc ? b : a, idx);
+
+                // Intenta convertir a número si es posible
+                const num1 = parseFloat(v1.replace(/,/g, ''));
+                const num2 = parseFloat(v2.replace(/,/g, ''));
+
+                if (!isNaN(num1) && !isNaN(num2)) { // Si ambos son números válidos
+                    return num1 - num2;
+                } else { // Si no son números, compara como texto
+                    return v1.toString().localeCompare(v2.toString());
+                }
+            };
+
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const headerRow = th.parentNode; // Fila del encabezado
+                    const columnIndex = Array.from(headerRow.children).indexOf(th);
+                    
+                    // Determinar el orden actual (ascendente por defecto o si se cambia de columna)
+                    const isAsc = th.classList.contains('asc');
+                    const isDesc = th.classList.contains('desc');
+                    let newAsc = true;
+
+                    if (isAsc) {
+                        newAsc = false; // Si ya estaba ascendente, ahora será descendente
+                    } else if (isDesc) {
+                        newAsc = true; // Si ya estaba descendente, ahora será ascendente
+                    }
+                    // Si no tiene ninguna clase, por defecto es ascendente
+
+                    // Eliminar clases de ordenamiento y flechas de todos los encabezados
+                    document.querySelectorAll('th.sortable').forEach(otherTh => {
+                        otherTh.classList.remove('asc', 'desc');
+                        const icon = otherTh.querySelector('.fas');
+                        if (icon) {
+                            icon.remove();
+                        }
+                    });
+
+                    // Añadir la clase y el icono de flecha al encabezado clickeado
+                    th.classList.add(newAsc ? 'asc' : 'desc');
+                    const newIconClass = newAsc ? 'fa-arrow-up' : 'fa-arrow-down';
+                    const newIcon = document.createElement('i');
+                    newIcon.className = `fas ${newIconClass}`;
+                    th.prepend(newIcon);
+
+                    // Reordenar las filas
+                    Array.from(tbody.querySelectorAll('tr:nth-child(n+1)')) // Seleccionar todas las filas, excluyendo la primera celda numérica
+                        .sort(comparer(columnIndex, newAsc))
+                        .forEach(tr => tbody.appendChild(tr));
+
+                    // Volver a numerar la primera columna después de ordenar
+                    Array.from(tbody.children).forEach((row, index) => {
+                        row.children[0].textContent = index + 1;
+                    });
+                });
+            });
+
+            // Simular un clic inicial en la columna 'query' para que empiece ordenada
+            const initialSortColumn = document.querySelector('th[data-column="query"]');
+            if (initialSortColumn) {
+                initialSortColumn.click();
+            }
+        });
+    </script>
+</body>
+</html>

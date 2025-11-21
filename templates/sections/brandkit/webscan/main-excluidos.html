@@ -1,0 +1,88 @@
+{% extends "sections/template.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+		<div class="loading-overlay" style="display: none;">
+			<div class="loading-animation"></div>
+			<span>Cargando...</span>
+		</div>
+		<section class="content">
+			<div class="btn-group" role="group" aria-label="Basic example">
+				<a class="btn btn-secondary" href="../webscan">Listado</a>
+				<a class="btn btn-secondary active" href="excluidos">Excluidos</a>
+			</div>
+			<main class="logo-content">
+				<h1 class="section-title">Website Scan</h1>
+				
+				<div class="input-section">
+				  <button class="btn btn-danger" type="button" id="btn-remover">Restablecer url</button>
+				  <a class="btn btn-primary" href="../webscan">Mostrar Urls</a>
+				</div>
+
+				<div class="helper">
+					<span class="pill" aria-hidden="true"></span>
+					<span id="lbl_mensaje">Las urls mostradas han sido previamente scaneadas</span>
+				</div>
+
+				<div class="table-container" id="load_list-raw"></div>
+
+			</main>
+		</section>
+<script>
+function getResultExcluidos(){
+	$.ajax({
+		url: 'list-excluidos',
+		type: 'GET',
+		data: {
+			site: "",
+		},
+		success: function(data) {
+			$('#load_list-raw').html(data);
+		},
+		error: function(xhr, status, error) {
+			console.error('Error al obtener el contenido AJAX:', error);
+		}
+	});
+}
+function getSelectAll() {
+	const isChecked = this.checked;
+	const bodyCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+	bodyCheckboxes.forEach(checkbox => {
+		checkbox.checked = isChecked;
+	});
+}
+function getRemover(){
+	var datosSeleccionados = [];
+	$('input[name="checkbox_url"]:checked').each(function() {
+		var url = $(this).val();
+		var id = $(this).data('id');
+		datosSeleccionados.push({'url': url,'id': id});
+	});
+	if (datosSeleccionados.length > 0) {
+		// Realizar la solicitud AJAX
+		$('#lbl_mensaje').html("Cargando...");
+		$.ajax({
+			url: 'remover-excluidos',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({ 'incluidos': datosSeleccionados }), // Enviar el array de objetos
+			success: function(response) {
+				$('#lbl_mensaje').html("URLs restablecidas exitosamente.");
+				getResultExcluidos()
+				console.log('Respuesta del servidor:', response);
+				//alert('URLs excluidas exitosamente.');
+			},
+			error: function(xhr, status, error) {
+				$('#lbl_mensaje').html("Ocurrió un error al procesar la solicitud.");
+				console.error('Error al enviar las URLs para excluir:', error);
+				//alert('Ocurrió un error al procesar la solicitud.');
+			}
+		});
+	} else {
+		alert('Por favor, selecciona al menos una URL para excluir.');
+	}
+}
+getResultExcluidos();
+$("#main").on("click","#checkbox-all", getSelectAll);
+$("#main").on("click","#btn-remover",getRemover);
+</script>
+{% endblock %}

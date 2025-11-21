@@ -1,0 +1,8 @@
+{% for lista in lista %}
+{% set myimage = lista['imgia_name'] %}
+{% set myphoto = generar_url_firmada("genia_information",myimage) %}
+<!-- Loading state -->
+<div class="loading-state" data-image="{{myimage}}" data-photo="{{myphoto}}" onclick="closeGalleryItem(this)">
+	<img src="{{myphoto}}">
+</div>
+{% endfor %}

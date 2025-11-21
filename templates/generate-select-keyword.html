@@ -1,0 +1,6 @@
+<select class="dropdown" id="cbo_keyword" name="cbo_keyword">
+	<option value="">Selecciona una palabra</option>
+	{% for item in keywords %}
+	<option value="{{ item.Keyword }}">{{ item.Keyword }}</option>
+	{% endfor %}
+</select>

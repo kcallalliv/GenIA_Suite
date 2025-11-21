@@ -1,0 +1,67 @@
+.sys-source_upload-module {background-color: #fff;border-radius: 8px;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);width:100%;padding: 30px;box-sizing: border-box;border-top: 4px solid #E62A29;}
+.sys-source_upload-module h2 {color: #333;font-size: 24px;margin-bottom: 20px;text-align: center;}
+.sys-source_drop-zone {position: relative;border: 2px dashed #ccc;border-radius: 8px;padding: 40px 20px;text-align: center;color: #666;cursor: pointer;transition: background-color 0.3s ease, border-color 0.3s ease;margin-bottom: 20px;background-color: #f8f8f8;}
+.sys-source_drop-zone.drag-over {background-color: #ffebeb;border-color: #E62A29;color: #E62A29;}
+.sys-source_drop-zone svg {width: 48px;height: 48px;margin-bottom: 15px;color: #E62A29;}
+.sys-source_drop-zone p {margin: 0;font-size: 18px;font-weight: 500;}
+.sys-source_drop-zone span {font-size: 14px;color: #999;}
+.sys-source_file-item {display: flex;justify-content: space-between;align-items: center;background-color: #f9f9f9;border: 1px solid #eee;border-radius: 6px;padding: 10px 15px;margin-bottom: 10px;font-size: 15px;color: #555;}
+.sys-source_file-item .file-name {flex-grow: 1;margin-right: 10px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.sys-source_file-item .remove-file {background: none;border: none;color: #E62A29;font-size: 18px;cursor: pointer;padding: 0 5px;line-height: 1;transition: color 0.2s ease;}
+.sys-source_file-item .remove-file:hover {color: #cc2222;}
+.sys-source_upload-button {background-color: #E62A29;color: white;padding: 12px 25px;border: none;border-radius: 6px;font-size: 16px;font-weight: 500;cursor: pointer;transition: background-color 0.3s ease;width: 100%;margin-top: 20px;}
+.sys-source_upload-button:hover {background-color: #cc2222;}
+#file-input {position: absolute;top: 0;left: 0;width: 100%;height: 100%;opacity: 0;cursor: pointer;z-index: 10;}
+#file-list {margin-top: 20px;border-top: 1px solid #eee;padding-top: 15px;}
+/*===Iconos===*/
+.sys-source_file-item .sys-source_file-name {flex-grow: 1;margin-right: 10px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;position: relative;padding-left: 25px;}
+.sys-source_file-name.icon-pdf::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c1";color: #E62A29;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-word::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c2";color: #2b579a;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-excel::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c3";color: #217346;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-ppt::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c4";color: #e84f00;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-zip::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c6";color: #f7a800;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-image::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c5";color: #4CAF50;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-js::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f3b8";color: #f7df1e;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-video::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c8";color: #E62A29;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-txt::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f15c";color: #333;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-svg::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f15b";color: #f09232;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-audio::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f1c7";color: #8a2be2;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-apk::before {font-family: "Font Awesome 6 Brands";font-weight: 400;content: "\f17b";color: #3DDC84;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-ai::before {font-family: "Font Awesome 6 Brands";font-weight: 400;content: "\f0d0";color: #FF7C00;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-email::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f0e0";color: #3498db;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-psd::before {font-family: "Font Awesome 6 Brands";font-weight: 400;content: "\f0d0";color: #3399FF;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-code::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f121";color: #6a0dad;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-json::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f121";color: #7a20c3;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-sql::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f0f6";color: #f47f21;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-font::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f2b9";color: #888;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-at::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f67f";color: #E62A29;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-iso::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f15b";color: #337ab7;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_file-name.icon-file-alt::before {font-family: "Font Awesome 6 Free";font-weight: 900;content: "\f15c";color: #666;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+/*===Upload===*/
+.sys-source_status-container {margin-top: 20px;padding: 20px;border-radius: 8px;text-align: left;border: 1px solid #eee;transition: all 0.3s ease-in-out;}
+.sys-source_status-container.success {background-color: #e6f7ec;border-color: #4CAF50;}
+.sys-source_status-container.error {background-color: #ffebeb;border-color: #E62A29;}
+.sys-source_status-container h3 {margin-top: 10px;margin-bottom: 5px;font-size: 20px;color: #08ab37;}
+.sys-source_status-container p {margin: 0 0;font-size: 14px;color: #666;line-height: 1.2em;}
+/* Animación de carga (spinner) */
+.sys-source_loading-spinner {border: 4px solid rgba(0, 0, 0, 0.1);border-top: 4px solid #E62A29;border-radius: 50%;width: 40px;height: 40px;animation: spin 1s linear infinite;margin: 0 auto 10px auto;}
+@keyframes spin {
+	0% { transform: rotate(0deg);}
+	00% { transform: rotate(360deg);}
+}
+/* Estilos para los iconos de éxito y error */
+.sys-source_summary-icon {font-size: 40px;line-height: 1;margin-bottom: 10px;}
+.sys-source_summary-icon.success-icon {color: #4CAF50;}
+.sys-source_summary-icon.error-icon {color: #E62A29;}
+/* Listado de errores */
+.sys-source_error-list {list-style: none;padding: 0;margin-top: 15px;text-align: left;max-height: 100px;overflow-y: auto;border-top: 1px solid #eee;padding-top: 10px;}
+.sys-source_error-list li {background-color: #fff5f5;color: #cc2222;padding: 6px 10px;border-left: 3px solid #E62A29;border-radius: 3px;margin-bottom: 5px;font-size: 14px;}
+.sys-source_success-list {list-style: none;padding: 0;margin-top: 15px;text-align: left;}
+.sys-source_success-list .sys-source_file-item {display: flex;justify-content: space-between;align-items: center;background-color: #f0fdf4;border: 1px solid #dcfce7;border-radius: 6px;padding: 10px 15px;margin-bottom: 10px;font-size: 15px;color: #166534;}
+.sys-source_success-list .sys-source_file-name {flex-grow: 1;margin-right: 10px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;position: relative;padding-left: 25px;}
+/* Icono de estado de éxito para cada archivo */
+.sys-source_status-icon {color: #22c55e;font-size: 20px;line-height: 1;}
+.sys-source_success-list .sys-source_file-name.icon-pdf::before,
+.sys-source_success-list .sys-source_file-name.icon-word::before,
+.sys-source_success-list .sys-source_file-name.icon-excel::before {font-family: "Font Awesome 6 Free";font-weight: 900;position: absolute;left: 0;top: 50%;transform: translateY(-50%);font-size: 18px;}
+.sys-source_success-list .fa-check-circle {color: #22c55e;}

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "prd-claro-mktg-data-storage",
+  "private_key_id": "2560da7d818c7b8d0f92db8320e9943020cb070e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC6PsYmBbw6ATKh\nso1oQyMGRny7QvgCNtiD21pxCb5wQEcAbY15Gh7Q6Y9bicfzNi4XNCbipDIGuAEG\nh7bkfPGaquP2t6sT09Qf08B/c8IzbUssQCxyQZVeruQrwTu4/FgkCPVkBbq+pn+H\nAYGssgQKjhwIFkpjTlePMJD4LVPdqT0r+CqnxzwZNX2rMtjzOCn351V3Y72kdQXR\nhTBtPPG/b5RyVeAB+PAIiC1M/3fPNqGsGfwdgbScV25yq7pXikDoU66txi6NFfz8\n4oZ8HgiumCoJ2904MEviGmgqV44dCErwvHF5pb6clgrSG+iXulml2ze43LEl3qxB\nydc1I3glAgMBAAECggEAD8dQMbn0KaTe1YCjRsVDUx2HJTVF/igH3Vno1mFJM0ja\nyxA891jNag0TgmGQoUwCiSA3uCVJgLS3j4ZRahekv2IBeK40TfR5CO4/ZXzY49L7\nVqckLNTeEvy1o3hWNzSXwgvJQF1U5iCEdttbkVYujfderBe5WyLwu5aVfZUXgRSX\nYKS+A0XQZaHG1X851sEJSvN2SUYa1Wi/w3oq110XQbjaqdf7aaMlAyDVWmpbqSD1\nTqeHPI3NrKUgD97yz7yJPA29p24gIcoo8KD5pg6hHIBbHKPUk1STx7s+Z0DABdcK\npSqznsNXnZ5/V7X3lquVgjMvoSQ1ruaEqJzA8rsl8QKBgQD5eJnwxBaQljbIdbOr\ndk/nS+q9RZqIMj+v04mw4R1nwi9AMW6BJdAq8/pmhaZe13WaO6sE0SKKFAxip4gh\ndCD7yGV+u75CWt8+SzCiwSSUm/SRuF3OKJjG4+KLGyAhF9AOMhatiGjOGrfMsKL3\nTvzSaZcoze15V4B3sZ78aGNQtQKBgQC/HpLof2E9+XXCQZvXTXIG/IBnnALQp5Xd\niZxFjebGdM2A+urizWzgCmH5q3pWZSB8ZaPv3BY2shNihZLwMhyyzHQ8LderGKsc\nBnqVGqtLJXyp37mYvefPfQkdquoLfMvcyRkRHcSdvwk0fwh+6Id7azeg77bHb+5A\n9cToil/fsQKBgQCMVT0zZPrUhst2ZE+XikxUbi40Hm1ZY/rTa4mvCFNERMXTtHrX\nB3BcWTZoaZI3E7jB9AK2CPcG+VQmQtufBfZv7EC709yo8vlVz3Iie8eaGUiwmCec\nitW2PAb5/V5Lf1u4QJDlOTDLj9gIuuxRdgteSauQdpa5hXFs42vtzMLhaQKBgQC8\nKlHhbmhDKDR0iTvyAmHd1wRk/gkXfafjcfTV1hv8EEu0TVas7ivfeNl1gwrzvKT7\nVObO5RVJzJGhUnmU2wG+V+WoykmoPqVY9lgCLTuwxLu0VHzakT6F3kj3WKsNnFTq\nj2OKopBN7yQU921Z5X5eWPVwEhMW0HD2rAKuIG68QQKBgEAUkKH2XdxGc8MkNNni\n9aCmRnHjGNSegBbwk/OsZUXWiOmtmQesakB8W55W6AyC3i35IsPPPdtHKYTBXlQA\nL9Rq1tRi8WdzSjoUIxoTJCDm9t+SMGGijV59iA+BjT9BCxBWoFwBMFm7Pe5PXbks\nBPc09wmUfdetwNJpY7DT4NM9\n-----END PRIVATE KEY-----\n",
+  "client_email": "genia-content@prd-claro-mktg-data-storage.iam.gserviceaccount.com",
+  "client_id": "113651783092745022323",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/genia-content%40prd-claro-mktg-data-storage.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

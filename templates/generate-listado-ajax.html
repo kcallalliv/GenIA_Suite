@@ -1,0 +1,47 @@
+<div class="subtitle">Keywords de Search Console</div>
+<div class="table-container">
+    <table id="myTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th data-column="keyword" class="sortable">
+                    Keyword <i class="fas fa-arrow-up"></i>
+                </th>
+                <th data-column="search_volume" class="sortable numeric">
+                    Total Impresions <i class="fas fa-arrow-up"></i>
+                </th>
+                <th data-column="position" class="sortable numeric">
+                    Posición Promedio <i class="fas fa-arrow-up"></i>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in keywords %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.query }}</td>
+                <td class="numeric">{{ item.total_impressions }}</td>
+                <td class="numeric">{{ item.total_clicks }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination-container">
+        <div class="pagination-controls">
+            <span>Elementos por página</span>
+            <select id="itemsPerPage">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-info">
+            <span id="paginationStatus">1 - 10 of 10</span>
+        </div>
+        <div class="pagination-buttons">
+            <button id="prevPage" disabled>&lt;</button>
+            <button id="nextPage" disabled>&gt;</button>
+        </div>
+    </div>
+</div>

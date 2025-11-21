@@ -1,0 +1,12 @@
+/dashboard
+/brand/x1215
+/brand/x1215/webscan
+/brand/x1215/images
+/brand/x1215/proyectos
+/brand/x1215/proyectos/x12454/
+/brand/x1215/proyectos/x12454/images
+/brand/x1215/proyectos/x12454/images
+
+/brand/{id}/proyectos/{id}/images
+
+search carousel mobile

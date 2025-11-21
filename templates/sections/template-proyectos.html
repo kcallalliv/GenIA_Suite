@@ -1,0 +1,150 @@
+{% set mypid = query_params['pid'] %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}GenIA{% endblock %}</title>
+	<link rel="icon" href="{{ url_for('static', filename='ico-genia_brain.ico') }}" type="image/x-icon" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/logo.css') }}">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="{% block page %}{% endblock %}" id="main">
+	<div class="loading-overlay" style="display: none;">
+		<div class="loading-animation"></div>
+		<span>Cargando...</span>
+	</div>
+	<header class="topbar">
+		<div class="topbar__brand">
+			<div class="logo"><img src="{{ url_for('static', filename='images/logo-genia-whitev3.svg') }}"></div>
+		</div>
+		<div class="topbar__perfil">
+			<a href="/perfil" class="topbar__link">
+				<span class="material-icons">person</span>
+				<span>Perfil</span>
+			</a>
+			<a href="/logout" class="topbar__link topbar__link--logout">
+				<span class="material-icons">logout</span>
+				<span>Cerrar Sesión</span>
+			</a>
+		</div>
+	</header>
+
+	<main class="layout">
+		<aside class="panel sidebar">
+			<div class="sidebar__section">
+				<div class="sidebar__section-header">
+					<span class="pill-marca" aria-hidden="true"><img src="{{ url_for('static', filename='images/logo_profile.png') }}"></span>
+					<span>Claro Perú<div class="subtitle">Proyecto 02</div></span>
+				</div>
+			</div>
+
+			<div class="sidebar__section">
+				<div class="sidebar__backitem"><a href="{{ url_for('proyectos_bp.proyectos_view', brand_id=url_args.brand_id) }}">
+					<span class="material-icons">arrow_back</span>
+					<span>Volver</span>
+				</a></div>
+				<div class="sidebar__section-header">
+					<span class="material-icons">dashboard</span>
+					<span>Brandkit</span>
+				</div>
+				<div class="sidebar__subitem"><a href="{{ url_for('bklogos_bp.bklogos_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">stars</span>
+					<span>Logos</span>
+				</a></div>
+				<div class="sidebar__subitem"><a href="{{ url_for('bkimages_bp.bkimages_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">image</span>
+					<span>Imágenes</span>
+				</a></div>
+				<div class="sidebar__subitem"><a href="{{ url_for('bkcolors_bp.bkcolors_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">palette</span>
+					<span>Colores</span>
+				</a></div>
+				<div class="sidebar__subitem"><a href="{{ url_for('bkfonts_bp.bkfonts_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">text_fields</span>
+					<span>Tipografías</span></a></div>
+			</div>
+			<div class="sidebar__divider"></div>
+			<div class="sidebar__section">
+				<div class="sidebar__section-header">
+					<span class="material-icons">folder</span>
+					<span>Datos</span>
+				</div>
+				<div class="sidebar__item"><a href="{{ url_for('links_bp.bklinks_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">cloud_upload</span>
+					<span>Uploads</span></a></div>
+				<div class="sidebar__item"><a href="{{ url_for('links_bp.bklinks_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">link</span>
+					<span>Links</span>
+				</a></div>
+				<div class="sidebar__item"><a href="{{ url_for('integraciones_bp.integracion_main', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">autorenew</span>
+					<span>Integraciones</span>
+				</a></div>
+				<div class="sidebar__item"><a href="{{ url_for('tendencias_bp.tendencias_keywords', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">tag</span>
+					<span>Keywords</span>
+				</a></div>
+				<div class="sidebar__item"><a href="{{ url_for('colecciones_bp.colecciones_colecciones', brand_id=url_args.brand_id, proyecto_id=url_args.proyecto_id) }}">
+					<span class="material-icons">auto_awesome</span>
+					<span>Generación IA</span>
+				</a></div>
+			</div>
+		</aside>
+
+		{% block content %}
+		{% endblock %}
+	</main>
+</body>
+</html>
+<script>
+	function toggleSection(header) {
+		const content = header.nextElementSibling;
+		const isActive = header.classList.contains('active');
+		
+		// Close all sections
+		document.querySelectorAll('.section-header').forEach(h => {
+			h.classList.remove('active');
+			h.nextElementSibling.classList.remove('active');
+		});
+		
+		// Open clicked section if it wasn't active
+		if (!isActive) {
+			header.classList.add('active');
+			content.classList.add('active');
+		}
+	}
+
+	function updateSlider(id, value) {
+		document.getElementById(id).textContent = value;
+	}
+
+	function generateImage() {
+		const loadingOverlay = document.getElementById('loading-overlay');
+		const previewImage = document.getElementById('preview-image');
+		const placeholder = document.querySelector('.preview-placeholder');
+		
+		// Show loading
+		loadingOverlay.classList.add('active');
+		placeholder.style.display = 'none';
+		
+		// Simulate API call
+		setTimeout(() => {
+			// Hide loading
+			loadingOverlay.classList.remove('active');
+			
+			// Show image (using placeholder for demo)
+			previewImage.src = 'https://via.placeholder.com/800x600/667eea/ffffff?text=Generated+Image';
+			previewImage.classList.add('active');
+		}, 2000);
+	}
+
+	// Preset buttons
+	document.querySelectorAll('.preset-btn').forEach(btn => {
+		btn.addEventListener('click', function() {
+			this.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+			this.classList.add('active');
+		});
+	});
+</script>

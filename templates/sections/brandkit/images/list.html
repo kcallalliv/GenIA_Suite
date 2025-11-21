@@ -1,0 +1,9 @@
+{% for lista in lista %}
+{% set myid = lista['asset_id'] %}
+{% set myname = lista['asset_name'] %}
+{% set mysrc = lista['asset_src'] %}
+{% set myimage = generar_url_firmada("genia_information",mysrc) %}
+<div class="tile-photo" role="button" data-name="{{myname}}" data_id="{{myid}}" aria-label="Agregar logo" style="background-image:url('{{ myimage }}');">
+	<div class="item-close">×</div>
+</div>
+{% endfor %}

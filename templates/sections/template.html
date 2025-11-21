@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}GenIA{% endblock %}</title>
+	<link rel="icon" href="{{ url_for('static', filename='ico-genia_brain.ico') }}" type="image/x-icon" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/logo.css') }}">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</head>
+<body class="{% block page %}{% endblock %}" id="main">
+	<div class="loading-overlay" style="display: none;">
+		<div class="loading-animation"></div>
+		<span>Cargando...</span>
+	</div>
+	<header class="topbar">
+		<div class="topbar__brand">
+			<div class="logo"><img src="{{ url_for('static', filename='images/logo-genia-whitev3.svg') }}"></div>
+		</div>
+		<div class="topbar__perfil">
+			<a href="/perfil" class="topbar__link">
+				<span class="material-icons">person</span>
+				<span>Perfil</span>
+			</a>
+			<a href="/logout" class="topbar__link topbar__link--logout">
+				<span class="material-icons">logout</span>
+				<span>Cerrar Sesión</span>
+			</a>
+		</div>
+	</header>
+
+	<main class="layout">
+		<aside class="panel sidebar">
+			<div class="sidebar__section">
+				<div class="sidebar__section-header">
+					<span class="pill-marca" aria-hidden="true"><img src="{{ url_for('static', filename='images/logo_profile.png') }}"></span>
+					<span>Claro Perú</span>
+				</div>
+			</div>
+
+			<div class="sidebar__section">
+				<div class="sidebar__section-header">
+					<span class="material-icons">dashboard</span>
+					<span>Brandkit</span>
+				</div>
+				<div class="sidebar__item page-info"><a href="{{ url_for('bkinfo_bp.bkinfo_main', brand_id=url_args.brand_id) }}">
+					<span class="material-icons">info</span>
+					<span>Información</span></a>
+				</div>
+				<div class="sidebar__item">
+					<a href="{{ url_for('bkwebscan_bp.bkwebscan_main', brand_id=url_args.brand_id) }}">
+						<span class="material-icons">scanner</span>
+						<span>Website scan</span>
+					</a>
+				</div>
+
+				<div class="sidebar__subitem">
+					<a href="{{ url_for('blogos_bp.bklogos_main', brand_id=url_args.brand_id) }}">
+						<span class="material-icons">stars</span>
+						<span>Logos</span>
+					</a>
+				</div>
+				<div class="sidebar__subitem"><a href="{{ url_for('bimages_bp.bkimages_main', brand_id=url_args.brand_id) }}">
+					<span class="material-icons">image</span>
+					<span>Imágenes</span>
+				</a></div>
+				<div class="sidebar__subitem">
+					<a href="{{ url_for('bcolors_bp.bkimages_main', brand_id=url_args.brand_id) }}">
+						<span class="material-icons">palette</span>
+						<span>Colores</span>
+					</a>
+				</div>
+				<div class="sidebar__subitem">
+					<a href="{{ url_for('bfonts_bp.bkfonts_main', brand_id=url_args.brand_id) }}">
+						<span class="material-icons">text_fields</span>
+						<span>Tipografías</span>
+					</a>
+				</div>
+				<div class="sidebar__item">
+					<a href="{{ url_for('bfiles_bp.bkfiles_main', brand_id=url_args.brand_id) }}">
+						<span class="material-icons">cloud_upload</span>
+						<span>Uploads</span>
+					</a>
+				</div>
+
+			</div>
+			<div class="sidebar__section">
+				<div class="sidebar__section-header">
+					<a href="{{ url_for('proyectos_bp.proyectos_view', brand_id=url_args.brand_id) }}">
+						<span class="material-icons">folder_open</span>
+						<span>Proyectos</span>
+					</a>
+				</div>
+			</div>
+			{% if 'permiso' in session %}
+			{% if session['permiso'] == 'admin' or session['permiso'] == 'superadmin' %}
+			<div class="sidebar__divider"></div>
+			<div class="sidebar__section">
+				<div class="sidebar__section-header">
+					<span class="material-icons">admin_panel_settings</span>
+					<span>Permisos</span>
+				</div>
+				<div class="sidebar__item"><a href="/sistema/users">
+					<span class="material-icons">group</span>
+					<span>Usuarios</span>
+				</a></div>
+			</div>
+			{% endif %}
+			{% endif %}
+		</aside>
+
+		{% block content %}
+		{% endblock %}
+	</main>
+</body>
+</html>

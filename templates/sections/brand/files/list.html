@@ -1,0 +1,11 @@
+{% for lista in lista %}
+{% set myid = lista['asset_id'] %}
+{% set myname = lista['asset_name'] %}
+{% set myext = lista['asset_ext'] %}
+{% set mysrc = lista['asset_src'] %}
+<div class="tile-photo" role="button" data-name="{{myname}}" data_id="{{myid}}" aria-label="Agregar archivo">
+	<div class="ico-{{lista['asset_ext']}}"></div>
+	<div class="lbl-text">{{lista['asset_name']}}</div>
+	<div class="item-close">×</div>
+</div>
+{% endfor %}

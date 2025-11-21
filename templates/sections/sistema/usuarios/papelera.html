@@ -1,0 +1,23 @@
+{% extends "sections/template-dashboard.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<div class="btn-group" role="group" aria-label="Basic example">
+		<a class="btn btn-secondary" href="/sistema/users">Listado</a>
+		<a class="btn btn-secondary active" href="/sistema/users/papelera">Papelera</a>
+		<a class="btn btn-secondary" href="/sistema/users/agregar">Nuevo</a>
+	</div>
+	<main class="logo-content">
+		<h1 class="section-title">Usuarios (Restaurar)</h1>
+		<div class="input-section">
+		  <div class="url-input">
+			<label for="url">Cuenta</label>
+			<input id="txt_buscar" type="text" value="" />
+		  </div>
+		  <button class="btn btn-primary" type="button" id="btn-filtrar-papelera">Buscar</button>
+		</div>
+		<div class="table-container" id="lst-users-papelera"></div>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/sys-usuarios.js') }}"></script>
+{% endblock %}

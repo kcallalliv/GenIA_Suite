@@ -1,0 +1,24 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<div class="btn-group" role="group" aria-label="Basic example">
+		<a class="btn btn-secondary active" href="links">Listado</a>
+		<a class="btn btn-secondary" href="papelera">Papelera</a>
+		<a class="btn btn-secondary" href="agregar">Nuevo</a>
+	</div>
+	<input type="hidden" id="txt_pid" name="txt_pid" value="{{pid}}">
+	<main class="logo-content">
+		<h1 class="section-title">Links</h1>
+		<div class="input-section">
+		  <div class="url-input">
+			<label for="url">Cuenta</label>
+			<input id="txt_buscar" type="text" value="" />
+		  </div>
+		  <button class="btn btn-primary" type="button" id="btn-filtrar">Buscar</button>
+		</div>
+		<div class="table-container" id="lst-link"></div>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/links.js') }}"></script>
+{% endblock %}

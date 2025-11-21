@@ -1,0 +1,32 @@
+{% extends "template.html" %}
+{% block content %}
+<div class="sys-theme">
+	<div class="sys-theme-cover"></div>
+	<div class="sys-wrap">
+		<div class="sys-left">
+			<div class="sys-logo-genia"><img src="{{ url_for('static', filename='images/logo-genia-white.svg') }}"></div>
+		</div>
+		<div class="sys-right">
+			<div class="sys-banner">
+				<button class="ico-close" id="btn-banner-close"></button>
+				<div class="content">
+					<div class="sys-first-message">
+						<div class="text">Bienvenido, así puedes crear tu primer artículo con Genia!</div>
+						<ul>
+							<li class="ico-grilla">Selecciona el origen de tus palabras clave</li>
+							<li class="ico-globe">Escoge la palabra clave más apropiada</li>
+							<li class="ico-smile">Dale el tono apropiado y publica</li>
+						</ul>
+					</div>
+					<div class="sys-title">Generar artículo</div>
+					<div class="sys-photo"><img src="{{ url_for('static', filename='images/photo_girl.png') }}"></div>
+				</div>
+			</div>
+			<div class="sys-wrapper">
+				<div class="sys-result" id="load_generate-content"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="{{ url_for('static', filename='scripts/geniatext.js') }}"></script>
+{% endblock %}

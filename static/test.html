@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Generador de Contenido</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+	<style>
+		body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	background-color: #f0f2f5; /* Fondo claro similar al de la imagen */
+	display: flex;
+	justify-content: center;
+	align-items: flex-start; /* Alinea al inicio verticalmente */
+	min-height: 100vh;
+	padding: 30px; /* Espacio alrededor del contenedor principal */
+	box-sizing: border-box;
+}
+
+.container {
+	width: 90%;
+	max-width: 900px; /* Ancho máximo para el contenido */
+	background-color: #fff; /* El contenedor principal tiene un fondo blanco en la imagen */
+	border-radius: 8px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+	overflow: hidden; /* Para que los bordes redondeados se apliquen bien */
+}
+
+.header {
+	background-color: #e0f2f7; /* Color azul claro del encabezado */
+	padding: 20px 30px;
+	color: #333;
+}
+
+.header p {
+	margin-bottom: 20px;
+	font-size: 1.1em;
+	font-weight: bold;
+	color: #444;
+}
+
+.controls {
+	display: flex;
+	gap: 15px; /* Espacio entre los elementos de control */
+	align-items: center;
+}
+
+.dropdown-wrapper {
+	position: relative;
+	flex-grow: 1; /* Permite que los dropdowns crezcan */
+	max-width: 200px; /* Ancho máximo para los dropdowns */
+}
+
+.dropdown {
+	width: 100%;
+	padding: 10px 15px;
+	padding-right: 35px; /* Espacio para el icono de la flecha */
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	background-color: #fff;
+	appearance: none; /* Elimina la flecha predeterminada del sistema */
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	font-size: 1em;
+	cursor: pointer;
+	color: #555;
+}
+
+.dropdown-icon {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #888;
+	pointer-events: none; /* Permite hacer clic a través del icono al select */
+}
+
+.generate-button {
+	background-color: #20a0b7; /* Color azul turquesa del botón */
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 1em;
+	display: flex;
+	align-items: center;
+	gap: 8px; /* Espacio entre el icono y el texto */
+	transition: background-color 0.3s ease;
+}
+
+.generate-button:hover {
+	background-color: #1a8397;
+}
+
+.button-icon {
+	font-size: 1.1em;
+}
+
+.content-card {
+	background-color: #fff;
+	padding: 30px;
+	border-radius: 8px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra para simular el card blanco */
+	margin-top: 20px; /* Espacio entre el header y el card */
+	margin-left: 30px;
+	margin-right: 30px;
+	margin-bottom: 30px;
+}
+
+.source-info {
+	margin-bottom: 25px;
+}
+
+.source-info .label {
+	font-size: 0.9em;
+	color: #777;
+	margin-bottom: 5px;
+}
+
+.source-info .source-name {
+	font-size: 1.8em;
+	color: #333;
+	margin: 0;
+}
+
+.data-chart {
+	padding-bottom: 20px;
+	position: relative; /* Para posicionar las líneas de la gráfica */
+}
+
+.chart-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 15px;
+	position: relative;
+	padding-bottom: 15px; /* Espacio para la línea divisoria */
+}
+
+.chart-item:not(:last-of-type)::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	border-bottom: 1px dashed #eee; /* Línea divisoria punteada */
+}
+
+.item-label {
+	width: 150px; /* Ancho fijo para las etiquetas */
+	font-size: 0.95em;
+	color: #444;
+}
+
+.bar-container {
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 20px; /* Altura de la barra */
+	position: relative;
+}
+
+.bar {
+	height: 100%;
+	border-radius: 3px;
+}
+
+.bar-blue {
+	background-color: #20a0b7; /* Color azul para la barra principal */
+	max-width: 700px; /* Limita el ancho máximo para la barra más grande */
+}
+
+.bar-gray {
+	background-color: #8f9ba3; /* Color gris para las otras barras */
+	max-width: 700px; /* Limita el ancho máximo */
+}
+
+.value {
+	font-size: 0.9em;
+	color: #555;
+	white-space: nowrap; /* Evita que el número se rompa en varias líneas */
+}
+
+.x-axis {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 20px;
+	padding-left: 150px; /* Alinea con el inicio de las barras */
+	position: relative;
+}
+
+.x-axis span {
+	font-size: 0.85em;
+	color: #777;
+	flex: 1;
+	text-align: center;
+	position: relative;
+}
+
+/* Líneas verticales del eje X */
+.x-axis span::before {
+	content: '';
+	position: absolute;
+	top: -10px; /* Ajusta la posición de la línea vertical */
+	left: 50%;
+	transform: translateX(-50%);
+	height: 10px; /* Altura de la marca */
+	border-left: 1px solid #ddd;
+}
+
+/* Ajuste para la primera línea vertical si es necesario */
+.x-axis span:first-child::before {
+	left: 0;
+	transform: none;
+}
+
+/* Ajuste para la última línea vertical si es necesario */
+.x-axis span:last-child::before {
+	left: auto;
+	right: 0;
+	transform: none;
+}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<p>Explora más palabras clave y genera contenido automáticamente</p>
+			<div class="controls">
+				<div class="dropdown-wrapper">
+					<select class="dropdown">
+						<option value="">Selecciona una fuente</option>
+						<option value="semrush">Semrush</option>
+						</select>
+					<i class="fas fa-chevron-down dropdown-icon"></i>
+				</div>
+				<div class="dropdown-wrapper">
+					<select class="dropdown">
+						<option value="">Selecciona una palabra</option>
+						<option value="velocidad">Medidor de velocidad</option>
+						</select>
+					<i class="fas fa-chevron-down dropdown-icon"></i>
+				</div>
+				<button class="generate-button">
+					<i class="fas fa-wrench button-icon"></i>
+					Generar contenido
+				</button>
+			</div>
+		</div>
+
+		<div class="content-card">
+			<div class="source-info">
+				<p class="label">Fuente</p>
+				<h2 class="source-name">Semrush</h2>
+			</div>
+
+			<div class="data-chart">
+				<div class="chart-item">
+					<div class="item-label">Medidor de velocidad</div>
+					<div class="bar-container">
+						<div class="bar bar-blue" style="width: 80%;"></div>
+						<span class="value">121,799</span>
+					</div>
+				</div>
+				<div class="chart-item">
+					<div class="item-label">Claro peru</div>
+					<div class="bar-container">
+						<div class="bar bar-gray" style="width: 33%;"></div>
+						<span class="value">50,799</span>
+					</div>
+				</div>
+				<div class="chart-item">
+					<div class="item-label">Fibra optica</div>
+					<div class="bar-container">
+						<div class="bar bar-gray" style="width: 17%;"></div>
+						<span class="value">25,567</span>
+					</div>
+				</div>
+				<div class="chart-item">
+					<div class="item-label">Chip postpago</div>
+					<div class="bar-container">
+						<div class="bar bar-gray" style="width: 4%;"></div>
+						<span class="value">5,789</span>
+					</div>
+				</div>
+				<div class="chart-item">
+					<div class="item-label">Promociones internet</div>
+					<div class="bar-container">
+						<div class="bar bar-gray" style="width: 3.1%;"></div>
+						<span class="value">4,678</span>
+					</div>
+				</div>
+				<div class="chart-item">
+					<div class="item-label">America movil</div>
+					<div class="bar-container">
+						<div class="bar bar-gray" style="width: 2.3%;"></div>
+						<span class="value">3,456</span>
+					</div>
+				</div>
+
+				<div class="x-axis">
+					<span>0</span>
+					<span>25k</span>
+					<span>50k</span>
+					<span>75k</span>
+					<span>150k</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

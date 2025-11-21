@@ -1,0 +1,214 @@
+{% extends "sections/template.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+
+		<section class="content">
+			<main class="logo-content">
+				<h1 class="section-title">Files</h1>
+
+				<div class="info-banner">
+					<span class="dot" aria-hidden="true"></span>
+					<span>Carga la mayor cantidad de variaciones disponibles de archivos. Esto nos permitirá generar contenido de manera más acertada.</span>
+				</div>
+
+				<div class="tiles">
+					<div class="tile-upload" role="button" aria-label="Agregar logo">
+						<div class="tile-upload__inner">
+							<div class="plus">+</div>
+						</div>
+					</div>
+					{% for lista in lista %}
+					{% set mysrc = lista['asset_src'] %}
+					{% set myimage = generar_url_firmada("genia_information",mysrc) %}
+					<div class="tile-photo" role="button" aria-label="Agregar file">
+						<div class="ico-{{lista['asset_ext']}}"></div>
+						<div class="lbl-text">{{lista['asset_name']}}</div>
+						<div class="item-close">×</div>
+					</div>
+					{% endfor %}
+				</div>
+				<input type="file" name="photos[]" multiple="" accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/csv, text/plain, application/vnd.openxmlformats-officedocument.presentationml.presentation, application/vnd.ms-powerpoint" style="display: none;">
+				<div class="actions">
+				  <button class="btn btn-primary" type="button" id="send-photos-button">Subir Photos</button>
+				</div>
+
+				<div class="helper">
+					<span class="pill" aria-hidden="true"></span>
+					<span id="lbl_mensaje"></span>
+				</div>
+			</main>
+		</section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const tileUpload = document.querySelector('.tile-upload');
+	const tilesContainer = document.querySelector('.tiles');
+	let fileInput = null;
+
+	// Función para crear o obtener el input de tipo file oculto
+	function getFileInput() {
+		if (!fileInput) {
+			fileInput = document.querySelector('input[name="photos[]"]');
+		}
+		return fileInput;
+	}
+	// Función para limpiar solo el input file
+	function clearFileInput() {
+		const input = getFileInput();
+		input.value = '';
+	}
+
+	tileUpload.addEventListener('click', () => {
+		const input = getFileInput();
+		input.click(); // Simula el clic en el input oculto
+
+		// Agrega un listener temporal para capturar los archivos seleccionados
+		input.addEventListener('change', () => {
+			const files = input.files;
+			console.log("Archivos agregados:", files); 
+			handleFiles(files, false); // `false` indica una selección
+		}, { once: true });
+	});
+
+	function getIconClass(fileName) {
+	  const extension = fileName.split('.').pop().toLowerCase();
+	  switch (extension) {
+		case 'pdf':
+		  return 'ico-pdf';
+		case 'xls':
+		case 'xlsx':
+		  return 'ico-xls';
+		case 'doc':
+		case 'docx':
+		  return 'ico-doc';
+		case 'ppt':
+		case 'pptx':
+		  return 'ico-ppt';
+		case 'csv':
+		  return 'ico-csv';
+		case 'jpg':
+		case 'jpeg':
+		case 'png':
+		case 'gif':
+		case 'webp':
+		  return 'ico-img'; // Para archivos de imagen
+		default:
+		  return 'ico-default'; // Ícono por defecto para otros tipos
+	  }
+	}
+
+	// Función para manejar los archivos
+	// Función para manejar los archivos
+	function handleFiles(files) {
+		if (!files || files.length === 0) {
+			console.error('No se seleccionaron archivos.');
+			return;
+		}
+
+		const validMimeTypes = [
+			'application/pdf',
+			'application/msword',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'application/vnd.ms-excel',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'text/csv',
+			'application/vnd.ms-powerpoint',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+		];
+		const currentFiles = getFileInput().files;
+		const newFileList = new DataTransfer();
+
+		// Conserva los archivos ya existentes en la nueva lista
+		for (let i = 0; i < currentFiles.length; i++) {
+			newFileList.items.add(currentFiles[i]);
+		}
+
+		// Procesa los nuevos archivos
+		for (const file of files) {
+			// Verifica si el archivo es válido
+			if (validMimeTypes.includes(file.type)) {
+				
+				// Crea el tile inmediatamente si es una imagen válida
+				const imageUrl = URL.createObjectURL(file);
+				const newTile = document.createElement('div');
+				const fileName = file.name;
+				const iconClass = getIconClass(fileName);
+
+				newTile.className = 'tile-photo';
+				newTile.setAttribute('role', 'button');
+				newTile.setAttribute('aria-label', `Imagen de: ${file.name}`);
+				//icono
+				const iconDiv = document.createElement('div');
+				iconDiv.className = iconClass;
+				// Crear el div para el nombre del archivo
+				const labelDiv = document.createElement('div');
+				labelDiv.className = 'lbl-text';
+				labelDiv.textContent = fileName;
+				// Agregar los elementos internos al tile principal
+				newTile.appendChild(iconDiv);
+				newTile.appendChild(labelDiv);
+				//Crear element
+				tilesContainer.appendChild(newTile);
+
+				// Lógica para evitar duplicación del archivo en la lista del input
+				const isDuplicate = Array.from(currentFiles).some(existingFile => 
+					existingFile.name === file.name && existingFile.size === file.size
+				);
+
+				if (!isDuplicate) {
+					newFileList.items.add(file); // Agrega el archivo solo si no es un duplicado
+				} else {
+					console.warn(`Archivo "${file.name}" ya existe y no se añadirá al DataTransfer.`);
+				}
+			} else {
+				console.warn(`Archivo "${file.name}" no es una imagen válida.`);
+			}
+		}
+		
+		// Asigna la nueva lista de archivos al input
+		getFileInput().files = newFileList.files;
+	}
+
+	// Lógica para enviar el formulario
+	const sendButton = document.querySelector('#send-photos-button');
+	if (sendButton) {
+		sendButton.addEventListener('click', () => {
+			const formData = new FormData();
+			const files = getFileInput().files;
+			document.getElementById("lbl_mensaje").textContent = "Cargando...";
+			if (files.length === 0) {
+				alert('No hay fotos para enviar.');
+				return;
+			}
+			console.log("Archivos que se van a enviar:", files);
+			for (const file of files) {
+				formData.append('photos[]', file);
+				console.log("Agregando al FormData:", file.name);
+			}
+			
+			// Envía la solicitud a la ruta de tu API
+			fetch('/brandkit/files/save', {
+				method: 'POST',
+				body: formData,
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('La solicitud falló con estado: ' + response.status);
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log('Respuesta del servidor:', data);
+				const fresult = data.message;
+				document.getElementById("lbl_mensaje").textContent = "Respuesta: "+fresult;
+				//alert('Fotos enviadas correctamente.');
+				clearFileInput();
+			})
+			.catch(error => {
+				console.error('Error al enviar:', error);
+				document.getElementById("lbl_mensaje").textContent = "Hubo un error al enviar las fotos.";
+			});
+		});
+	}
+});
+</script>
+{% endblock %}

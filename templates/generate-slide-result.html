@@ -1,0 +1,60 @@
+<div class="header-result">
+	<div class="controls">
+		<div class="field">
+			<p class="ico-starfill">Este es el contenido que hemos creado para ti!</p>
+		</div>
+		<div class="field">
+			<button id="btn-generate-new-article" class="generate-button">
+				<i class="fas fa-wrench button-icon"></i>
+				Genera un nuevo artículo
+			</button>
+		</div>
+	</div>
+</div>
+<div class="resultado-result">
+	<div class="left">
+		<div class="texto">{{ articulo.content | safe }} 
+			<!--<div class="title">Medidor de Velocidad</div>
+			<p class="subtitle">¿Qué es y Por Qué es Importante en Perú?</p>
+			<p>¿Alguna vez te has preguntado qué significa realmente esa frase y por qué es crucial para tu experiencia online en Perú? En este artículo, exploraremos a fondo este concepto, desentrañando su significado y revelando su importancia en la era digital.</p>
+			<p class="parrafo-h2">Entendiendo el Medidor de Velocidad: Más Allá de los Números</p>
+			<p>Un medidor de velocidad, también conocido como test de velocidad de internet, es una herramienta que te permite evaluar la rapidez con la que viajan los datos entre tu dispositivo (computadora, smartphone, tablet) y el servidor de internet. En esencia, mide el rendimiento de tu conexión a internet en un momento específico.</p>
+			<p class="parrafo-h1">¿Qué Mide Exactamente?</p>
+			<p>Principalmente, un medidor de velocidad analiza dos aspectos fundamentales:</p>
+			<p class="parrafo-h22">Velocidad de Descarga (Download Speed):</p>
+			<p>Indica la rapidez con la que puedes recibir datos desde internet. Es crucial para actividades como ver videos en streaming, descargar archivos, navegar por páginas web y jugar juegos online. Se mide en megabits por segundo (Mbps).</p>
+			<p class="parrafo-h22">Velocidad de Carga (Upload Speed)</p>
+			<p>Mide la rapidez con la que puedes enviar datos a internet. Es importante para actividades como subir fotos y videos a redes sociales, realizar videollamadas, enviar correos electrónicos y transmitir en vivo. También se mide en Mbps.</p>
+			<p>Además, algunos medidores de velocidad también miden la latencia o ping, que es el tiempo que tarda un paquete de datos en viajar desde tu dispositivo al servidor y regresar. Una latencia baja es crucial para juegos online y videollamadas, donde la respuesta en tiempo real es esencial.</p>-->
+		</div>
+	</div>
+	<div class="right">
+		<div class="meta">
+			<p class="title">Meta title</p>
+			<p>{{ articulo.meta_title | safe }}</p>
+			<p class="title">Meta description</p>
+			<p>{{ articulo.meta_description | safe }}</p>
+			<p class="title">Enlaces</p>
+			{% if urls_sugeridas %}
+			    {# Verifica si urls_sugeridas es la cadena de error o una lista #}
+			    {% if urls_sugeridas is string %}
+			        {# Si es la cadena de error, muéstrala directamente #}
+			        <p>{{ urls_sugeridas }}</p>
+			    {% else %}
+			        {# Si es una lista de URLs, itera sobre ella #}
+			        {% for url in urls_sugeridas %}
+			            {% if url is not none and url | length > 10 and (url.startswith('http://') or url.startswith('https://')) %}
+			                <p><a href="{{ url }}" target="_blank">{{ url }}</a></p>
+			            {% endif %}
+			        {% endfor %}
+			    {% endif %}
+			{% else %}
+			    <p>No se encontraron URLs relevantes para sugerir.</p>
+			{% endif %}
+			<a id="btn-generate-article" class="generate-button" download='FileName' href='/download-generated-article'>
+				<i class="fas fa-wrench button-icon"></i>
+				Descargar documento
+			</a>
+		</div>
+	</div>
+</div>

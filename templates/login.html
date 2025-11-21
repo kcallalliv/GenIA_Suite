@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Genia Suite</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<!--<link href="css/vendor/bootstrap.min.css" rel="stylesheet">-->
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/bootstrap.min.css') }}">
+		<link rel="icon" href="{{ url_for('static', filename='ico-genia.ico') }}" type="image/x-icon" />
+		<link href="https://bootswatch.com/5/flatly/bootstrap.css" rel="stylesheet">
+		<link href="https://bootswatch.com/_vendor/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+		<link href="https://bootswatch.com/_assets/css/custom.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/sistema.css') }}">
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<!-- Bootstrap 4 requires Popper.js -->
+		<script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+		<script src="http://vjs.zencdn.net/6.6.3/video.js"></script>
+		<!--<script src="scripts/flat-ui.js"></script>-->
+	</head>
+	<body>
+		<div class="panel">
+			<div class="align-father">
+				<div class="align-chidren">
+					<div class="login-vertical">
+						<div class="login-container">
+							<form id="form-login" method="post" action="/procesar">
+								<fieldset>
+									<legend style="text-align: center;">Genia Suite</legend>
+									<div>
+									  <input type="email" class="form-control" id="txt_usuario" name="txt_usuario" aria-describedby="emailHelp" placeholder="Enter email">
+									</div>
+									<div>
+									  <input type="password" class="form-control" id="txt_password" name="txt_password" placeholder="Password" autocomplete="off">
+									</div>
+									<button type="submit" class="btn btn-danger">Ingresar</button>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block page %}page-info{% endblock %}
+{% block content %}
+<section class="content">
+	<div class="btn-group" role="group" aria-label="Basic example">
+		<a class="btn btn-secondary active" href="agregar">Crear</a>
+		<a class="btn btn-secondary" href="view">Listado</a>
+		<a class="btn btn-secondary" href="papelera">Eliminados</a>
+	</div>
+	<main class="logo-content">
+		<h1 class="section-title">Proyecto</h1>
+		<form id="form-proyecto-update" action="update" autocomplete="off" method="post">
+			<input type="hidden" class="form-control" id="proyecto_id" name="proyecto_id" value="{{ data['proyecto_id'] }}">
+			<div class="form-row">
+				<div class="field">
+					<label for="proyecto_name">Nombre</label>
+					<div class="input">
+						<input id="proyecto_name" name="proyecto_name" type="text" placeholder="" value="{{ data['proyecto_name'] }}">
+					</div>
+				</div>
+			</div>
+
+			<div class="field">
+				<label for="proyecto_description">Descripción</label>
+				<textarea id="proyecto_description" name="proyecto_description" rows="8">{{ data['proyecto_description'] }}</textarea>
+			</div>
+
+			<div class="actions">
+				<button type="submit" class="btn btn-primary" id="btn-guardar">Confirmar</button>
+			</div>
+
+			<div class="helper">
+				<span class="pill" aria-hidden="true"></span>
+				<span id="lbl_mensaje">
+				{% if 'mensaje' in session %}
+					{{ session['mensaje'] }}
+					{% set _ = session.pop('mensaje', None) %}
+				{% endif %}
+				</span>
+			</div>
+		</form>
+	</main>
+</section>
+<script src="{{ url_for('static', filename='scripts/proyectos.js') }}"></script>
+{% endblock %}

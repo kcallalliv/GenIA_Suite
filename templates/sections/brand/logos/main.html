@@ -1,0 +1,233 @@
+{% extends "sections/template.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<main class="logo-content">
+		<h1 class="section-title">Logos</h1>
+
+		<div class="info-banner">
+			<span class="dot" aria-hidden="true"></span>
+			<span>Carga la mayor cantidad de variaciones disponibles del logo. Esto nos permitirá generar contenido de manera más acertada.</span>
+		</div>
+		<input type="hidden" id="txt_pid" name="txt_pid" value="{{pid}}">
+		<div class="tiles">
+			<div class="tile-upload" role="button" aria-label="Agregar logo">
+				<div class="tile-upload__inner">
+					<div class="plus">+</div>
+				</div>
+			</div>
+			{% for lista in lista %}
+			{% set myid = lista['asset_id'] %}
+			{% set myname = lista['asset_name'] %}
+			{% set mysrc = lista['asset_src'] %}
+			{% set myimage = generar_url_firmada("genia_information",mysrc) %}
+			<div class="tile-photo" role="button" data-name="{{myname}}" data_id="{{myid}}" style="background-image:url('{{ myimage }}');">
+				<div class="item-close">×</div>
+			</div>
+			{% endfor %}
+		</div>
+		<input type="file" name="photos[]" multiple="" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;" wfd-invisible="true">
+
+		<div class="actions">
+		  <button class="btn btn-primary" type="button" id="send-photos-button">Subir Photos</button>
+		</div>
+
+		<div class="helper">
+			<span class="pill" aria-hidden="true"></span>
+			<span id="lbl_mensaje"></span>
+		</div>
+	</main>
+</section>
+
+<script>
+	const uploadTile = document.querySelector('.tile-upload');
+	const container = document.querySelector('.tiles');
+	const filesArray = [];
+
+	// Función unificada para la lógica de eliminación
+	function setupCloseButton(tileElement, fileObject) {
+		const closeButton = tileElement.querySelector('.item-close');
+		if (!closeButton) return;
+
+		closeButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			
+			const indexToRemove = filesArray.findIndex(item => item === fileObject);
+			if (indexToRemove !== -1) {
+				filesArray.splice(indexToRemove, 1);
+				console.log('Elemento eliminado del array. Array actualizado:', filesArray);
+			}
+			
+			if (fileObject && fileObject.file) {
+				URL.revokeObjectURL(tileElement.style.backgroundImage.slice(5, -2));
+			}
+			
+			tileElement.remove();
+		});
+	}
+
+	// Inicializa los tiles existentes y los añade al array
+	const existingTiles = document.querySelectorAll('.tile-photo[data_id]');
+	existingTiles.forEach((tile) => {
+		//const id = parseInt(tile.getAttribute("data_id"));
+		const id = tile.getAttribute("data_id");
+		const name = tile.getAttribute("data-name") || null; // Obtiene el nombre
+		const fileObject = { id: id, name: name, file: null }; // Agrega el nombre al objeto
+		filesArray.push(fileObject);
+		console.log('Elemento existente añadido al array:', fileObject);
+		setupCloseButton(tile, fileObject);
+	});
+
+	// Lógica para el botón de carga de archivos
+	uploadTile.addEventListener('click', () => {
+		const tempFileInput = document.createElement('input');
+		tempFileInput.type = 'file';
+		tempFileInput.multiple = true;
+		tempFileInput.accept = 'image/jpeg, image/png, image/gif, image/webp';
+		
+		tempFileInput.addEventListener('change', (event) => {
+			const files = event.target.files;
+			if (files.length > 0) {
+				handleFiles(files);
+			}
+			tempFileInput.remove();
+		});
+
+		tempFileInput.click();
+	});
+
+	// Lógica para manejar los archivos subidos
+	function handleFiles(files) {
+		const validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+		for (const file of files) {
+			if (validMimeTypes.includes(file.type)) {
+				const imageUrl = URL.createObjectURL(file);
+				const newTileContainer = document.createElement('div');
+				newTileContainer.innerHTML = `<div class="tile-photo" role="button" style="background-image: url('${imageUrl}');">
+					<div class="item-close">×</div>
+				</div>`;
+				
+				const photoTile = newTileContainer.querySelector('.tile-photo');
+				container.appendChild(photoTile);
+				
+				const fileObject = { id: null, name: file.name, file: file }; // Agrega el nombre del archivo
+				filesArray.push(fileObject);
+				console.log('Archivo agregado al array:', fileObject);
+				setupCloseButton(photoTile, fileObject);
+			} else {
+				console.warn(`Archivo "${file.name}" no es una imagen válida.`);
+			}
+		}
+	}
+
+	function recargarContenidoDinamico() {
+		const contenedorTiles = document.querySelector('.tiles');
+		// Asegúrate de que esta URL sea la correcta si el endpoint cambió de 'fonts' a 'images'
+		const urlListado = 'list';
+
+		// 1. Eliminar todos los elementos existentes que no sean el botón de carga
+		const tilesAEliminar = contenedorTiles.querySelectorAll('.tile-photo');
+		tilesAEliminar.forEach(tile => {
+			// --- ADAPTACIÓN CLAVE PARA background-image ---
+			// Obtener la URL de fondo si existe y revocarla para liberar memoria
+			const bgImageStyle = tile.style.backgroundImage;
+			if (bgImageStyle && bgImageStyle.includes('url("blob:')) {
+				// Extraer la URL de Blob del estilo y revocarla
+				const blobUrl = bgImageStyle.slice(5, -2).replace(/['"]/g, '');
+				URL.revokeObjectURL(blobUrl);
+				console.log(`URL de Blob revocada: ${blobUrl}`);
+			}
+			// ---------------------------------------------
+			
+			tile.remove();
+		});
+		
+		// 2. Limpiar el array y las consolas
+		filesArray.length = 0; 
+		console.log('Array de archivos/IDs vaciado:', filesArray);
+		
+		// 3. Cargar el contenido HTML de list.html (o el endpoint que lo devuelva)
+		fetch(urlListado)
+			.then(response => {
+				if (!response.ok) {
+					// Si la solicitud falla (ej. 404)
+					throw new Error(`Error ${response.status}: No se pudo cargar la lista actualizada.`);
+				}
+				return response.text();
+			})
+			.then(htmlContent => {
+				// Inyectar el nuevo HTML al final del contenedor (después del tile-upload)
+				contenedorTiles.insertAdjacentHTML('beforeend', htmlContent);
+				
+				// 4. Re-inicializar los nuevos tiles (los que tienen data_id)
+				const nuevosTiles = contenedorTiles.querySelectorAll('.tile-photo[data_id]');
+				nuevosTiles.forEach((tile) => {
+					const id = tile.getAttribute("data_id");
+					const name = tile.getAttribute("data-name") || null;
+					
+					// Nota: file: null porque los archivos cargados desde el servidor no son objetos File
+					const fileObject = { id: id, name: name, file: null }; 
+					filesArray.push(fileObject);
+					console.log('Elemento recién cargado añadido al array:', fileObject);
+					
+					// Re-asociar el botón de cerrar y su lógica de eliminación del array
+					setupCloseButton(tile, fileObject); 
+				});
+				document.getElementById("lbl_mensaje").textContent = "Archivos subidos y lista actualizada.";
+			})
+			.catch(error => {
+				console.error('Error al recargar la lista:', error);
+				document.getElementById("lbl_mensaje").textContent = "Archivos subidos, pero hubo un error al recargar la lista.";
+			});
+	}
+
+	// Lógica para enviar el formulario
+	const sendButton = document.querySelector('#send-photos-button');
+	if (sendButton) {
+		sendButton.addEventListener('click', () => {
+			const formData = new FormData();
+			formData.append('data_info', JSON.stringify(filesArray));
+			var pid = $("#txt_pid").val();
+			formData.append('pid', pid);
+			document.getElementById("lbl_mensaje").textContent = "Cargando...";
+
+			if (filesArray.length === 0) {
+				document.getElementById("lbl_mensaje").textContent = "No hay fotos para enviar.";
+				return;
+			}
+
+			filesArray.forEach((item) => {
+				if (item.file) {
+					formData.append('photos[]', item.file);
+				} else if (item.id) {
+					//formData.append('ids[]', item.id);
+					//formData.append('names[]', item.name); 
+					// Opcional: Si el backend necesita el nombre del archivo existente, puedes enviarlo
+					// formData.append('names[]', item.name);
+				}
+			});
+			
+			fetch('save', {
+				method: 'POST',
+				body: formData,
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('La solicitud falló con estado: ' + response.status);
+				}
+				return response.json();
+			})
+			.then(data => {
+				const fresult = data.message;
+				recargarContenidoDinamico();
+				document.getElementById("lbl_mensaje").textContent = "Respuesta: " + fresult;
+			})
+			.catch(error => {
+				console.error('Error al enviar:', error);
+				document.getElementById("lbl_mensaje").textContent = "Hubo un error al enviar las fotos.";
+			});
+		});
+	}
+</script>
+{% endblock %}

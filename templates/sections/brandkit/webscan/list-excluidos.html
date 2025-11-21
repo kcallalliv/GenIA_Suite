@@ -1,0 +1,29 @@
+<table class="data-table">
+	<thead>
+		<tr>
+			<th width="30"><input type="checkbox" name="checkbox_all" id="checkbox-all"/></th>
+			<th width="10" style="text-align:center;"><span class="spacing">#</span></th>
+			<th width="auto"><span class="spacing">URL</span></th>
+			<th width="200"><span class="spacing">Última Actualización</span></th>
+			<th width="100"><span class="spacing">Estado</span></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for lista in lista %}
+		{% set myid = lista['exsite_id'] %}
+		{% set myestado = lista['exsite_estado'] %}
+		{% set mystatus = verEstado(0) %}
+		{% set myfecha = lista['exsite_fecha'] %}
+		{% set myurl = lista['exsite_url'] %}
+		<tr>
+			<td>
+				<input type="checkbox" name="checkbox_url" id="checkbox_url_{{ loop.index }}" value="{{myurl}}" data-id="{{myid}}"/>
+			</td>
+			<td style="text-align:center;"><label for="checkbox_url_{{ loop.index }}">{{ loop.index }}</label></td>
+			<td><label for="checkbox_url_{{ loop.index }}">{{ myurl }}</label></label></td>
+			<td><label for="checkbox_url_{{ loop.index }}">{{ myfecha }}</label></td>
+			<td><label for="checkbox_url_{{ loop.index }}"><span class="status {{ mystatus }}">{{ mystatus }}</span></label></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

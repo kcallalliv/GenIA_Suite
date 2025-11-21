@@ -1,0 +1,273 @@
+# routes/alerts.py
+from flask import Blueprint, render_template, request, session, redirect, url_for, send_file, jsonify
+from google.cloud import bigquery
+from google import genai
+from google.genai.types import HttpOptions
+from google.genai import types
+from google.api_core.client_options import ClientOptions
+from google.cloud import storage
+from google.cloud import discoveryengine_v1 as discoveryengine
+from functools import wraps
+from datetime import datetime
+from sqlalchemy.sql import text
+from sqlalchemy.orm import aliased
+from sqlalchemy import desc, and_
+from bs4 import BeautifulSoup
+from io import BytesIO
+import os
+import json
+import re
+import hashlib
+import difflib
+import requests
+import random
+import pytz
+import string
+from io import BytesIO
+import mimetypes
+import pathlib
+import datetime
+import pandas as pd
+import traceback # Asume que pandas está importado
+import uuid
+import base64
+import vertexai
+from vertexai.preview.vision_models import ImageGenerationModel
+from werkzeug.utils import secure_filename
+from google.cloud import aiplatform
+#llamar a config
+from routes.models import db, Assets, Configuracion, Proyectos, Imagesia
+from routes.config.geniaconfig import bq_client, bucket_name, storage_client, validar_sesion, fechaActual, generarCodigo
+
+ia_articulo_bp = Blueprint('ia_articulo_bp', __name__)
+#Variables Globales
+secret_key = os.environ.get('SESSION_KEY', 'creative_claro_super_secret_key_prod')
+#model_name = "imagen-4.0-generate-001"
+model_name = "gemini-2.5-flash-image-preview"
+#model_name = "imagen-3.0-generate-002"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBjLIPcIzCY6zuWJdiikno0sWHpilbwLw4") 
+GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME", "tu-bucket-de-claro-imagenes")
+# Definición de formatos de plataformas (sin cambios)
+AVAILABLE_MODELS = {
+	"gemini-2.5-flash-lite-preview-09-2025": {"name": "G2.5 Lite Preview", "description": "Rentable, baja latencia. Ideal para drafts masivos.", "priority": 9, "type": "Gemini_API"},
+	"gemini-2.5-flash-preview-09-2025": {"name": "G2.5 Flash Preview", "description": "Modelo estándar con buen razonamiento. Balance costo/calidad.", "priority": 7, "type": "Gemini_API"},
+	"gemini-2.5-flash-image": {"name": "G2.5 Flash Image (Nano Banana)", "description": "Generación y edición multimodal de imágenes. Buen balance para generación de imágenes.", "priority": 5, "type": "Gemini_API"},
+	"gemini-2.5-pro": {"name": "G2.5 Pro", "description": "Modelo de razonamiento más avanzado. Máxima calidad. Alto costo.", "priority": 1, "type": "Gemini_API"},
+	"imagen-4.0-ultra-generate-001": {"name": "Imagen 4.0 Ultra", "description": "Máxima calidad FOTORREALISTA. Ideal para activos finales Premium de alto impacto.", "priority": 1, "type": "Imagen_VertexAI"},
+	"imagen-4.0-generate-001": {"name": "Imagen 4.0 Standard", "description": "Alta fidelidad a marca y Aspect Ratio. Balance entre calidad y costo. Recomendado para banners.", "priority": 2, "type": "Imagen_VertexAI"},
+	"imagen-4.0-stylize-001": {"name": "Imagen 4.0 Stylize", "description": "Modelo de nicho. Énfasis en estilos artísticos y conceptuales. Útil para branding abstracto.", "priority": 4, "type": "Imagen_VertexAI"},
+	"veo-3.0-generate-001": {"name": "VEO 3.0 Video Generation", "description": "Generación de clips de video a partir de texto. Proceso Asíncrono (LRO).", "priority": 5, "type": "Veo_VertexAI"},
+}
+platform_specs = {
+	"ig_post": {"name": "Instagram Post (Vertical)", "width": 1080, "height": 1350, "ratio": "4:5"},
+	"fb_square": {"name": "Facebook Post / Square", "width": 1200, "height": 1200, "ratio": "1:1"},
+	"story": {"name": "Instagram/TikTok Story", "width": 1080, "height": 1920, "ratio": "9:16"},
+	"web_banner": {"name": "Web Banner Publicitario", "width": 1920, "height": 600, "ratio": "3.2:1"},
+	"blog_cover": {"name": "Imagen para Blog (Cover 4.5:1)", "width": 1800, "height": 400, "ratio": "4.5:1"},
+	"article_cover": {"name": "Imagen para Artículo (Social Link Preview)", "width": 1200, "height": 628, "ratio": "1.91:1"},
+	"yt_thumb": {"name": "YouTube Thumbnail (16:9)", "width": 1280, "height": 720, "ratio": "16:9"},
+	"x_post": {"name": "Twitter/X Post Image (16:9)", "width": 1200, "height": 675, "ratio": "16:9"},
+	"linkedin_post": {"name": "LinkedIn Post Image (1.91:1)", "width": 1200, "height": 628, "ratio": "1.91:1"},
+}
+
+#===Tendencias===
+@ia_articulo_bp.route('/proyectos/colecciones/image-article')
+@validar_sesion
+def colecciones_colecciones():
+	proyecto_id = request.values.get('pid')
+	paltaform_format = "blog_cover" 
+	return render_template('sections/colecciones/ia-article/main.html',proyecto_id=proyecto_id)
+
+@ia_articulo_bp.route('/proyectos/colecciones/image-article/image', methods=["GET", "POST"])
+@validar_sesion
+def colecciones_image():
+	form_params = request.args.to_dict()
+	spec_key = "blog_cover" 
+	params = form_params 
+	result = execute_generation(spec_key, params)
+	imagen_url = result.get('url')
+	imagen_promt = result.get('prompt')
+	image = generar_url_firmada("genia_information",imagen_url)
+	#print("PROMPT ENVIADO A GEMINI:", result.get('prompt', 'N/A'))
+	#print("PROMPT ENVIADO A GEMINI:", imagen_url)
+	if 'error' in result:
+		return f"<p class='error-message'>Error: {result['error']}</p>", 500
+	else:
+		# Save
+		imageia_id = generarCodigo("IA");
+		imgia_name = imagen_url
+		imgia_promt = imagen_promt
+		imgia_type = "blog"
+		imgia_fecha = fechaActual()
+		proyecto_id = params.get('txt_pid', '')
+
+		new_data = Imagesia(
+			imgia_id = imageia_id,
+			imgia_name = imgia_name,
+			imgia_promt = imgia_promt,
+			imgia_type = imgia_type,
+			imgia_fecha = imgia_fecha,
+			imgia_estado = 1,
+			proyecto_id = proyecto_id
+		)
+		db.session.add(new_data)
+		db.session.commit()
+		return render_template('sections/colecciones/ia-article/image_result_fragment.html', result=result, image=image)
+
+def execute_generation(spec_key: str, params: dict) -> dict:
+	"""Ejecuta la generación de imagen para una especificación y sube a GCS."""
+	spec = platform_specs[spec_key]
+	prompt = build_conditional_prompt(spec, params)
+	if not GEMINI_API_KEY:
+		 return {"error": "Error de Configuración: La clave GEMINI_API_KEY no está configurada.", "prompt": prompt, "spec_key": spec_key}
+	try:
+		client = genai.Client(api_key=GEMINI_API_KEY)
+		resp = client.models.generate_content(
+			model=model_name,
+			contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
+			config=types.GenerateContentConfig()
+		)
+	except Exception as e:
+		return {"error": f"Error API/Conexión: {e}", "prompt": prompt, "spec_key": spec_key}
+	candidates = getattr(resp, "candidates", [])
+	if not candidates or not candidates[0].content or not candidates[0].content.parts:
+		return {"error": "El modelo no produjo datos de imagen (posiblemente prompt bloqueado).", "prompt": prompt, "spec_key": spec_key}
+	try:
+		part = candidates[0].content.parts[0]
+		inline = getattr(part, "inline_data", None)
+		if inline and getattr(inline, "data", None):
+			image_url = save_image_to_gcs(inline.data, inline.mime_type, folder_path=spec_key)
+			return {
+				"url": image_url,
+				"name": spec['name'],
+				"resolution": f"{spec['width']}x{spec['height']}",
+				"caption": params.get('caption_es', 'Sin copy sugerido.'),
+				"prompt": prompt,
+				"spec_key": spec_key
+			}	
+		return {"error": "El modelo no produjo datos de imagen (posiblemente prompt bloqueado).", "prompt": prompt, "spec_key": spec_key}
+	except Exception as e:
+		return {"error": f"Error de procesamiento de datos: {e}. Revise el formato.", "prompt": prompt, "spec_key": spec_key}
+
+def build_conditional_prompt(spec: dict, params: dict) -> str:
+	# (El código de construcción de prompt es el mismo que en la respuesta anterior)
+	imagen_cover = "https://ff12ca702f16c0db8bf46e59e547904e6950ef108a94630119a0a8d-apidata.googleusercontent.com/download/storage/v1/b/genia_information/o/templates%2Fblog_cover.png?jk=AUDkFIkIxJ4hJZ8TEGY2mUcM7AzMfbgykhcDeztf3PjZL3jDdMWjUiV8A_cz9-y8JvzJ2n-eHuSCsTCNLDdZcm1y-Yf2ncUzwA3tnBlAgsIMB9yQ1ZR7bri8aLHd2R-QiqCP8RkdjskvwKYLgjAh8o6t1UgV473bawy0p0W2fGL4NU8fkjD5t7yGltvaKkw94CeFMxfRl3PHFMRXfE37B4xccjAZLwH10cFGcMHtf_D7-WfsCleU5nxZBlTX_Dz3jCYvgy-E6aXh0Ir3qBkV7cNN-AcxYeRU9-AVCi38_nWFn9XW6dnH-UhnwNvXOJJkIm5530Jl9YI6R4AZQ7nWU5m_aEi2uRF1Is_guehvCNQ8xt1lDtE8fe2o5C8TO0hjVf21uCA-LXiMMg4JnW_MFedc68OOMp-u4TYcdfBI6a4kISsJumivJEzX_YfzZQYhDwoLsalcZXLwCQxaWlCZdtRYUnUsu_cJaonc65POAecL8YocnmDdiKwPOaBpJblZv88yXjOGK38nS6sbDAEaXleV14C_Qb7ysoqW2MizsWJXrIlV-2LmWnokWBOdX0BDpvkTf-EDmRy267JY-ZYf4Ha8UB433_iGTFw4lZP6WEJZHSGc628r30YE71E_cseIWKrsobeKRtvC7dsUdK804cI9bGNDnXAqedEnuMxXAQKmLQuwJnPQh62wRivQg9Ae7KSM0BhJSE7jNkjTcqzM02cdHc8piQtTJ6bX54CYGGaeeJ9j_A-NTbeuOnkqmW7I0G7s8d-tGF-MsZG_n70yseZEljiXLwTnLIjueGv8iVT1KHVPjKWvVinpfVjFf-X8rXCC-anVjy9bhf4zjef6DF1LGPK0PHsq96QbOGn0-K8P6zw2cDT4Ef31VcZG20phs3xRtL9gdRPy4n8ULnNpcMGpllvh_zdQlJ-Qmj6sBkcpGAFckFHQgMnxl0qht0M6DfmGQSSoFKHLZqhu0LcVeUtFH-0zBD0q6Lfq4YqpsmNA3hzc1Qg9tMBB9nJGbl91xstQxoBRmiTucukZPLBEa4bBDBz30feXbkRo2Y2X6ytuLSS7tjSng-RJzSkO9UYfLnmtVkjWdjPv82zARtMecku3YXv8maHsvN-Tuaf569qbBLXrsk6Itwx0K9u0aru6Ng9em37Xy7o7S4nXopHs93k49JrSaoPF2F7G0-d-1NO4mRIv0RogzupphhL8Qb7qeBg1o2HyuFd96fm-0DRWXstdIxLEWupHol8qBNlpHqhG7NEM5vWf0QMrWA1iKYII7MlgcT2DepuZrOpTkPgNZUz4Q&isca=1"
+	# I. BASES
+	W, H = spec['width'], spec['height']
+	PRODUCTO = params.get('producto', 'Producto Claro Perú')
+	ESTILO = params.get('estilo_visual', 'clean, modern, premium advertising style')
+	COLORES = params.get('colores_base', 'Brand colors: red (#E60000) background with white accents.')
+	
+	# V. PERSONAS y ESCENA
+	personas_input = params.get('incluir_personas', 'no')
+	
+	if personas_input.lower().startswith('sí') or personas_input.lower().startswith('yes'):
+		ESCENA_DETAIL = params.get('elementos_visuales', 'Familia feliz en casa usando dispositivos conectados.')
+		INTERACCION = params.get('interaccion_humana', 'Uso Indirecto') 
+		ESCENA_CLAUSE = f"Scene detail: Include people. Model type: {personas_input}. Interaction: {INTERACCION}. The main concept is: {ESCENA_DETAIL}"
+	else:
+		ESCENA_DETAIL = params.get('elementos_visuales', 'Glowing fiber optic waves and advanced technology, implying speed.')
+		ESCENA_CLAUSE = f"Scene detail: Focus on technology and abstract visuals without people. The main concept is: {ESCENA_DETAIL}"
+		
+	MARCA_ELEMENTOS = params.get('elementos_marca', '')
+	if MARCA_ELEMENTOS:
+		 ESCENA_CLAUSE += f" Integrate mandatory brand elements: {MARCA_ELEMENTOS}."
+
+	# II & III. CLÁUSULAS TÉCNICAS Y COMPOSICIÓN AVANZADA
+	adicionales = []
+	if 'contexto_imagen' in params: adicionales.append(f"Lighting: {params['contexto_imagen']}")
+	#if 'textura_render' in params: adicionales.append(f"Render Quality: {params['textura_render']}")
+	#if 'iluminacion' in params: adicionales.append(f"Lighting: {params['iluminacion']}")
+	if 'angulo_camara' in params: adicionales.append(f"Camera Angle: {params['angulo_camara']}")
+	if 'emocion_tono' in params: adicionales.append(f"Emotional Tone: {params['emocion_tono']}")
+	if 'tipo_fondo' in params: adicionales.append(f"Background/Setting Type: {params['tipo_fondo']}")
+	if 'tipo_composicion' in params: adicionales.append(f"Composition Rule: {params['tipo_composicion']}")
+	if 'profundidad_campo' in params: adicionales.append(f"Depth of Field: {params['profundidad_campo']} (Bokeh effect).")
+	if 'velocidad_implicita' in params: adicionales.append(f"Implied Speed: Use {params['velocidad_implicita']} to show dynamism.")
+	if 'grado_abstraccion' in params: adicionales.append(f"Abstraction Level: {params['grado_abstraccion']}.")
+	
+	CLAUSULAS_ADICIONALES = ", ".join(adicionales)
+	if CLAUSULAS_ADICIONALES:
+		CLAUSULAS_ADICIONALES = f"Composition and Technical Details: {CLAUSULAS_ADICIONALES}."
+
+	# IV. CLÁUSULA DE TEXTOS (REFORZADA) y LOGO
+	TEXTO_CLAUSE = ""
+	T1 = params.get('texto_overlay_1')
+	T2 = params.get('texto_overlay_2')
+	T_FORMAT = params.get('formato_texto', 'Tipografía Sans-serif negrita')
+	T_JERARQUIA = params.get('jerarquia_texto', 'Título 1 Dominante') 
+	T_ZONA = params.get('zona_segura_texto', 'Inferior Central')
+	LOGO_POS = params.get('ubicacion_logo', 'Esquina Superior Derecha')
+
+	if T1 or T2:
+		TEXTO_CLAUSE = """
+		Generate Spanish text overlays in ALL CAPS. Use legible and readable typography.
+		***HIGH PRIORITY TEXT GENERATION INSTRUCTIONS:***
+		Generate Spanish text overlays **ONLY IN SPANISH AND ALL CAPS**. 
+		**CRITICAL: DO NOT MAKE TYPOS, DO NOT USE GARBLED TEXT, AND DO NOT USE ENGLISH WORDS.**
+		Use strong typographic contrast and legible spacing. 
+		"""
+		TEXTO_CLAUSE += f" Typography Style: {T_FORMAT}. Text Hierarchy: {T_JERARQUIA}. Text Placement: {T_ZONA}. "
+		
+		if T1: TEXTO_CLAUSE += f" Primary Overlay (MUST BE LEGIBLE): \"{T1}\". "
+		if T2: TEXTO_CLAUSE += f" Secondary Overlay (MUST BE LEGIBLE): \"{T2}\". "
+		
+		TEXTO_CLAUSE += " Respect safe margins for the platform (8% of width/height)."
+	
+	TEXTO_CLAUSE += f" Allocate clear, clean space for the Claro logo in the {LOGO_POS} (DO NOT GENERATE THE LOGO, only the clean space)."
+
+	# V. RESTRICCIONES DE MARCA
+	RESTRICCION_CLAUSE = ""
+	if 'restricciones_marca' in params:
+		RESTRICCION_CLAUSE = f"STRICT BRAND GUIDELINES: {params['restricciones_marca']}."
+
+	# VI. IMAGEN DE REFERENCIA (NUEVA SECCIÓN)
+	# Se usa la variable url_base_cover (que contiene el valor de imagen_cover)
+	IMAGEN_REFERENCIA_CLAUSE = f"Use this image as a strong reference for style, composition, and content: {imagen_cover}. Incorporate elements and overall aesthetic from the reference image."
+
+	# Prompt final ensamblado
+	prompt = f"""
+	Generate a promotional image for Claro Perú about {PRODUCTO} with a {ESTILO}.
+	Canvas must be exactly {W}x{H} pixels (Aspect Ratio: {spec['ratio']}).
+	Colors: {COLORES}.
+	
+	{ESCENA_CLAUSE}
+	
+	{CLAUSULAS_ADICIONALES}
+	
+	{TEXTO_CLAUSE}
+	
+	{RESTRICCION_CLAUSE}
+
+	Output only the image; do not add watermarks, UI chrome, or extra frames.
+	"""
+	print(f"--- PROMPT ENVIADO A IMAGEN 4.0: {prompt} ---")
+	return " ".join(prompt.split())
+
+def save_image_to_gcs(data, mime_type, folder_path) -> str:
+	if isinstance(data, str):
+		data_bytes = base64.b64decode(data)
+	else:
+		data_bytes = data
+	ext = mimetypes.guess_extension(mime_type)
+	ext = ext.lstrip('.') if ext else "png" 
+	fecha_utc = datetime.datetime.utcnow().strftime('%Y%m%d')
+	name_archivo = f"{fecha_utc}_{folder_path}_{uuid.uuid4().hex}"
+	name_fileext = f"{name_archivo}.{ext}"
+	nombre_archivo = f"generate/blog/{name_fileext}" 
+	bucket = storage_client.bucket(bucket_name)
+	blob = bucket.blob(nombre_archivo)
+	blob.upload_from_string(data_bytes, content_type=mime_type)
+	#return blob.public_url
+	return name_fileext
+
+def generar_url_firmada(bucket_name, blob_name):
+	bucket = storage_client.bucket(bucket_name)
+	blob_path = f"generate/blog/{blob_name}"
+	blob = bucket.blob(blob_path)
+	url = blob.generate_signed_url(
+		version="v4",
+		expiration=datetime.timedelta(minutes=15),
+		method="GET",
+	)
+	return url

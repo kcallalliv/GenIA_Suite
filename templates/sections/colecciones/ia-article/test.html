@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Imágenes AI</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .generator-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        /* Panel de Controles */
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .panel-header .material-icons {
+            font-size: 28px;
+            color: #da291c;
+        }
+
+        .panel-header h2 {
+            font-size: 20px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        /* Secciones colapsables */
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #e9ecef;
+        }
+
+        .section-header.active {
+            background: #da291c;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .material-icons {
+            font-size: 20px;
+        }
+
+        .section-header.active .section-title .material-icons {
+            color: white;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+
+        .section-header.active .toggle-icon {
+            transform: rotate(180deg);
+            color: white;
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 16px;
+        }
+
+        .section-content.active {
+            max-height: 1000px;
+            padding: 16px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #da291c;
+            box-shadow: 0 0 0 3px rgba(218, 41, 28, 0.1);
+        }
+
+        /* Slider personalizado */
+        .slider-container {
+            margin-bottom: 16px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #da291c;
+            background: #fce8e6;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #da291c;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #da291c;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Botones de acción */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #da291c 0%, #a01f15 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(218, 41, 28, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(218, 41, 28, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Panel de Preview */
+        .preview-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-header h3 {
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .icon-btn .material-icons {
+            font-size: 20px;
+            color: #4a5568;
+        }
+
+        .preview-area {
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #d0d5dd;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .preview-placeholder .material-icons {
+            font-size: 64px;
+            color: #d1d5db;
+            margin-bottom: 16px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .preview-image.active {
+            display: block;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #da291c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Logo Position Grid */
+        .logo-position-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .logo-position-grid input[type="radio"] {
+            display: none;
+        }
+
+        .position-option {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .position-box {
+            width: 100%;
+            height: 50px;
+            background: #f8f9fa;
+            border: 2px solid #d0d5dd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .logo-icon {
+            font-size: 18px;
+            color: #E60000;
+            transition: all 0.2s;
+        }
+
+        /* Las flechas ya están centradas por defecto, no necesitan posicionamiento especial */
+
+        .position-label {
+            font-size: 10px;
+            color: #6b7280;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .position-option:hover .position-box {
+            border-color: #da291c;
+            background: #fce8e6;
+        }
+
+        .position-option:hover .logo-icon {
+            transform: scale(1.2);
+        }
+
+        input[type="radio"]:checked + .position-option .position-box {
+            border-color: #da291c;
+            background: #da291c;
+            box-shadow: 0 0 0 3px rgba(218, 41, 28, 0.1);
+        }
+
+        input[type="radio"]:checked + .position-option .logo-icon {
+            color: white;
+            transform: scale(1.3);
+        }
+
+        input[type="radio"]:checked + .position-option .position-label {
+            color: #da291c;
+            font-weight: 600;
+        }
+
+        /* Preset buttons */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            border-color: #da291c;
+            background: #fce8e6;
+        }
+
+        .preset-btn.active {
+            border-color: #da291c;
+            background: #da291c;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .generator-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="generator-layout">
+            <!-- Panel de Controles -->
+            <div class="controls-panel">
+                <div class="panel-header">
+                    <span class="material-icons">tune</span>
+                    <h2>Parámetros de Generación</h2>
+                </div>
+
+                <!-- Sección I: Producción Técnica -->
+                <div class="section">
+                    <div class="section-header active" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <span class="material-icons">videocam</span>
+                            <span>I. Producción Técnica</span>
+                        </div>
+                        <span class="material-icons toggle-icon">expand_more</span>
+                    </div>
+                    <div class="section-content active">
+                        <div class="form-group">
+                            <label class="form-label">Render Quality</label>
+                            <select class="form-select">
+                                <option>4K Fotorrealista</option>
+                                <option selected>8K Fotorrealista</option>
+                                <option>16K Ultra HD</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Iluminación</label>
+                            <select class="form-select">
+                                <option selected>Luz de estudio suave</option>
+                                <option>Luz natural</option>
+                                <option>Luz dramática</option>
+                                <option>Luz ambiental</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ángulo de Cámara</label>
+                            <select class="form-select">
+                                <option selected>Normal (Eye-level)</option>
+                                <option>Plano cenital (Top view)</option>
+                                <option>Contrapicado (Low angle)</option>
+                                <option>Picado (High angle)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección II: Composición y Escena -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <span class="material-icons">photo_camera</span>
+                            <span>II. Composición y Escena</span>
+                        </div>
+                        <span class="material-icons toggle-icon">expand_more</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">Emoción/Tono</label>
+                            <input type="text" class="form-input" placeholder="Velocidad y Dinamismo" value="Velocidad y Dinamismo">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Fondo / ESCENA</label>
+                            <input type="text" class="form-input" placeholder="Living moderno, Tienda Claro" value="Living de hogar moderno y cálido">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Composición</label>
+                            <select class="form-select">
+                                <option selected>Regla de Tercios</option>
+                                <option>Centrado</option>
+                                <option>Simetría</option>
+                                <option>Diagonal</option>
+                            </select>
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <label class="form-label">Profundidad de Campo</label>
+                                <span class="slider-value" id="depth-value">50</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" oninput="updateSlider('depth-value', this.value)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Velocidad Implícita</label>
+                            <input type="text" class="form-input" placeholder="Motion blur, Líneas de luz" value="Líneas de luz y movimiento">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <label class="form-label">Grado de Abstracción</label>
+                                <span class="slider-value" id="abstract-value">20</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="20" oninput="updateSlider('abstract-value', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección III: Bases y Concepto -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <span class="material-icons">lightbulb</span>
+                            <span>III. Bases y Concepto</span>
+                        </div>
+                        <span class="material-icons toggle-icon">expand_more</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">Producto/Servicio</label>
+                            <input type="text" class="form-input" placeholder="Fibra Óptica Claro" value="Fibra Óptica Claro">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Estilo Visual</label>
+                            <input type="text" class="form-input" placeholder="3D Abstracto de Alta Calidad" value="3D Abstracto de Alta Calidad">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Colores Principales</label>
+                            <input type="text" class="form-input" placeholder="Rojo Claro (#E60000) y Negro" value="Rojo Claro (#E60000) y Negro, con acentos azules y blancos">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Concepto Visual Principal</label>
+                            <input type="text" class="form-input" placeholder="Olas de fibra óptica" value="Olas de fibra óptica y dispositivos conectados">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección IV: Texto y Marca -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <span class="material-icons">text_fields</span>
+                            <span>IV. Texto & Marca/Personas</span>
+                        </div>
+                        <span class="material-icons toggle-icon">expand_more</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">Texto Principal (ALL CAPS)</label>
+                            <input type="text" class="form-input" placeholder="VELOCIDAD ILIMITADA" value="VELOCIDAD ILIMITADA">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Texto Secundario (ALL CAPS)</label>
+                            <input type="text" class="form-input" placeholder="POTENCIA PARA TU HOGAR" value="POTENCIA PARA TU HOGAR">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Jerarquía de Texto</label>
+                            <select class="form-select">
+                                <option selected>Título 1 Dominante</option>
+                                <option>Título 2 Dominante</option>
+                                <option>Equilibrado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Zona Segura Texto (Inferior Central)</label>
+                            <select class="form-select">
+                                <option>Superior Central</option>
+                                <option selected>Inferior Central</option>
+                                <option>Lateral Izquierdo</option>
+                                <option>Lateral Derecho</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección V: Branding y Restricciones -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <span class="material-icons">branding_watermark</span>
+                            <span>V. Branding y Restricciones</span>
+                        </div>
+                        <span class="material-icons toggle-icon">expand_more</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">Incluir Personas</label>
+                            <select class="form-select">
+                                <option>No</option>
+                                <option selected>Sí (Familia Latinoamericana)</option>
+                                <option>Sí (Jóvenes)</option>
+                                <option>Sí (Profesionales)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Interacción Humana</label>
+                            <select class="form-select">
+                                <option>Uso Directo</option>
+                                <option selected>Uso Indirecto</option>
+                                <option>Sin interacción</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Elementos de Marca</label>
+                            <input type="text" class="form-input" placeholder="Router Wi-Fi 6 de Claro" value="Router Wi-Fi 6 de Claro">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ubicación Logo Claro</label>
+                            <div class="logo-position-grid">
+                                <input type="radio" name="logo-position" id="pos-tl" value="top-left">
+                                <label for="pos-tl" class="position-option" title="Superior Izquierda">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-tl">north_west</span>
+                                    </div>
+                                    <span class="position-label">Superior Izq.</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-tc" value="top-center">
+                                <label for="pos-tc" class="position-option" title="Superior Centro">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-tc">north</span>
+                                    </div>
+                                    <span class="position-label">Superior Centro</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-tr" value="top-right" checked>
+                                <label for="pos-tr" class="position-option" title="Superior Derecha">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-tr">north_east</span>
+                                    </div>
+                                    <span class="position-label">Superior Der.</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-ml" value="middle-left">
+                                <label for="pos-ml" class="position-option" title="Centro Izquierda">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-ml">west</span>
+                                    </div>
+                                    <span class="position-label">Centro Izq.</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-mc" value="middle-center">
+                                <label for="pos-mc" class="position-option" title="Centro">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-mc">radio_button_checked</span>
+                                    </div>
+                                    <span class="position-label">Centro</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-mr" value="middle-right">
+                                <label for="pos-mr" class="position-option" title="Centro Derecha">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-mr">east</span>
+                                    </div>
+                                    <span class="position-label">Centro Der.</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-bl" value="bottom-left">
+                                <label for="pos-bl" class="position-option" title="Inferior Izquierda">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-bl">south_west</span>
+                                    </div>
+                                    <span class="position-label">Inferior Izq.</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-bc" value="bottom-center">
+                                <label for="pos-bc" class="position-option" title="Inferior Centro">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-bc">south</span>
+                                    </div>
+                                    <span class="position-label">Inferior Centro</span>
+                                </label>
+
+                                <input type="radio" name="logo-position" id="pos-br" value="bottom-right">
+                                <label for="pos-br" class="position-option" title="Inferior Derecha">
+                                    <div class="position-box">
+                                        <span class="material-icons logo-icon arrow-br">south_east</span>
+                                    </div>
+                                    <span class="position-label">Inferior Der.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Restricciones de Marca (Opcional)</label>
+                            <textarea class="form-input" rows="3" placeholder="Ej: No usar sombras dudosas. No distorsionar logo.">No usar sombras dudosas. No distorsionar logo.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección VI: Copy Final -->
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <div class="section-title">
+                            <span class="material-icons">rate_review</span>
+                            <span>VI. Copy Final</span>
+                        </div>
+                        <span class="material-icons toggle-icon">expand_more</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">Copy Sugerido (ES)</label>
+                            <textarea class="form-input" rows="4" placeholder="Escribe el copy final aquí...">¡Experimenta la velocidad insuperable de Claro! Descúbrelo hoy.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="action-buttons">
+                    <button class="btn btn-secondary">
+                        <span class="material-icons">restart_alt</span>
+                        Reset
+                    </button>
+                    <button class="btn btn-primary" onclick="generateImage()">
+                        <span class="material-icons">auto_awesome</span>
+                        Generar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Preview -->
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <h3>Preview</h3>
+                    <div class="preview-actions">
+                        <button class="icon-btn" title="Descargar">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button class="icon-btn" title="Compartir">
+                            <span class="material-icons">share</span>
+                        </button>
+                        <button class="icon-btn" title="Favorito">
+                            <span class="material-icons">star_border</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="preview-area" id="preview-area">
+                    <div class="preview-placeholder">
+                        <span class="material-icons">image</span>
+                        <p>Ajusta los parámetros y haz clic en "Generar"</p>
+                    </div>
+                    <img src="" alt="Generated Image" class="preview-image" id="preview-image">
+                    <div class="loading-overlay" id="loading-overlay">
+                        <div class="spinner"></div>
+                        <p>Generando imagen...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+            
+            // Close all sections
+            document.querySelectorAll('.section-header').forEach(h => {
+                h.classList.remove('active');
+                h.nextElementSibling.classList.remove('active');
+            });
+            
+            // Open clicked section if it wasn't active
+            if (!isActive) {
+                header.classList.add('active');
+                content.classList.add('active');
+            }
+        }
+
+        function updateSlider(id, value) {
+            document.getElementById(id).textContent = value;
+        }
+
+        function generateImage() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const previewImage = document.getElementById('preview-image');
+            const placeholder = document.querySelector('.preview-placeholder');
+            
+            // Show loading
+            loadingOverlay.classList.add('active');
+            placeholder.style.display = 'none';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Hide loading
+                loadingOverlay.classList.remove('active');
+                
+                // Show image (using placeholder for demo)
+                previewImage.src = 'https://via.placeholder.com/800x600/667eea/ffffff?text=Generated+Image';
+                previewImage.classList.add('active');
+            }, 2000);
+        }
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+{% extends "sections/template.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+		<div class="loading-overlay" style="display: none;">
+			<div class="loading-animation"></div>
+			<span>Cargando...</span>
+		</div>
+		<section class="content">
+			<div class="btn-group" role="group" aria-label="Basic example">
+				<a class="btn btn-secondary active" href="../webscan">Listado</a>
+				<a class="btn btn-secondary" href="excluidos">Excluidos</a>
+			</div>
+			<main class="logo-content">
+				<h1 class="section-title">Website Scan</h1>
+				
+				<div class="input-section">
+				  <div class="url-input">
+					<label for="url">URL</label>
+					<input id="txt_sitemap" type="url" placeholder="https://" value="https://www.claro.com.pe/sitemap.xml" />
+				  </div>
+				  <button class="btn btn-primary" type="button" id="btn-scan">Scanear Site</button>
+				  <button class="btn btn-danger" type="button" id="btn-excluir">Excluir</button>
+				  <button class="btn btn-secondary" type="button" id="btn-scraping">Iniciar Scraping</button>
+				</div>
+
+				<div class="helper">
+					<span class="pill" aria-hidden="true"></span>
+					<span id="lbl_mensaje">Las urls mostradas han sido previamente scaneadas</span>
+				</div>
+
+				<div class="table-container" id="load_list-raw"></div>
+
+			</main>
+		</section>
+<script>
+function validaSelect(name) {
+	var val = document.querySelector(name).value;
+	var ok = 0;
+	document.querySelector(name).classList.remove("is-invalid");
+	if (val === "") {
+		ok = 1;
+		document.querySelector(name).classList.add("is-invalid");
+	}
+	return ok;
+}
+function validaInput(name) {
+	var val = $(name).val(); // Obtener el valor del input usando jQuery
+	var ok = 0;
+	$(name).removeClass("is-invalid"); // Remover la clase is-invalid si existe
+	if (val === null || val === "null"  || val === "") {
+		ok = 1;
+		$(name).addClass("is-invalid"); // Agregar la clase is-invalid si el valor está vacío
+	}
+	return ok;
+}
+function getResult(){
+	var vsite = document.querySelector("#txt_sitemap").value;
+	//var v01 = validaSelect("select[name='cbo_fuente']");
+	if (vsite !== "") {
+		var vsite = document.querySelector("#txt_sitemap").value;
+		// Verifica si el checkbox está marcado
+		//$("#load_list-raw").html("<div class='loading'><div class='lds-ripple'><div></div><div></div></div></div>");
+		$.ajax({
+			url: 'list-raw',
+			type: 'GET',
+			data: {
+				site: vsite,
+			},
+			success: function(data) {
+				$('#load_list-raw').html(data);
+			},
+			error: function(xhr, status, error) {
+				console.error('Error al obtener el contenido AJAX:', error);
+			}
+		});
+	}else{
+		return false;
+	}
+}
+function getResultExcluidos(){
+	var vsite = document.querySelector("#txt_sitemap").value;
+	//var v01 = validaSelect("select[name='cbo_fuente']");
+	if (vsite !== "") {
+		var vsite = document.querySelector("#txt_sitemap").value;
+		// Verifica si el checkbox está marcado
+		//$("#load_list-raw").html("<div class='loading'><div class='lds-ripple'><div></div><div></div></div></div>");
+		$.ajax({
+			url: 'list-excluidos',
+			type: 'GET',
+			data: {
+				site: vsite,
+			},
+			success: function(data) {
+				$('#load_list-raw').html(data);
+			},
+			error: function(xhr, status, error) {
+				console.error('Error al obtener el contenido AJAX:', error);
+			}
+		});
+	}else{
+		return false;
+	}
+}
+function getScanSite(){
+	var vsite = document.querySelector("#txt_sitemap").value;
+	//var v01 = validaSelect("select[name='cbo_fuente']");
+	if (vsite !== "") {
+		var vsite = document.querySelector("#txt_sitemap").value;
+		// Verifica si el checkbox está marcado
+		$("#load_list-raw").html("");
+		$("#lbl_mensaje").html("Cargando...");
+		$.ajax({
+			url: 'raw',
+			type: 'GET',
+			data: {
+				site: vsite,
+			},
+			success: function(data) {
+				getResult();
+				$("#lbl_mensaje").html("Finalizado");
+			},
+			error: function(xhr, status, error) {
+				console.error('Error al obtener el contenido AJAX:', error);
+			}
+		});
+	}else{
+		return false;
+	}
+}
+function getExcluir(){
+	var datosSeleccionados = [];
+	$('input[name="checkbox_url"]:checked').each(function() {
+		var url = $(this).val();
+		var id = $(this).data('id');
+		datosSeleccionados.push({'url': url,'id': id});
+	});
+	if (datosSeleccionados.length > 0) {
+		// Realizar la solicitud AJAX
+		$('#lbl_mensaje').html("Cargando...");
+		$.ajax({
+			url: 'excluir',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({ 'excluidos': datosSeleccionados }), // Enviar el array de objetos
+			success: function(response) {
+				$('#lbl_mensaje').html("URLs excluidas exitosamente.");
+				getResult()
+				console.log('Respuesta del servidor:', response);
+				//alert('URLs excluidas exitosamente.');
+			},
+			error: function(xhr, status, error) {
+				$('#lbl_mensaje').html("Ocurrió un error al procesar la solicitud.");
+				console.error('Error al enviar las URLs para excluir:', error);
+				//alert('Ocurrió un error al procesar la solicitud.');
+			}
+		});
+	} else {
+		alert('Por favor, selecciona al menos una URL para excluir.');
+	}
+}
+function getIncluir(){
+	var datosSeleccionados = [];
+	$('input[name="checkbox_url"]:checked').each(function() {
+		var url = $(this).val();
+		var id = $(this).data('id');
+		datosSeleccionados.push({'url': url,'id': id});
+	});
+	if (datosSeleccionados.length > 0) {
+		// Realizar la solicitud AJAX
+		$('#lbl_mensaje').html("Cargando...");
+		$.ajax({
+			url: 'incluir',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({ 'incluidos': datosSeleccionados }), // Enviar el array de objetos
+			success: function(response) {
+				$('#lbl_mensaje').html("URLs restablecidas exitosamente.");
+				getResult()
+				console.log('Respuesta del servidor:', response);
+				//alert('URLs excluidas exitosamente.');
+			},
+			error: function(xhr, status, error) {
+				$('#lbl_mensaje').html("Ocurrió un error al procesar la solicitud.");
+				console.error('Error al enviar las URLs para excluir:', error);
+				//alert('Ocurrió un error al procesar la solicitud.');
+			}
+		});
+	} else {
+		alert('Por favor, selecciona al menos una URL para excluir.');
+	}
+}
+function getSelectAll() {
+	const isChecked = this.checked;
+	const bodyCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+	bodyCheckboxes.forEach(checkbox => {
+		checkbox.checked = isChecked;
+	});
+}
+function getResultScraping(){
+	var vsite = document.querySelector("#txt_sitemap").value;
+	//var v01 = validaSelect("select[name='cbo_fuente']");
+	if (vsite !== "") {
+		var vsite = document.querySelector("#txt_sitemap").value;
+		// Verifica si el checkbox está marcado
+		//$("#load_list-raw").html("<div class='loading'><div class='lds-ripple'><div></div><div></div></div></div>");
+		$.ajax({
+			url: 'list-scraping',
+			type: 'GET',
+			data: {
+				site: vsite,
+			},
+			success: function(data) {
+				$('#load_list-raw').html(data);
+			},
+			error: function(xhr, status, error) {
+				console.error('Error al obtener el contenido AJAX:', error);
+			}
+		});
+	}else{
+		return false;
+	}
+}
+getResult();
+$("#main").on("click","#btn-list_exluidos",getResultExcluidos);
+$("#main").on("click","#btn-scraping",getResultScraping);
+$("#main").on("click","#checkbox-all", getSelectAll);
+$("#main").on("click","#btn-scan",getScanSite);
+$("#main").on("click","#btn-excluir",getExcluir);
+$("#main").on("click","#btn-incluir",getIncluir);
+</script>
+{% endblock %}

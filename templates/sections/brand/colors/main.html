@@ -1,0 +1,235 @@
+{% extends "sections/template.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<main class="logo-content">
+		<h1 class="section-title">Colores</h1>
+
+		<div class="info-banner">
+			<span class="dot" aria-hidden="true"></span>
+			<span>Carga la mayor cantidad de variaciones disponibles del logo. Esto nos permitirá generar contenido de manera más acertada.</span>
+		</div>
+		<input type="hidden" id="txt_pid" name="txt_pid" value="">
+		<div class="tiles">
+			<div class="tile-upload" role="button" aria-label="Agregar logo">
+				<div class="tile-upload__inner">
+					<div class="plus">+</div>
+				</div>
+			</div>
+			{% for lista in lista %}
+			{% set myid = lista['asset_id'] %}
+			{% set mycolor = lista['asset_value'] %}
+			<div class="tile-photo item-color" data_id="{{myid}}" data_color="{{ mycolor }}" role="button" style='background-color: {{ mycolor }}'>
+				<div class="color-hover"><input type="text" data-coloris="" value="{{mycolor}}"></div>
+				<!--<div class="item-close">×</div>-->
+			</div>
+			{% endfor %}
+		</div>
+		<div class="actions">
+			<button class="btn btn-primary" type="button" id="send-photos-button">Guardar</button>
+		</div>
+
+		<div class="helper">
+			<span class="pill" aria-hidden="true"></span>
+			<span id="lbl_mensaje"></span>
+		</div>
+	</main>
+</section>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css"/>
+<script src="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js"></script>
+<script>
+	const itemClose = document.querySelector('.item-close');
+	const uploadTile = document.querySelector('.tile-upload');
+	const container = uploadTile.parentNode;
+	const colorsArray = [];
+	const existingTiles = document.querySelectorAll('.tile-photo.item-color');
+	existingTiles.forEach((tile) => {
+		console.log(tile);
+		//const id = tile.getAttribute("data_id") ? parseInt(tile.getAttribute("data_id")) : null;
+		const id = tile.getAttribute("data_id") ? tile.getAttribute("data_id") : null;
+		const color = tile.getAttribute("data_color") || '#000000';
+		colorsArray.push({ id: id, color: color });
+		createCloseButton(tile);
+		console.log('Array de colores actualizado (listado):', colorsArray);
+	});
+	uploadTile.addEventListener('click', () => {
+		const newPhotoTile = document.createElement('div');
+		newPhotoTile.classList.add('tile-photo', 'item-color');
+		newPhotoTile.setAttribute('role', 'button');
+		const defaultColor = '#eef1f4';
+		const newId = null;
+		newPhotoTile.innerHTML = `
+			<div class="color-hover">
+				<input type="text" data-coloris="" value="${defaultColor}">
+			</div>
+			<div class="item-close">×</div>
+		`;
+		container.appendChild(newPhotoTile);
+
+		// Agrega el nuevo objeto de color al array
+		const newColorItem = { id: newId, color: defaultColor };
+		colorsArray.push(newColorItem);
+		
+		console.log('Array de colores actualizado (nuevo elemento):', colorsArray);
+	});
+	function setupCloseButton(tileElement, fileObject) {
+		const closeButton = tileElement.querySelector('.item-close');
+		if (!closeButton) return;
+
+		closeButton.addEventListener('click', (event) => {
+			event.stopPropagation();
+			
+			const indexToRemove = filesArray.findIndex(item => item === fileObject);
+			if (indexToRemove !== -1) {
+				filesArray.splice(indexToRemove, 1);
+				console.log('Elemento eliminado del array. Array actualizado:', filesArray);
+			}
+			
+			if (fileObject && fileObject.file) {
+				URL.revokeObjectURL(tileElement.style.backgroundImage.slice(5, -2));
+			}
+			
+			tileElement.remove();
+		});
+	}
+	function createCloseButton(parentTile) {
+		const closeButton = document.createElement('div');
+		closeButton.classList.add('item-close');
+		closeButton.textContent = '×'; // Símbolo de "X" o el que prefieras
+		parentTile.appendChild(closeButton);
+
+		closeButton.addEventListener('click', (event) => {
+			event.stopPropagation(); // Evita que el evento se propague al padre (la tile de color)
+			
+			// Encuentra el índice del elemento a eliminar
+			const tileToRemove = event.target.closest('.tile-photo.item-color');
+			const indexToRemove = Array.from(container.children).indexOf(tileToRemove) - 1; // Ajusta el índice por el 'tile-upload'
+			
+			if (indexToRemove >= 0 && indexToRemove < colorsArray.length) {
+				// Elimina el elemento del array
+				colorsArray.splice(indexToRemove, 1);
+				console.log('Elemento eliminado del array. Array actualizado:', colorsArray);
+			}
+			
+			// Elimina el elemento del DOM
+			tileToRemove.remove();
+		});
+	}
+
+	function recargarContenidoDinamico() {
+		const contenedorTiles = document.querySelector('.tiles');
+		const urlListado = 'list'; // Sugerencia de URL para colores
+		const tilesAEliminar = contenedorTiles.querySelectorAll('.tile-photo');
+		tilesAEliminar.forEach(tile => {
+			// No se necesita lógica de revocación de URL aquí (no hay URLs de Blob en colores)
+			tile.remove();
+		});
+		// 2. Limpiar el array y las consolas
+		colorsArray.length = 0;
+		console.log('Array de archivos/IDs vaciado:', colorsArray);
+		// 3. Cargar el contenido HTML actualizado (los nuevos colores)
+		fetch(urlListado)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`Error ${response.status}: No se pudo cargar la lista actualizada de colores.`);
+				}
+				return response.text();
+			})
+			.then(htmlContent => {
+				// Inyectar el nuevo HTML (los nuevos tiles de color)
+				contenedorTiles.insertAdjacentHTML('beforeend', htmlContent);
+				
+				// 4. Re-inicializar los nuevos tiles (los que tienen data_id)
+				const nuevosTiles = contenedorTiles.querySelectorAll('.tile-photo[data_id]');
+				nuevosTiles.forEach((tile) => {
+					const id = tile.getAttribute("data_id");
+					// Para colores, el nombre puede ser el código HEX o simplemente nulo. Usaremos el data-color.
+					const name = tile.getAttribute("data_color") || null; 
+					
+					// El objeto para colores solo necesita ID y Nombre/Color
+					const fileObject = { id: id, color: name};
+					colorsArray.push(fileObject);
+					console.log('Elemento de color recién cargado añadido al array:', fileObject);
+					
+					// Re-asociar el botón de cerrar y su lógica de eliminación del array
+					setupCloseButton(tile, fileObject);
+				});
+				document.getElementById("lbl_mensaje").textContent = "Colores actualizados y lista recargada.";
+			})
+			.catch(error => {
+				console.error('Error al recargar la lista de colores:', error);
+				document.getElementById("lbl_mensaje").textContent = "Colores enviados, pero hubo un error al recargar la lista.";
+			});
+	}
+
+	// Lógica para enviar el formulario
+	const sendButton = document.querySelector('#send-photos-button');
+	if (sendButton) {
+		sendButton.addEventListener('click', () => {
+			const formData = new FormData();
+			// Convierte el array de colores a una cadena JSON y lo añade a FormData.
+			formData.append('colors', JSON.stringify(colorsArray));
+			var pid = $("#txt_pid").val();
+			formData.append('pid', pid);
+			document.getElementById("lbl_mensaje").textContent = "Cargando...";
+			// Envía la solicitud a la ruta de tu API
+			fetch('save', {
+				method: 'POST',
+				body: formData,
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('La solicitud falló con estado: ' + response.status);
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log('Respuesta del servidor:', data);
+				const fresult = data.message;
+				recargarContenidoDinamico();
+				document.getElementById("lbl_mensaje").textContent = "Respuesta: " + fresult;
+			})
+			.catch(error => {
+				console.error('Error al enviar:', error);
+				document.getElementById("lbl_mensaje").textContent = "Hubo un error al enviar los datos.";
+			});
+		});
+	}
+	Coloris({
+		defaultColor: '#e9c46a',
+		theme: 'pill',
+		themeMode: 'auto',
+		formatToggle: true,
+		swatches: [
+			'DarkSlateGray',
+			'#2a9d8f',
+			'#e9c46a',
+			'coral',
+			'rgb(231, 111, 81)',
+			'Crimson',
+			'#023e8a',
+			'#0077b6',
+			'hsl(194, 100%, 39%)',
+			'#00b4d8',
+			'#48cae4'
+		],
+		onChange: (color, inputEl) => {
+			var colorContainer = inputEl.closest(".item-color");
+			colorContainer.style.backgroundColor = color;
+			colorContainer.setAttribute('data_color', color); 
+			// Usamos el índice del data-set para actualizar el array directamente
+			//var index = colorContainer.dataset.index;
+			var ver_index = colorContainer.getAttribute("data_id");
+			var siblings = colorContainer.parentNode.children;
+			var index = Array.from(siblings).indexOf(colorContainer)-1;
+			console.log(ver_index);
+			console.log('Posición (index):', index);
+			if (index !== null) {
+				colorsArray[index].color = color;
+				console.log('Array de colores actualizado (cambio de color):', colorsArray);
+			}
+		}
+	});
+</script>
+{% endblock %}
