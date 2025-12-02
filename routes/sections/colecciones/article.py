@@ -629,8 +629,8 @@ def generatePromtImageIA(brand_id, proyecto_id):
 	titulo_articulo = request.args.get('titulo', '')
 	motivo_articulo = request.args.get('motivo', '')
 	# Valores fijos de ejemplo, reemplaza 'Claro Perú' según la lógica de tu aplicación
-	producto_nombre = "Producto Claro Perú" 
-	brand_name = "Claro Perú"
+	producto_nombre = "Claro Perú"
+	brand_name = ""#Claro Perú
 	
 	# --- INICIO DE LA LÓGICA DE CONSTRUCCIÓN DEL PROMPT ---
 	
@@ -639,7 +639,7 @@ def generatePromtImageIA(brand_id, proyecto_id):
 	render_calidad = 'Render 8K'
 	
 	# 2. Ajustar el Tono Emocional y Estilo Visual según el Tipo (Lógica existente)
-	estilo_visual = "clean, modern, premium advertising style"
+	estilo_visual = "clean, modern, premium style" # Se añade 'premium style' por defecto
 	tono_emocional = "Calma y Seguridad" # Valor por defecto ajustado a tu ejemplo
 
 	if tipo_articulo.lower() == "educativo":
@@ -652,34 +652,36 @@ def generatePromtImageIA(brand_id, proyecto_id):
 	# 3. Preparar Cláusulas para Ensamblaje
 	
 	# Secciones principales del prompt
-	producto = f"producto: {producto_nombre}"
-	concepto_principal = f"The main concept is: {tema_articulo}, emphasizing the use of the {keyword_articulo} service."
+	#producto = f"producto: {producto_nombre}"
+	concepto_principal = f"The main concept imagen is: {tema_articulo}, emphasizing the use of the {keyword_articulo} service."
 	
-	# Modificación para elementos visuales base y keyword
-	elementos_visuales_final = f"debe incorporar de forma sutil elementos visuales relacionados con la palabra clave '{keyword_articulo}'."
+	# *** 1. SECCIÓN CLAVE: RESTRICCIÓN DE IMAGEN PURA ***
+	# Esta es la cláusula de negación explícita dentro de la descripción de elementos.
+	restriccion_pura = "(ABSOLUTAMENTE SIN LOGOS, SIN TEXTOS, SIN TIPOGRAFÍA, SIN NINGÚN TIPO DE ANOTACIÓN DIGITAL O ICONOS)"
+	
+	# Modificación para elementos visuales base y keyword, AÑADIENDO LA RESTRICCIÓN
+	elementos_visuales_base = f"debe incorporar de forma sutil elementos visuales relacionados con la palabra clave '{keyword_articulo}'."
+	elementos_visuales_final = f"{elementos_visuales_base} {restriccion_pura}"
 	
 	# a. CLÁUSULAS PRINCIPALES (Scene Clause)
 	escena_clausulas = [
-		producto,
 		f"estilo_visual: {estilo_visual}",
 		"Model type: si",
 		"Interaction: Uso Indirecto",
 		concepto_principal,
-		f"elementos_visuales: {elementos_visuales_final}"
+		f"elementos_visuales: {elementos_visuales_final}" # YA INCLUYE LA RESTRICCIÓN AQUÍ
 	]
 	if titulo_articulo:
 		escena_clausulas.append(f"El contexto de la imagen debe visualizar el concepto principal de: '{titulo_articulo}'")
 	if motivo_articulo:
 		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{motivo_articulo}'")
 	else:
-		elementos_visuales_base = "Familia tradicional (padres hombre y mujer) en casa usando dispositivos conectados."
-		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{elementos_visuales_base}'")
+		elementos_visuales_base_default = "Familia tradicional (padres hombre y mujer) en casa usando dispositivos conectados."
+		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{elementos_visuales_base_default}'")
 	escena_clause_str = ", ".join(escena_clausulas)
+
 	# b. DETALLES DE COMPOSICIÓN Y TÉCNICOS (Technical Details Clause)
-	# Se ajustan las cláusulas a tu ejemplo, eliminando las que no estaban o ajustando el formato
 	adicionales = [
-		"Contexto Imagen: ",  # Se mantienen las dos cláusulas vacías
-		"Contexto Imagen: ",
 		"Artistic Style: realistic",
 		"Lighting: Luz de estudio suave",
 		"Camera Angle: Normal (Eye-level)",
@@ -687,28 +689,26 @@ def generatePromtImageIA(brand_id, proyecto_id):
 		f"Background/Setting Type: {background_setting}",
 		"Composition Rule: Regla de Tercios",
 		"Depth of Field: 50 (Bokeh effect)."
-		# Se eliminan: Implied Speed, Abstraction Level (no estaban en tu ejemplo estricto)
 	]
 	
 	clausulas_adicionales_str = ", ".join(adicionales)
-	# Ensamblaje de la sección de detalles técnicos, solo si hay contenido
 	if clausulas_adicionales_str:
 		clausulas_adicionales_final = f"Composition and Technical Details: {clausulas_adicionales_str}"
 	else:
 		clausulas_adicionales_final = ""
 
-
-	# c. INSTRUCCIONES CRÍTICAS
-	critical_instructions = ("CRITICAL INSTRUCTIONS: The final output MUST BE A PURE IMAGE ONLY. ABSOLUTELY NO TEXT OVERLAYS, NO LOGOS (regardless of brand or style), "
-							 "NO WATERMARKS, NO UI CHROME, NO DEBUG ARTIFACTS, NO BOUNDING BOXES, NO ANNOTATIONS, NO GUIDES, AND NO EXTRA FRAMES. Ensure a pristine, clean image output.")
-
+	# *** 2. SECCIÓN CLAVE: INSTRUCCIONES CRÍTICAS REFORZADAS ***
+	critical_instructions = (
+		"ULTRA CRITICAL: ABSOLUTELY NO TEXT OVERLAYS, NO LOGOS, NO WATERMARKS, NO UI CHROME, NO DEBUG ARTIFACTS, NO BOUNDING BOXES, NO ANNOTATIONS, NO GUIDES, AND NO WIFI/SIGNAL ICONS ARE PERMITTED ANYWHERE IN THE IMAGE. PURE IMAGE OUTPUT ONLY."
+	)
+	
 	# 4. ENSAMBLAJE FINAL DEL PROMPT
-	# Se sigue la estructura de tu prompt de ejemplo
+	# Se asegura que el primer párrafo incluya el render_calidad.
 	mi_prompt = f"""
 Generate a image for {brand_name} about {producto} with a {estilo_visual}, {render_calidad}.
 {escena_clause_str}
-{critical_instructions}
 {clausulas_adicionales_final}
+{critical_instructions}
 """
 	# Se eliminan los saltos de línea y espacios excesivos para mantener la limpieza
 	mi_prompt = mi_prompt.strip()
@@ -718,7 +718,7 @@ Generate a image for {brand_name} about {producto} with a {estilo_visual}, {rend
 	# 5. DEVOLVER EL PROMPT EN LA RESPUESTA JSON
 	return jsonify({
 		"success": True,
-		"promt": mi_prompt 
+		"promt": mi_prompt
 	})
 
 def generar_imagen_imagen4(prompt: str):
