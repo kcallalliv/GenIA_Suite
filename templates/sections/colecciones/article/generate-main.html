@@ -105,32 +105,31 @@
 				
 				<div class="blog-title">Blog</div>
 				<input type="hidden" id="txt_pid" name="txt_pid" value="{{pid}}">
+				<textarea id="txt_promt_image" name="txt_promt_image" style="display: none;"></textarea>
 				<input type="hidden" id="txt_photo" name="txt_photo">
 				<input type="hidden" id="txt_image" name="txt_image">
 				<div class="editor-layout">
-					<div class="preview-area" id="ia_img">
-						<button class="ai-button" onclick="openGallery()">
-							<span class="material-icons">search</span>
-						</button>
-					</div>
+					
 
 					<div class="form-area">
-						<div class="form-group">
-							<label class="form-label">Keyword</label>
-							<div class="form-input-ia">
-								<input type="text" id="txt_keyword" placeholder="" value="{{data.keyword_name}}" readonly>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="form-label">Tipo de contenido</label>
-							<div class="form-select">
-								<div id="select-tipo-articulo">
-									<select id="cbo_keyword" name="cbo_keyword">
-										<option value="">Selecciona una palabra</option>							
-									</select>
+						<div class="form-all">
+							<div class="form-field">
+								<label class="form-label">Keyword</label>
+								<div class="form-input-ia">
+									<input type="text" id="txt_keyword" placeholder="" value="{{data.keyword_name}}" readonly>
 								</div>
-								<i class="dropdown-icon"></i>
-							</div>							
+							</div>
+							<div class="form-field">
+								<label class="form-label">Tipo de contenido</label>
+								<div class="form-select">
+									<div id="select-tipo-articulo">
+										<select id="cbo_keyword" name="cbo_keyword">
+											<option value="">Selecciona una palabra</option>							
+										</select>
+									</div>
+									<i class="dropdown-icon"></i>
+								</div>							
+							</div>
 						</div>
 						<div class="form-group">
 							<label class="form-label">Tema</label>
@@ -146,6 +145,21 @@
 							<button class="ai-button-field" id="btn-generar-title">
 								<span class="material-icons">auto_awesome</span>
 							</button>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Imagen</label>
+							<div id="load-motivo" class="form-input-ia">
+								<input type="text" id="txt_motivo" placeholder="Escribir motivo para mas presición (puedes dejarlo en blanco)" value="">
+							</div>
+							<button class="ai-button-field" onclick="generaImagen()">
+								<span class="material-icons">auto_awesome</span>
+							</button>
+						</div>
+						<div class="preview-area" id="ia_img">
+							<div id="load-image"></div>
+							<!--<button class="ai-button" onclick="generaImagen()">
+								<span class="material-icons">auto_awesome</span>
+							</button>-->
 						</div>
 						<div class="button-container">
 							<button class="generate-button" id="btn-generar">

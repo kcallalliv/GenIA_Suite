@@ -8,6 +8,63 @@ function validaSelect(name) {
 	}
 	return ok;
 }
+function generaImagen() {
+	var v01 = validaSelect("#cbo_tipo_articulo");
+	var v02 = validaSelect("#txt_titulo");
+	var total = v01+v02;
+	if (total == 0) {
+		const $inputTitle = $("#txt_titulo");
+		const $loadContainer = $("#load-image");
+		const loadingHtml = "<div class='loading' id='loader-temp'><div class='lds-ellipsis'><div></div><div></div><div></div><div></div></div></div>";
+		$loadContainer.append(loadingHtml);
+		//Datos
+		var data_tipo = $("#cbo_tipo_articulo").val();
+		var data_tema = $("#txt_tema").val();
+		var data_keyword = $("#txt_keyword").val();
+		var data_titulo = $("#txt_titulo").val();
+		var data_motivo = $("#txt_motivo").val();
+		//genera promt
+		$.ajax({
+			url: "generated-promt",
+			type: 'GET',
+			data: {
+				tipo: data_tipo,
+				tema: data_tema,
+				keyword: data_keyword,
+				titulo: data_titulo,
+				motivo: data_motivo
+			},
+			success: function (data) {
+				const data_promt = data.promt;
+				$("#txt_promt_image").val(data_promt);
+				//Genera Imagen
+				$.ajax({
+					url: "generated-image",
+					type: 'GET',
+					data: {
+						tipo: data_tipo,
+						tema: data_tema,
+						keyword: data_keyword,
+						promt: data_promt
+					},
+					success: function (data) {
+						const imageUrl = data.imagen_temporal;
+						$("#ia_img").css("background-image", "url(" + imageUrl + ")");
+						$("#loader-temp").remove();
+					},
+					error: function (xhr, status, error) {
+						console.error('Error al obtener el contenido AJAX:', error);
+					}
+				});
+
+
+			},
+			error: function (xhr, status, error) {
+				console.error('Error al obtener el contenido AJAX:', error);
+			}
+		});
+	}
+}
 function generaTitle() {
 	var v01 = validaSelect("#cbo_tipo_articulo");
 	//var v02 = validaSelect("#txt_tema");
@@ -23,7 +80,7 @@ function generaTitle() {
 		var data_tema = $("#txt_tema").val();
 		var data_keyword = $("#txt_keyword").val();
 		$.ajax({
-			url: "article-title",
+			url: "generated-title",
 			type: 'GET',
 			data: {
 				tipo: data_tipo,
@@ -31,7 +88,8 @@ function generaTitle() {
 				keyword: data_keyword
 			},
 			success: function (data) {
-				$inputTitle.val(data).show();
+				const title = data.title;
+				$inputTitle.val(title).show();
 				$("#loader-temp").remove();
 			},
 			error: function (xhr, status, error) {

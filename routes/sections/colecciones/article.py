@@ -3,8 +3,15 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from google.cloud import bigquery
 from google import genai
 from google.genai.types import HttpOptions
+from google.api_core.client_options import ClientOptions
+from google.cloud import storage
+from google.cloud import discoveryengine_v1 as discoveryengine
+from google.genai import types
 from functools import wraps
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
+import datetime
+import sys
 import os
 import json
 import re
@@ -14,12 +21,9 @@ import requests
 import random
 import string
 from io import BytesIO
+import mimetypes
 from docx import Document
 from docx.shared import Inches
-from google.api_core.client_options import ClientOptions
-from google.cloud import storage
-from google.cloud import discoveryengine_v1 as discoveryengine
-from google import genai
 import pandas as pd
 import traceback # Asume que pandas está importado
 import uuid
@@ -32,7 +36,7 @@ from docx.enum.dml import MSO_THEME_COLOR
 from docx.shared import RGBColor, Pt 
 #llamar a config
 from routes.models import db, Assets, Keywords, Imagesia, Configuracion
-from routes.config.geniaconfig import bq_client, bucket_name, storage_client, bq_table_config, genai_client, bq_table_brands, validar_sesion
+from routes.config.geniaconfig import bq_client, bucket_name, storage_client, bq_table_config, genai_client, bq_table_brands, validar_sesion, fechaActual, generarCodigo
 
 client = bigquery.Client(project="prd-claro-mktg-data-storage")
 
@@ -53,14 +57,12 @@ def article_images(brand_id,proyecto_id):
 	lista = listarImages(pid)
 	return render_template('sections/colecciones/article/images.html',lista=lista,generar_url_firmada=generar_url_firmada)
 
-@cltarticle_bp.route('article-title', methods=['GET', 'POST'])
-def generaTitleIA(brand_id,proyecto_id):
+@cltarticle_bp.route('generated-title', methods=['GET', 'POST'])
+def generaTitleIA(brand_id, proyecto_id):
 	tipo_contenido = request.values.get('tipo')
 	tema = request.values.get('tema')
 	keyword = request.values.get('keyword')
-	#tipo_contenido = "celulares"
-	#tema = "hogar"
-	#keyword = "claro"
+
 	try:
 		tipo_final_para_prompt = tipo_contenido
 		# --- Construcción del Prompt (Instrucción simplificada) ---
@@ -87,29 +89,51 @@ def generaTitleIA(brand_id,proyecto_id):
 			"**NO** incluyas ninguna explicación, introducción, comentario o frase de verificación de datos. **SOLO** el título final."
 		)
 		# --- Llamada a Gemini ---
+		# Asegúrate de que 'genai_client' esté definido e inicializado correctamente antes de esta función
+		# response = genai_client.models.generate_content(...) 
+		
+		# Simulando la respuesta para que el código sea funcional en este contexto
+		# contenido_generado = "El Mejor título sobre **hogar** y **celulares** que contenga la palabra **claro**"
+		
+		# Usando la línea original, asumiendo que 'genai_client' está definido
 		response = genai_client.models.generate_content(
 			model="gemini-2.0-flash-001",
 			contents=prompt
 		)
 		contenido_generado = response.text
+
 		# --- Extracción y Retorno del Título (El parser) ---
 		# Si pedimos negritas, buscamos el patrón: ** (Texto del título) **
 		match = re.search(r'\*\*([^*]+)\*\*', contenido_generado)
+		result_title = "" # Inicializar variable
+
 		if match:
 			result_title = match.group(1).strip()
-			return result_title
 		else:
 			# Si la IA no usa negritas, devolvemos el texto completo y limpio
 			result_title = contenido_generado.strip()
-			# Si el texto aún está vacío o es demasiado corto, es un error de formato.
-			if len(result_title) < 5:
-				 return "ERROR: La IA no devolvió el título en el formato esperado."
-			return result_title
+		
+		# Verificación de longitud para manejo de errores de formato
+		if len(result_title) < 5:
+			# Si es muy corto, aún lo devolvemos, pero se puede considerar un error si es crítico
+			pass
+
+		return jsonify({
+			"success": True,
+			"title": result_title
+		})
+		
 	except Exception as e:
 		error_msg = f"ERROR: Fallo crítico en la función generaTitleIA: {e}"
-		st.error(error_msg)
+		
+		# 🚨 SOLUCIÓN: Usamos el logger estándar en lugar de st.error
+		logging.error(error_msg) 
+		
 		result_title = f"Error de ejecución: {e}"
-		return result_title
+		return jsonify({
+			"success": False,
+			"title": result_title
+		})
 @cltarticle_bp.route('article-content', methods=['GET', 'POST'])
 def generaContenidoIA(brand_id, proyecto_id):
 	# --- 1. Datos de Entrada ---
@@ -225,8 +249,10 @@ def generaContenidoIA(brand_id, proyecto_id):
 		if len(contenido_generado) < 50:
 			 return "ERROR: Contenido insuficiente generado por la IA."
 
-		return contenido_generado
-
+		return jsonify({
+			"success": True,
+			"title": contenido_generado 
+		})
 	except Exception as e:
 		error_msg = f"ERROR en generaContenidoIA: {e}"
 		print(error_msg)
@@ -533,6 +559,224 @@ def download_generated_article():
 		as_attachment=True,
 		download_name=name_file
 	)
+
+
+
+@cltarticle_bp.route('generated-image', methods=["GET", "POST"])
+def generateImageIA(brand_id,proyecto_id):
+	data_prompt = request.args.get('promt', '')
+	data_bytes, mime_type = generar_imagen_imagen4(data_prompt)
+
+	if data_bytes is None:
+		return jsonify({"error": "Fallo al generar la imagen.", "details": "El modelo no devolvió datos."}), 500
+
+	try:
+		# 3. Guardar en Google Cloud Storage
+		folder_path = "blog_cover" # Un identificador único para el nombre de archivo
+		
+		# 'name_fileext' es el nombre del archivo dentro del bucket (ej: 20251106_gamefest_banner_abc123.png)
+		name_fileext = save_image_to_gcs(
+			data=data_bytes, 
+			mime_type=mime_type, 
+			folder_path=folder_path
+		)
+
+		# 4. Generar URL Firmada
+		# La función generar_url_firmada requiere el nombre del archivo (blob_name)
+		url_firmada = generar_url_firmada(
+			bucket_name=bucket_name,
+			blob_name=name_fileext # Pasamos solo el nombre del archivo
+		)
+		# 4. Save
+		imageia_id = generarCodigo("IA");
+		imgia_name = name_fileext
+		imgia_promt = data_prompt
+		imgia_type = "blog"
+		imgia_fecha = fechaActual()
+		proyecto_id = request.values.get('txt_pid', '')
+
+		new_data = Imagesia(
+			imgia_id = imageia_id,
+			imgia_name = imgia_name,
+			imgia_promt = imgia_promt,
+			imgia_type = imgia_type,
+			imgia_fecha = imgia_fecha,
+			imgia_estado = 1,
+			proyecto_id = proyecto_id
+		)
+		db.session.add(new_data)
+		db.session.commit()
+		# 5. Devolver la URL
+		return jsonify({
+			"success": True,
+			"message": "Imagen generada y guardada en GCS.",
+			"imagen_temporal": url_firmada,
+			"nombre_archivo": name_fileext
+		})
+
+	except Exception as e:
+		# Esto captura errores de GCS (conexión, permisos, etc.)
+		return jsonify({"error": f"Error al guardar o firmar la URL: {str(e)}"}), 500
+
+from flask import request, jsonify # Asegúrate de tener estas importaciones
+
+@cltarticle_bp.route('generated-promt', methods=["GET"])
+def generatePromtImageIA(brand_id, proyecto_id):
+	# 1. RECUPERAR PARÁMETROS DE LA SOLICITUD GET
+	tipo_articulo = request.args.get('tipo', '')
+	tema_articulo = request.args.get('tema', '')
+	keyword_articulo = request.args.get('keyword', '')
+	titulo_articulo = request.args.get('titulo', '')
+	motivo_articulo = request.args.get('motivo', '')
+	# Valores fijos de ejemplo, reemplaza 'Claro Perú' según la lógica de tu aplicación
+	producto_nombre = "Producto Claro Perú" 
+	brand_name = "Claro Perú"
+	
+	# --- INICIO DE LA LÓGICA DE CONSTRUCCIÓN DEL PROMPT ---
+	
+	# Parámetros Fijos o Base
+	background_setting = "Living de hogar moderno y cálido"
+	render_calidad = 'Render 8K'
+	
+	# 2. Ajustar el Tono Emocional y Estilo Visual según el Tipo (Lógica existente)
+	estilo_visual = "clean, modern, premium advertising style"
+	tono_emocional = "Calma y Seguridad" # Valor por defecto ajustado a tu ejemplo
+
+	if tipo_articulo.lower() == "educativo":
+		estilo_visual = "minimalist, informative, friendly visual style"
+		tono_emocional = "Confianza, Claridad y Aprendizaje"
+	elif tipo_articulo.lower() == "guía":
+		estilo_visual = "detailed, structured, high-quality rendering style"
+		tono_emocional = "Organización, Eficiencia y Logro"
+
+	# 3. Preparar Cláusulas para Ensamblaje
+	
+	# Secciones principales del prompt
+	producto = f"producto: {producto_nombre}"
+	concepto_principal = f"The main concept is: {tema_articulo}, emphasizing the use of the {keyword_articulo} service."
+	
+	# Modificación para elementos visuales base y keyword
+	elementos_visuales_final = f"debe incorporar de forma sutil elementos visuales relacionados con la palabra clave '{keyword_articulo}'."
+	
+	# a. CLÁUSULAS PRINCIPALES (Scene Clause)
+	escena_clausulas = [
+		producto,
+		f"estilo_visual: {estilo_visual}",
+		"Model type: si",
+		"Interaction: Uso Indirecto",
+		concepto_principal,
+		f"elementos_visuales: {elementos_visuales_final}"
+	]
+	if titulo_articulo:
+		escena_clausulas.append(f"El contexto de la imagen debe visualizar el concepto principal de: '{titulo_articulo}'")
+	if motivo_articulo:
+		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{motivo_articulo}'")
+	else:
+		elementos_visuales_base = "Familia tradicional (padres hombre y mujer) en casa usando dispositivos conectados."
+		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{elementos_visuales_base}'")
+	escena_clause_str = ", ".join(escena_clausulas)
+	# b. DETALLES DE COMPOSICIÓN Y TÉCNICOS (Technical Details Clause)
+	# Se ajustan las cláusulas a tu ejemplo, eliminando las que no estaban o ajustando el formato
+	adicionales = [
+		"Contexto Imagen: ",  # Se mantienen las dos cláusulas vacías
+		"Contexto Imagen: ",
+		"Artistic Style: realistic",
+		"Lighting: Luz de estudio suave",
+		"Camera Angle: Normal (Eye-level)",
+		f"Emotional Tone: {tono_emocional}",
+		f"Background/Setting Type: {background_setting}",
+		"Composition Rule: Regla de Tercios",
+		"Depth of Field: 50 (Bokeh effect)."
+		# Se eliminan: Implied Speed, Abstraction Level (no estaban en tu ejemplo estricto)
+	]
+	
+	clausulas_adicionales_str = ", ".join(adicionales)
+	# Ensamblaje de la sección de detalles técnicos, solo si hay contenido
+	if clausulas_adicionales_str:
+		clausulas_adicionales_final = f"Composition and Technical Details: {clausulas_adicionales_str}"
+	else:
+		clausulas_adicionales_final = ""
+
+
+	# c. INSTRUCCIONES CRÍTICAS
+	critical_instructions = ("CRITICAL INSTRUCTIONS: The final output MUST BE A PURE IMAGE ONLY. ABSOLUTELY NO TEXT OVERLAYS, NO LOGOS (regardless of brand or style), "
+							 "NO WATERMARKS, NO UI CHROME, NO DEBUG ARTIFACTS, NO BOUNDING BOXES, NO ANNOTATIONS, NO GUIDES, AND NO EXTRA FRAMES. Ensure a pristine, clean image output.")
+
+	# 4. ENSAMBLAJE FINAL DEL PROMPT
+	# Se sigue la estructura de tu prompt de ejemplo
+	mi_prompt = f"""
+Generate a image for {brand_name} about {producto} with a {estilo_visual}, {render_calidad}.
+{escena_clause_str}
+{critical_instructions}
+{clausulas_adicionales_final}
+"""
+	# Se eliminan los saltos de línea y espacios excesivos para mantener la limpieza
+	mi_prompt = mi_prompt.strip()
+
+	# --- FIN DE LA LÓGICA DE CONSTRUCCIÓN DEL PROMPT ---
+	
+	# 5. DEVOLVER EL PROMPT EN LA RESPUESTA JSON
+	return jsonify({
+		"success": True,
+		"promt": mi_prompt 
+	})
+
+def generar_imagen_imagen4(prompt: str):
+	try:
+		# Aquí debes asegurarte de que la clave API esté disponible
+		# Nota: Es altamente inseguro dejar la clave API dura en el código. Úsala solo para desarrollo/prueba.
+		clave_secreta_gemini = os.environ.get("GEMINI_API_KEY", "AIzaSyBjLIPcIzCY6zuWJdiikno0sWHpilbwLw4")
+		if not clave_secreta_gemini:
+			print("Error: Clave GEMINI_API_KEY no configurada.", file=sys.stderr)
+			return None, None
+			
+		client = genai.Client(api_key=clave_secreta_gemini)
+		
+		response = client.models.generate_images(
+			model='imagen-4.0-generate-001',
+			prompt=prompt,
+			config=types.GenerateImagesConfig(
+				number_of_images=1,
+				#  CAMBIO 1: Usamos el parámetro aspect_ratio en la configuración
+				aspect_ratio='16:9',
+			)
+		)
+
+		if response.generated_images:
+			img_bytes = response.generated_images[0].image.image_bytes
+			mime_type = 'image/png'
+			
+			#  CAMBIO 2: Devuelve los bytes y el tipo MIME (para GCS)
+			return img_bytes, mime_type
+		else:
+			print("No se pudo generar la imagen. La respuesta no contiene imágenes generadas.", file=sys.stderr)
+			return None, None
+
+	except Exception as e:
+		print(f"Ocurrió un error en la generación: {e}", file=sys.stderr)
+		return None, None
+
+# --- FUNCIONES AUXILIARES (Sin Cambios Relevantes) ---
+def save_image_to_gcs(data, mime_type, folder_path) -> str:
+	if isinstance(data, str):
+		data_bytes = base64.b64decode(data)
+	else:
+		data_bytes = data
+	ext = mimetypes.guess_extension(mime_type)
+	ext = ext.lstrip('.') if ext else "png" 
+	fecha_utc = datetime.datetime.utcnow().strftime('%Y%m%d')
+	name_archivo = f"{fecha_utc}_{folder_path}_{uuid.uuid4().hex}"
+	name_fileext = f"{name_archivo}.{ext}"
+	nombre_archivo = f"generate/blog/{name_fileext}" 
+	bucket = storage_client.bucket(bucket_name)
+	blob = bucket.blob(nombre_archivo)
+	blob.upload_from_string(data_bytes, content_type=mime_type)
+	return name_fileext
+
+
+#------------------------
+#-------Funciones
+#------------------------
 
 def generar_url_firmada(bucket_name, blob_name):
 	bucket = storage_client.bucket(bucket_name)

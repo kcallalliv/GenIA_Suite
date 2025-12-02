@@ -821,14 +821,14 @@ input[readonly] {background-color: #f0bb5217;cursor: not-allowed;}
 	appearance: none;-webkit-appearance: none;-moz-appearance: none;cursor: pointer;color: #555;position: relative;overflow-x: hidden;
 }
 .form-select select{
-	width: 100%;padding: 12px 16px;padding-right: 35px;border: 1px solid #fff;border-radius: 8px;appearance: none;
+	width: 100%;padding: 11px 16px;padding-right: 35px;border: 1px solid #fff;border-radius: 8px;appearance: none;
 	-webkit-appearance: none;-moz-appearance: none;font-size: 1em;cursor: pointer;color: #555;
 }
 .form-select select:focus {outline: none;}
 .form-select .dropdown-icon{position: absolute;right: 12px;top: 50%;transform: translateY(-50%);color: #888;pointer-events: none;}
 .form-select .dropdown-icon::before {content: "▼";}
 .ai-button-field {
-	position: absolute;top: 37px;right: 5px;background: #5d5e70;color: white;width: 27px;height: 27px;border-radius: 50%;border: none;
+	position: absolute;top: 35px;right: 5px;background: #5d5e70;color: white;width: 27px;height: 27px;border-radius: 50%;border: none;
 	cursor: pointer;display: flex;align-items: center;justify-content: center;transition: all 0.3s ease;
 }
 .ai-button-field span{font-size: 15px;}
