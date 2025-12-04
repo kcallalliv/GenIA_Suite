@@ -19,6 +19,7 @@ function generaImagen() {
 		$loadContainer.append(loadingHtml);
 		//Datos
 		var data_tipo = $("#cbo_tipo_articulo").val();
+		var data_description = $("#cbo_tipo_articulo").find('option:selected').data('description');
 		var data_tema = $("#txt_tema").val();
 		var data_keyword = $("#txt_keyword").val();
 		var data_titulo = $("#txt_titulo").val();
@@ -29,6 +30,7 @@ function generaImagen() {
 			type: 'GET',
 			data: {
 				tipo: data_tipo,
+				description: data_description,
 				tema: data_tema,
 				keyword: data_keyword,
 				titulo: data_titulo,
@@ -129,7 +131,7 @@ function generaContenido() {
 				keyword: data_keyword
 			},
 			success: function (data) {
-				$inputTitle.val(data).show();
+				$inputTitle.val(data.texto).show();
 				$(".loading").remove();
 			},
 			error: function (xhr, status, error) {
@@ -243,118 +245,9 @@ document.addEventListener('keydown', function (e) {
 		closePopup();
 	}
 });
-
 // Función para parsear el contenido del artículo
 function parseArticleContent(content) {
-	// Esta es la validación CLAVE que previene el error 'split' si content es undefined/null.
-	var photo = $("#txt_photo").val();
-	if (typeof content !== 'string' || !content) {
-		console.error("Error: La función parseArticleContent recibió un argumento nulo o no válido.");
-		return '';
-	}
-	// ===================================================
-
-	const lines = content.split('\n');
-	let html = '';
-	let currentSection = '';
-	let inArticleLinksSection = false; // Flag para controlar la sección de enlaces sugeridos
-
-	lines.forEach(line => {
-		line = line.trim();
-		if (!line) return;
-
-		if (line.startsWith('[title]')) {
-			const title = line.replace('[title]', '').trim();
-
-			// Detecta si es el título principal o el título de la sección de URLs Sugeridas
-			if (title.toLowerCase().includes('urls sugeridas')) {
-				// Cierra el div.article-links anterior si estaba abierto
-				if (inArticleLinksSection) {
-					html += `</div>`;
-				}
-				html += `<div class="article-links-title"><span class="material-icons">link</span>${title}</div>`;
-				html += `<div class="article-links">`; // Abre el contenedor de enlaces sugeridos
-				inArticleLinksSection = true;
-				currentSection = 'links-title';
-			} else if (currentSection === '') {
-				html += `<img src="${photo}">`;
-				html += `<h1 class="article-title">${title}</h1>`;
-				currentSection = 'title';
-			} else {
-				html += `<h3 class="section-title">${title}</h3>`; // Títulos intermedios/subtítulos H3
-			}
-
-		} else if (line.startsWith('[intro]')) {
-			const intro = line.replace('[intro]', '').trim();
-			html += `<div class="article-intro">${intro}</div>`;
-		} else if (line.startsWith('[subtitle]')) {
-			const subtitle = line.replace('[subtitle]', '').trim();
-			html += `<h2 class="article-subtitle">${subtitle}</h2>`;
-		} else if (line.startsWith('[text]')) {
-			let text = line.replace('[text]', '').trim();
-
-			// 🛠️ CORRECCIÓN APLICADA: Nueva Expresión Regular para [link=URL]TEXTO[/link]
-			// Captura 1: URL (.*?)
-			// Captura 2: Texto del enlace (.*?)
-			const linkRegex = /\[link=(.*?)\](.*?)\[\/link\]/g;
-
-			// Reemplazar el formato completo con la etiqueta <a>
-			text = text.replace(linkRegex, (match, url, linkText) => {
-				// 'url' y 'linkText' son el resultado de las capturas (.*?)
-				if (url && linkText) {
-					return `<a href="${url}" target="_blank" class="text-link">${linkText}</a>`;
-				}
-				// Si no coincide o falta algo, devuelve el match original para que se vea el error en el texto.
-				return match;
-			});
-
-			html += `<p class="article-text">${text}</p>`;
-
-		} else if (line.startsWith('[item-link=')) {
-			// Manejo seguro del match para URLs sugeridas (previene el error si la regex falla)
-			const match = line.match(/\[item-link=(.*?)\]/);
-			if (match && match[1]) {
-				const url = match[1];
-
-				html += `
-					<a href="${url}" target="_blank" class="article-link">
-						<span class="material-icons">open_in_new</span>
-						<span>${url}</span>
-					</a>
-				`;
-			}
-		}
-	});
-
-	// Cierra el div.article-links si la sección estaba abierta al final del contenido
-	if (inArticleLinksSection) {
-		html += `</div>`;
-	}
-
-	// Añadir metadata al final
-	const date = new Date().toLocaleDateString('es-ES', {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric'
-	});
-	html += `
-		<div class="article-meta">
-			<div class="article-meta-item">
-				<span class="material-icons">calendar_today</span>
-				<span>${date}</span>
-			</div>
-			<div class="article-meta-item">
-				<span class="material-icons">person</span>
-				<span>Redacción Claro</span>
-			</div>
-			<div class="article-meta-item">
-				<span class="material-icons">label</span>
-				<span id="article-keyword">Blog</span>
-			</div>
-		</div>
-	`;
-
-	return html;
+	
 }
 
 // Función para cargar el contenido del artículo
@@ -412,7 +305,22 @@ window.addEventListener('DOMContentLoaded', function () {
 		//var data_content = exampleContent;
 		console.log(data_keyword);
 		console.log(data_content);
-		loadArticleContent(data_content, data_keyword);
+		$("#article-container").html(data_content);
+		/*$.ajax({
+			url: "generated-html",
+			type: 'POST',
+			data: {
+				content: data_content,
+				keyword: data_keyword
+			},
+			success: function (data) {
+				const html = data.html;
+				$("#article-container").html(html);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error al obtener el contenido AJAX:', error);
+			}
+		});*/
 	});
 });
 

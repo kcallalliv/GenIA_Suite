@@ -184,11 +184,22 @@ def generaContenidoIA(brand_id, proyecto_id):
 		)
 
 	try:
+		print(f"====Urls sugeridas: {sugerencias_urls}")
 		# --- 4. Construcción del Prompt (Optimizado) ---
 		prompt = (
 			f"Actúa como el **Redactor Senior de Productos y Ventas Digitales de Claro Perú**.\n"
 			"Tu objetivo es crear un artículo útil, experto y altamente persuasivo que posicione a Claro como la mejor solución.\n\n"
-
+			"Antes de redactar:\n"
+			"- Analiza a profundidad la keyword y, si aplica, el tema específico.\n" # <--- Pequeño ajuste aquí
+			"- Investiga temas, subtemas y preguntas relacionadas más buscadas en Google (autocomplete).\n"
+			"- Integra esas búsquedas dentro del contenido de forma natural.\n"
+			"- Usa redacción fluida, clara y natural, sin repetir innecesariamente la keyword.\n"
+			"- Incluye sinónimos o términos relacionados estratégicamente.\n"
+			"- Relaciona naturalmente conceptos con otros artículos o secciones del portal cuando sea posible.\n"
+			"- Sugiere al lector, de manera útil y sutil, visitar páginas específicas del sitio web si quiere ampliar el tema.\n"
+			"- Solo puedes redirigir a las URLs proporcionadas arriba, si el contenido lo permite de forma natural.\n"
+			"- Cuando enlaces a otra URL, hazlo con frases como: 'como explicamos en nuestro artículo sobre...', 'puedes ver más en...', 'también te puede interesar...'.\n"
+			"- Solo puedes mencionar la marca 'Claro' un máximo de dos veces en todo el artículo.\n\n"
 			f"**DATOS DEL ARTÍCULO:**\n"
 			f"- Keyword Principal: {keyword}\n"
 			f"- Tema: {tema}\n"
@@ -200,41 +211,49 @@ def generaContenidoIA(brand_id, proyecto_id):
 			f"**INFORMACIÓN DE BASE (Vertex AI):**\n{contexto_vertex}\n\n"
 
 			"**REGLAS DE REDACCIÓN Y ESTILO (ESTRICTAS):**\n"
-			"1. **CAPITALIZACIÓN (Sentence Case):** Está prohibido usar MAYÚSCULAS SOSTENIDAS en títulos[title] o subtítulos[subtitle]. Usa siempre 'Tipo oración' (Ej: 'Internet en casa: Lo que necesitas saber'). Solo la primera letra va en mayúscula.\n"
+			"1. **CAPITALIZACIÓN (Sentence Case):** Está prohibido usar MAYÚSCULAS SOSTENIDAS en títulos<h1> o subtítulos<h2>. Usa siempre 'Tipo oración' (Ej: 'Internet en casa: Lo que necesitas saber'). Solo la primera letra va en mayúscula.\n"
 			"2. **PUNTUACIÓN:** NUNCA termines un título o subtítulo con dos puntos (:), punto (.) o punto y coma (;).\n"
 			"3. **MARCA:** Menciona 'Claro' de forma natural. Convierte características técnicas en beneficios emocionales.\n"
-			"4. **ENLACES:** Sugiere visitar otras secciones usando frases naturales como 'como te contamos en...', 'puedes ver más detalles en...'.\n\n"
+			"4. No capitalizes el texto en los titulo,subtitulos,h1 y h2 \n"
+			"5. si vaz a poner '**' pon en su lugar <strong></strong> \n"
+			"6. si vaz a generar una tabla usa <table><tr><td>\n"
+			"7. **ENLACES:** Sugiere visitar otras secciones usando frases naturales como 'como te contamos en...', 'puedes ver más detalles en...'.\n\n"
 
-			"**FORMATO DE SALIDA (ESTRICTO):**\n"
+			"**FORMATO HTML DE SALIDA (ESTRICTO):**\n"
+			"**NUNCA DEVOLVER EL CÓDIGO HTML DENTRO DE BLOQUES MARKDOWN (NO USAR ```HTML).**\n" # <-- AÑADIR ESTA RESTRICCIÓN
+			"**Devolver solo el mquetado html**\n"
 			"Usa EXACTAMENTE estas etiquetas:\n\n"
 
-			"[title] <Escribe aquí el Título H1>\n"
-			"Atractivo, CAPITALIZACIÓN (Sentence Case), sin dos puntos finales.\n\n"
+			"<h1> <Escribe aquí el Título H1>\n"
+			"Atractivo, CAPITALIZACIÓN (Sentence Case), sin dos puntos finales.</h1>\n\n"
 
-			"[intro] <Párrafo introductorio>\n"
-			"Enganche (máx 4 líneas). La keyword principal ('" + keyword + "') debe estar en negrita.\n\n"
+			"<div class='article-intro'> <Párrafo introductorio si vas a poner ** reemplazalo por '<strong>'>\n"
+			"Enganche (máx 4 líneas). La keyword principal ('" + keyword + "') debe estar en negrita.<div>\n\n"
 
-			"[subtitle] <Primer Subtítulo H2>\n"
-			"Sentence Case. Sin dos puntos.\n\n"
+			"<h2> <Primer Subtítulo H2>\n"
+			"Sentence Case. Sin dos puntos.</h2>\n\n"
 
 			"**Cuerpo del artículo:** Desarrolla el tema entre 600 y 1200 palabras. Todos los subtítulos dentro del cuerpo del artículo también deben estar en negrita (usando ****).\n"
 			". Cada sección debe estar separada por saltos de línea (párrafos vacíos entre ellas).\n\n"
-			"[text]\n"
+			"<p>\n"
+			"en vez de '**' usa <h3>\n"
 			"Desarrolla el contenido aquí. Usa párrafos cortos.\n"
-			"- **NO uses viñetas (bullets).** Si enumeras características, escribe: <strong>Característica:</strong> Descripción.\n"
-			"- Si necesitas otro subtítulo, usa la etiqueta [subtitle] nuevamente, seguida de [text].\n"
-			"- Integra la marca Claro de forma natural.\n\n"
+			"- **NO uses viñetas (bullets).** Si enumeras características o listas usa <ul> <li>, en vez de '*' usa <ul> <li>, escribe: <strong>Característica:</strong> Descripción.\n"
+			"- Si necesitas otro subtítulo, usa la etiqueta <h2> nuevamente, seguida de <p>.\n"
+			"- Integra la marca Claro de forma natural.</p>\n\n"
 
-			"Si hay URLs sugeridas muestra el title:\n"
-			"[title] URLs Sugeridas\n"
-			"Si hay URLs sugeridas arriba, lístalas así:\n"
-			"[item-link=URL_AQUI]\n\n"
+			"Si hay URLs sugeridas muestra el title en <h2> URLs Sugeridas</h2>\n"
+			"Si hay URLs sugeridas arriba, lístalas en <a> con su respectiva url:\n"
 
-			"[meta_title]\n"
-			"Título SEO (Máx 65 chars) | Hablando Claro\n\n"
-
-			"[meta_description]\n"
-			"Resumen SEO (Máx 155 chars).\n"
+			"**coloca la seccion meta como meta_title y meta_description en <div class='article-meta'>\n"
+			"Esta parte debe tener Máximo 65 caracteres debe terminar con '| Hablando Claro' y estar entre <p><strong><Escribe aquí el Meta title | Hablando Claro></strong></p>.\n"
+			"La parte del meta description Máximo 160 caracteres. y entre <p><p>.\n"
+			"la palabra Meta title y meta description no debe de estar soolo su contenido.\n"
+			"Los h1,h2,h3 no debe contener strong.\n"
+			"Una vez que generes el contenido, ordena el contenido si es necesario ubicalos en <ul> o <table>,\n"
+			"si existe la palabra 'Meta title:' o 'Meta description:' removerlo.\n"
+			"**si existe una palabra con '**' ponerlo entre <strong>\n"
+			"antes de devolver,ordena el html,\n"
 		)
 
 		# --- 5. Llamada a Gemini ---
@@ -244,6 +263,10 @@ def generaContenidoIA(brand_id, proyecto_id):
 		)
 		
 		contenido_generado = response.text.strip()
+		#Limpiar
+		texto_limpio = contenido_generado.replace("```html\n", "", 1)
+		texto_limpio = texto_limpio.rstrip().removesuffix("```")
+		contenido_generado = texto_limpio.lstrip()
 
 		# Validación simple
 		if len(contenido_generado) < 50:
@@ -251,12 +274,16 @@ def generaContenidoIA(brand_id, proyecto_id):
 
 		return jsonify({
 			"success": True,
-			"title": contenido_generado 
+			"texto": contenido_generado 
 		})
 	except Exception as e:
 		error_msg = f"ERROR en generaContenidoIA: {e}"
-		print(error_msg)
-		return f"Error: {e}"
+		#print(error_msg)
+		#return f"Error: {e}"
+		return jsonify({
+			"success": False,
+			"texto": error_msg
+		})
 def get_json_tipo_contenido():
 	base_dir = os.path.dirname(os.path.abspath(__file__))
 	json_file_path = os.path.join(base_dir, '..', '..', '..', 'static', 'json', 'json_tipo-contenido.json')
@@ -314,10 +341,10 @@ def elegir_urls_relevantes_con_gemini(keyword, urls_df):
 		suggested_urls = url_pattern.findall(gemini_raw_response)
 		return suggested_urls if suggested_urls else "No se encontraron URLs relevantes para sugerir."
 	except Exception as e:
-		print(f"ERROR: elegir_urls_relevantes_con_gemini falló con una excepción: {e}")
+		print(f"=====ERROR: elegir_urls_relevantes_con_gemini falló con una excepción: {e}")
 		return "Error al generar sugerencias de URLs."
 def get_urls_similares_por_keyword(keyword, urls_df):
-	print(f"INFO: Buscando URLs similares para keyword: '{keyword}'")
+	print(f"=====INFO: Buscando URLs similares para keyword: '{keyword}'")
 	textos = urls_df["page_url"].tolist()
 	# Asegúrate de que 'textos' no esté vacío antes de llamar a difflib.get_close_matches
 	if not textos:
@@ -397,7 +424,8 @@ def get_tipo_contenido(brand_id,proyecto_id):
 		html_output += '\t<option value="">Selecciona una palabra</option>\n'
 		for item in contenido_list:
 			nombre = item["nombre_tipo"]
-			html_output += f'\t<option value="{nombre}">{nombre}</option>\n'
+			descripcion = item["descripcion"]
+			html_output += f'\t<option value="{nombre}" data_description="{descripcion}">{nombre}</option>\n'
 		html_output += '</select>'
 		return html_output
 	except FileNotFoundError:
@@ -618,30 +646,24 @@ def generateImageIA(brand_id,proyecto_id):
 		# Esto captura errores de GCS (conexión, permisos, etc.)
 		return jsonify({"error": f"Error al guardar o firmar la URL: {str(e)}"}), 500
 
-from flask import request, jsonify # Asegúrate de tener estas importaciones
-
 @cltarticle_bp.route('generated-promt', methods=["GET"])
 def generatePromtImageIA(brand_id, proyecto_id):
 	# 1. RECUPERAR PARÁMETROS DE LA SOLICITUD GET
+	# 'request' debe estar importado y disponible aquí.
 	tipo_articulo = request.args.get('tipo', '')
+	tipo_description = request.args.get('description', '') # Variable no usada en el prompt final, pero mantenida.
 	tema_articulo = request.args.get('tema', '')
 	keyword_articulo = request.args.get('keyword', '')
-	titulo_articulo = request.args.get('titulo', '')
+	titulo_articulo = request.args.get('titulo', '') 
 	motivo_articulo = request.args.get('motivo', '')
-	# Valores fijos de ejemplo, reemplaza 'Claro Perú' según la lógica de tu aplicación
-	producto_nombre = "Claro Perú"
-	brand_name = ""#Claro Perú
-	
-	# --- INICIO DE LA LÓGICA DE CONSTRUCCIÓN DEL PROMPT ---
 	
 	# Parámetros Fijos o Base
-	background_setting = "Living de hogar moderno y cálido"
 	render_calidad = 'Render 8K'
 	
-	# 2. Ajustar el Tono Emocional y Estilo Visual según el Tipo (Lógica existente)
-	estilo_visual = "clean, modern, premium style" # Se añade 'premium style' por defecto
-	tono_emocional = "Calma y Seguridad" # Valor por defecto ajustado a tu ejemplo
-
+	# 2. Lógica para Estilo y Tono Emocional (DEBE IR ANTES DE CONSTRUIR EL PROMPT)
+	estilo_visual = "clean, modern, premium style" 
+	tono_emocional = "Calma y Seguridad" # Tono por defecto
+	
 	if tipo_articulo.lower() == "educativo":
 		estilo_visual = "minimalist, informative, friendly visual style"
 		tono_emocional = "Confianza, Claridad y Aprendizaje"
@@ -649,77 +671,74 @@ def generatePromtImageIA(brand_id, proyecto_id):
 		estilo_visual = "detailed, structured, high-quality rendering style"
 		tono_emocional = "Organización, Eficiencia y Logro"
 
-	# 3. Preparar Cláusulas para Ensamblaje
-	
-	# Secciones principales del prompt
-	#producto = f"producto: {producto_nombre}"
-	concepto_principal = f"The main concept imagen is: {tema_articulo}, emphasizing the use of the {keyword_articulo} service."
-	
-	# *** 1. SECCIÓN CLAVE: RESTRICCIÓN DE IMAGEN PURA ***
-	# Esta es la cláusula de negación explícita dentro de la descripción de elementos.
-	restriccion_pura = "(ABSOLUTAMENTE SIN LOGOS, SIN TEXTOS, SIN TIPOGRAFÍA, SIN NINGÚN TIPO DE ANOTACIÓN DIGITAL O ICONOS)"
-	
-	# Modificación para elementos visuales base y keyword, AÑADIENDO LA RESTRICCIÓN
-	elementos_visuales_base = f"debe incorporar de forma sutil elementos visuales relacionados con la palabra clave '{keyword_articulo}'."
-	elementos_visuales_final = f"{elementos_visuales_base} {restriccion_pura}"
-	
-	# a. CLÁUSULAS PRINCIPALES (Scene Clause)
-	escena_clausulas = [
-		f"estilo_visual: {estilo_visual}",
-		"Model type: si",
-		"Interaction: Uso Indirecto",
-		concepto_principal,
-		f"elementos_visuales: {elementos_visuales_final}" # YA INCLUYE LA RESTRICCIÓN AQUÍ
-	]
-	if titulo_articulo:
-		escena_clausulas.append(f"El contexto de la imagen debe visualizar el concepto principal de: '{titulo_articulo}'")
-	if motivo_articulo:
-		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{motivo_articulo}'")
-	else:
-		elementos_visuales_base_default = "Familia tradicional (padres hombre y mujer) en casa usando dispositivos conectados."
-		escena_clausulas.append(f"Motivo y Enfoque de la imagen: la imagen se genera para: '{elementos_visuales_base_default}'")
-	escena_clause_str = ", ".join(escena_clausulas)
+	# 3. PREPARAR CLÁUSULAS (Asegurando que la definición precede al uso)
 
-	# b. DETALLES DE COMPOSICIÓN Y TÉCNICOS (Technical Details Clause)
+	# A1. Concepto principal del tema
+	concepto_principal = f"Scene Concept: {tema_articulo}, emphasizing the seamless use of the {keyword_articulo} service."
+	
+	# A2. Elementos visuales y restricción suave
+	elementos_visuales = f"Visual Elements: Subtly incorporate discrete visual elements related to the keyword '{keyword_articulo}'"
+	
+	# A3. Lógica correcta para Motivo y Enfoque (DEBE RESOLVERSE CON IF/ELSE)
+	if motivo_articulo:
+		motivo_enfoque_contenido = motivo_articulo
+	else:
+		motivo_enfoque_contenido = "Familia tradicional (padres hombre y mujer) en casa usando dispositivos conectados."
+		
+	motivo_enfoque = f"Image theme and focus: the image is generated for: {motivo_enfoque_contenido}"
+
+
+	# A4. Lógica de Fondo (Background/Setting) - Anti-Borde Blanco
+	background_setting_base = f"If the keyword '{keyword_articulo}' refers to a specific place, set it as the background using a modern and premium filter. Otherwise, use a modern and warm home living room setting."
+	background_setting = f"Background/Setting: {background_setting_base}, seamless background, image must occupy the entire viewport."
+	
+	# B. DETALLES DE COMPOSICIÓN Y TÉCNICOS
+	# El tono emocional ya se ha resuelto en el punto 2.
 	adicionales = [
-		"Artistic Style: realistic",
-		"Lighting: Luz de estudio suave",
-		"Camera Angle: Normal (Eye-level)",
-		f"Emotional Tone: {tono_emocional}",
-		f"Background/Setting Type: {background_setting}",
-		"Composition Rule: Regla de Tercios",
-		"Depth of Field: 50 (Bokeh effect)."
+		f"Full-frame render, Wide-Screen aspect ratio, Cinematic", 
+		f"Artistic Style: realistic",
+		f"Lighting: Studio light soft",
+		f"Camera Angle: Normal (Eye-level)",
+		f"Emotional Tone: {tono_emocional}", # Se usa la variable resuelta
+		f"Composition Rule: Rule of Thirds",
+		f"Depth of Field: 50 (Bokeh effect)."
 	]
 	
 	clausulas_adicionales_str = ", ".join(adicionales)
-	if clausulas_adicionales_str:
-		clausulas_adicionales_final = f"Composition and Technical Details: {clausulas_adicionales_str}"
-	else:
-		clausulas_adicionales_final = ""
+	clausulas_adicionales_final = f"Composition and Technical Details: {clausulas_adicionales_str}"
 
-	# *** 2. SECCIÓN CLAVE: INSTRUCCIONES CRÍTICAS REFORZADAS ***
+	# C. INSTRUCCIONES CRÍTICAS REFORZADAS
+	# Se condensa en una sola línea para evitar problemas de formato.
 	critical_instructions = (
-		"ULTRA CRITICAL: ABSOLUTELY NO TEXT OVERLAYS, NO LOGOS, NO WATERMARKS, NO UI CHROME, NO DEBUG ARTIFACTS, NO BOUNDING BOXES, NO ANNOTATIONS, NO GUIDES, AND NO WIFI/SIGNAL ICONS ARE PERMITTED ANYWHERE IN THE IMAGE. PURE IMAGE OUTPUT ONLY."
+		"ULTRA CRITICAL: ABSOLUTELY NO TEXT, NO LOGOS, NO WATERMARKS, NO UI CHROME, NO DEBUG ARTIFACTS, NO BOUNDING BOXES, "
+		"NO black bars cinema, NO ANNOTATIONS, NO GUIDES, AND NO WIFI/SIGNAL ICONS ARE PERMITTED ANYWHERE."
+		"NO extra limbs, NO mutated hands, NO deformed fingers, NO extra arms. PURE IMAGE OUTPUT ONLY."
 	)
 	
-	# 4. ENSAMBLAJE FINAL DEL PROMPT
-	# Se asegura que el primer párrafo incluya el render_calidad.
-	mi_prompt = f"""
-Generate a image for {brand_name} about {producto} with a {estilo_visual}, {render_calidad}.
-{escena_clause_str}
-{clausulas_adicionales_final}
-{critical_instructions}
-"""
-	# Se eliminan los saltos de línea y espacios excesivos para mantener la limpieza
+	# 4. ENSAMBLAJE FINAL DEL PROMPT (Usando f-strings de forma limpia)
+	mi_prompt = (
+			f"Generame y arregla my promt que es el siguiente:\n"
+			f"Generate an {render_calidad}, full-frame, cinematic image for telco.\n"
+			f"Visual style: {estilo_visual}, realistic. ubica los elementos de forma coherente.\n"
+			f"{concepto_principal}\n"
+			f"{elementos_visuales}\n"
+			f"{motivo_enfoque}\n" # Se inserta la variable ya resuelta
+			f"{background_setting}\n"
+			f"{clausulas_adicionales_final}\n"
+			f"{critical_instructions}"
+	)
+	
+	# Se eliminan los saltos de línea y espacios excesivos
 	mi_prompt = mi_prompt.strip()
-
+	final_prompt = generarPrompIA(mi_prompt)
 	# --- FIN DE LA LÓGICA DE CONSTRUCCIÓN DEL PROMPT ---
 	
 	# 5. DEVOLVER EL PROMPT EN LA RESPUESTA JSON
 	return jsonify({
 		"success": True,
-		"promt": mi_prompt
+		"promt": final_prompt
 	})
+
 
 def generar_imagen_imagen4(prompt: str):
 	try:
@@ -796,3 +815,28 @@ def listarImages(data_id):
 		return lista
 	except Exception as e:
 		return jsonify({"error": str(e)}), 500
+
+def generarPrompIA(prompt):
+	"""
+	Envía un prompt a la IA para su mejora y extrae el resultado más limpio.
+	"""
+	try:
+		# Usando la línea original, asumiendo que 'genai_client' está definido
+		# NOTA: genai_client debe ser una variable global o pasada como argumento si no está
+		# definida en este scope. Asumo que está definida globalmente por el import de config.
+		response = genai_client.models.generate_content(
+			model="gemini-2.0-flash-001",
+			contents=prompt
+		)
+		contenido_generado = response.text
+		
+		# Se elimina la verificación de longitud de < 5
+		return contenido_generado
+		
+	except Exception as e:
+		error_msg = f"ERROR: Fallo crítico en la función generarPrompIA: {e}"
+		# Se usa logging.error, asumiendo que logging está importado
+		logging.error(error_msg)  
+		
+		# Retornamos el error como el prompt
+		return f"Error de ejecución al mejorar el prompt: {e}"
