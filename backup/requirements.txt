@@ -16,3 +16,4 @@ pip install Flask-SQLAlchemy
 pip install pytz
 pip install requests
 pip install "cloud-sql-python-connector[pg8000]"
+pip install Spire.Doc

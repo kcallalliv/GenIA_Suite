@@ -19,6 +19,7 @@
 
 				<!-- Contenido -->
 				<div class="popup-content">
+					<div id="article-photo"></div>
 					<article class="article-container" id="article-container">
 						<!-- El contenido se cargará aquí dinámicamente -->
 					</article>
@@ -36,10 +37,10 @@
 						<button class="popup-button popup-button-secondary" onclick="closePopup()">
 							Cerrar
 						</button>
-						<button class="popup-button popup-button-success" id="btn-descargar">
+						<!--<button class="popup-button popup-button-success" id="btn-descargar">
 							<span class="material-icons">publish</span>
-							Publicar
-						</button>
+							Descargar Word
+						</button>-->
 					</div>
 				</div>
 			</div>
@@ -57,15 +58,6 @@
 						<span class="material-icons">close</span>
 					</button>
 				</div>
-
-				<!-- Search Bar -->
-				<!--<div class="search-bar">
-					<input type="text" class="search-input" id="search-input" placeholder="Buscar imágenes... (ej: paisaje, tecnología, personas)">
-					<button class="search-button" onclick="searchImages()">
-						<span class="material-icons">search</span>
-						<span>Buscar</span>
-					</button>
-				</div>-->
 
 				<!-- Content -->
 				<div class="popup-content">
@@ -157,9 +149,11 @@
 						</div>
 						<div class="preview-area" id="ia_img">
 							<div id="load-image"></div>
-							<!--<button class="ai-button" onclick="generaImagen()">
-								<span class="material-icons">auto_awesome</span>
-							</button>-->
+							<!--<a href="/images/image-name.jpg" target="_blank" download="imageia.jpg" rel="noopener noreferrer" id="txt_photo-descarga">
+								<button class="ai-button btn-descargar-image">
+									<span class="material-icons">download</span>
+								</button>
+							</a>-->
 						</div>
 						<div class="button-container">
 							<button class="generate-button" id="btn-generar">
@@ -172,10 +166,20 @@
 								<span class="material-icons">visibility</span>
 							</button>
 
-							<button class="preview-button">
+							<button class="popup-button popup-button-success btn-descargar-word" id="btn-descargar">
+								Descargar Word
+								<span class="material-icons">description</span>
+							</button>
+
+							<button class="popup-button popup-button-success btn-descargar-html">
+								Descargar HTML
+								<span class="material-icons">description</span>
+							</button>
+
+							<!--<button class="preview-button">
 								<span>Guardar</span>
 								<span class="material-icons">save</span>
-							</button>
+							</button>-->
 						</div>
 						<div class="form-group">
 							<label class="form-label">Contenindo Generado</label>

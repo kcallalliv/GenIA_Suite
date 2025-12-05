@@ -22,6 +22,7 @@ import random
 import string
 from io import BytesIO
 import mimetypes
+from bs4 import BeautifulSoup
 from docx import Document
 from docx.shared import Inches
 import pandas as pd
@@ -184,6 +185,33 @@ def generaContenidoIA(brand_id, proyecto_id):
 		)
 
 	try:
+		template = """<h1>[titulo]</h1>
+				<div class='article-intro'>
+					<p>[text intro]</p>
+				</div>
+				<h2>[subtitulo]</h2>
+				<h2>[subtitulo]</h2>
+				<p>{text parrafo}</p>
+				<ul>(solo si es necesario usar lista)
+					<li><strong>[caracteristica]</strong> [texto]</li>
+					<li><strong>[caracteristica]</strong> [texto]</li>
+					<li><strong>[caracteristica]</strong> [texto]</li>
+				<ul>
+				<h2>[subtitulo]</h2>
+				<p>[texto parrafo]</p>
+				<p>[texto parrafo]</p>
+				<p>[texto parrafo]</p>
+				<h2>URLs Sugeridas</h2>
+				<div class='article-links'>
+					<a href='[link]'>[link]</a>
+					<a href='[link]'>[link]</a>
+					<a href='[link]'>[link]</a>
+				</a>
+				<table></table>
+				<div class='article-meta'>
+					<p><strong>Meta Title: </strong>[meta title] | Hablando Claro</p>
+					<p><strong>Meta Description: </strong>[meta description]</p>
+				</div>"""
 		print(f"====Urls sugeridas: {sugerencias_urls}")
 		# --- 4. Construcción del Prompt (Optimizado) ---
 		prompt = (
@@ -238,12 +266,13 @@ def generaContenidoIA(brand_id, proyecto_id):
 			"<p>\n"
 			"en vez de '**' usa <h3>\n"
 			"Desarrolla el contenido aquí. Usa párrafos cortos.\n"
-			"- **NO uses viñetas (bullets).** Si enumeras características o listas usa <ul> <li>, en vez de '*' usa <ul> <li>, escribe: <strong>Característica:</strong> Descripción.\n"
+			"- **NO uses viñetas (bullets).** Si enumeras características o listas (solo si es necesario sino el contenido que sea solo parrafo) usa <ul> <li>, en vez de '*' usa <ul> <li>, escribe: <strong>Característica:</strong> Descripción.\n"
 			"- Si necesitas otro subtítulo, usa la etiqueta <h2> nuevamente, seguida de <p>.\n"
 			"- Integra la marca Claro de forma natural.</p>\n\n"
 
 			"Si hay URLs sugeridas muestra el title en <h2> URLs Sugeridas</h2>\n"
 			"Si hay URLs sugeridas arriba, lístalas en <a> con su respectiva url:\n"
+
 
 			"**coloca la seccion meta como meta_title y meta_description en <div class='article-meta'>\n"
 			"Esta parte debe tener Máximo 65 caracteres debe terminar con '| Hablando Claro' y estar entre <p><strong><Escribe aquí el Meta title | Hablando Claro></strong></p>.\n"
@@ -254,6 +283,7 @@ def generaContenidoIA(brand_id, proyecto_id):
 			"si existe la palabra 'Meta title:' o 'Meta description:' removerlo.\n"
 			"**si existe una palabra con '**' ponerlo entre <strong>\n"
 			"antes de devolver,ordena el html,\n"
+			f"Template base(no innecesariamente el la secuencia es asi):{template}\n"
 		)
 
 		# --- 5. Llamada a Gemini ---
@@ -437,21 +467,149 @@ def get_tipo_contenido(brand_id,proyecto_id):
 	except Exception as e:
 		print(f"Ocurrió un error inesperado al cargar el JSON: {e}")
 		return f"Error interno del servidor: {e}", 500
+
+#Crear Documento HTML
+def crear_html(texto_contenido, name_file):
+	"""
+	Crea un buffer BytesIO conteniendo el texto de entrada (texto_contenido)
+	sin ninguna modificación, simulando la generación de un archivo .txt.
+	"""
+	# 1. Crear un buffer en memoria para el archivo.
+	buffer = BytesIO()
+	
+	# 2. Escribir el texto de entrada (HTML/Texto) tal cual.
+	# Es esencial codificar la cadena de texto (str) a bytes para escribir en BytesIO.
+	buffer.write(texto_contenido.encode('utf-8'))
+	
+	# 3. Mover el puntero al inicio para que el contenido pueda ser leído.
+	buffer.seek(0)
+	
+	return buffer
+
 #Crear Documento Word
 def crear_docx(texto_contenido, name_file):
-	document = Document()
+	# -----------------------------------------------------
+	# FASE 1: CONVERSIÓN de HTML a MARCADO INTERNO (CORREGIDA)
+	# -----------------------------------------------------
+
+	soup = BeautifulSoup(texto_contenido, 'lxml')
+	custom_markup = []
+
+	# Función auxiliar para convertir enlaces <a> a tu patrón [link=URL]TEXTO[/link]
+	def process_links(element):
+		html_segment = str(element)
+		link_regex_html = re.compile(r'<a\s+href=["\'](.*?)["\']>(.*?)<\/a>', re.IGNORECASE)
+		processed_text = link_regex_html.sub(r'[link=\1]\2[/link]', html_segment)
+		
+		clean_soup = BeautifulSoup(processed_text, 'lxml')
+		return clean_soup.get_text()
+
+	# Título Principal (H1)
+	h1 = soup.find('h1')
+	if h1:
+		custom_markup.append(f"[title]{h1.get_text().strip()}")
+
+	# Introducción (div.article-intro)
+	intro_div = soup.find('div', class_='article-intro')
+	if intro_div and intro_div.p:
+		intro_text = process_links(intro_div.p)
+		custom_markup.append(f"[intro]{intro_text.strip()}")
 	
-	# El nombre del archivo se infiere del keyword (name_file)
-	inferred_keyword = name_file.replace(".docx", "").replace("_", " ").title()
+	# Variable de control
+	urls_sugeridas_title_processed = False
+
+	# Procesar el Cuerpo del Artículo
+	body_elements = soup.find_all(['h2', 'h3', 'p', 'ul', 'ol', 'table', 'div'])
 	
-	# Lista de líneas
+	for element in body_elements:
+		tag_name = element.name
+		
+		# Saltar elementos ya procesados (H1 y INTRO)
+		if element == h1 or (intro_div and element.find_parent('div', class_='article-intro') == intro_div):
+			 continue
+
+		# Títulos y Subtítulos (Manejo de H2/H3)
+		elif tag_name in ['h2', 'h3']:
+			title_text = element.get_text().strip()
+			
+			if "urls sugeridas" in title_text.lower():
+				# 1. Si es "URLs Sugeridas", marcarlo como [title] para activar la bandera en FASE 2
+				custom_markup.append(f"[title]{title_text}")
+				urls_sugeridas_title_processed = True
+			else:
+				custom_markup.append(f"[subtitle]{title_text}")
+		
+		# Manejo de URLs Sugeridas (div.article-links)
+		elif tag_name == 'div' and 'article-links' in element.get('class', []):
+			if urls_sugeridas_title_processed:
+				for a_tag in element.find_all('a'):
+					url = a_tag.get('href')
+					link_text = a_tag.get_text().strip()
+					custom_markup.append(f"[item-link={url}]{link_text}")
+			continue
+			
+		# Manejo de Metadatos (div.article-meta) - CORRECCIÓN DE DUPLICACIÓN
+		elif tag_name == 'div' and 'article-meta' in element.get('class', []):
+			custom_markup.append("[subtitle]Metadatos del Artículo")
+			
+			for p in element.find_all('p'):
+				text_content = p.get_text().strip()
+				
+				# 1. Título Meta (Robusto con re.sub)
+				if re.match(r'Meta Title:', text_content, re.IGNORECASE):
+					# Usamos re.sub para limpiar el prefijo de forma robusta e ignorar mayúsculas/minúsculas
+					cleaned_text = re.sub(r'Meta Title:\s*', '', text_content, flags=re.IGNORECASE).strip()
+					custom_markup.append(f"[text]Título Meta: {cleaned_text}")
+					
+				# 2. Descripción Meta (Robusto con re.sub)
+				elif re.match(r'Meta Description:', text_content, re.IGNORECASE):
+					cleaned_text = re.sub(r'Meta Description:\s*', '', text_content, flags=re.IGNORECASE).strip()
+					custom_markup.append(f"[text]Descripción Meta: {cleaned_text}")
+					
+				# 3. Si no es un meta tag conocido, se añade el texto original
+				elif text_content: # Solo añadir si hay contenido y no es un meta tag conocido
+					custom_markup.append(f"[text]{text_content}")
+					
+			continue
+
+		# Párrafos (p)
+		elif tag_name == 'p':
+			text_content = process_links(element)
+			if text_content.strip():
+				custom_markup.append(f"[text]{text_content.strip()}")
+			
+		# Listas (UL y OL)
+		elif tag_name in ['ul', 'ol']:
+			for li in element.find_all('li', recursive=False):
+				item_content = process_links(li)
+				custom_markup.append(f"[text]* {item_content.strip()}")
+
+		# Tablas (TABLE)
+		elif tag_name == 'table':
+			custom_markup.append("[subtitle]Contenido de Tabla")
+			
+			header_row = element.find('thead')
+			if header_row:
+				custom_markup.append("[text]ENCABEZADOS:")
+				headers = [th.get_text().strip() for th in header_row.find_all('th')]
+				custom_markup.append(f"[text]* {' | '.join(headers)}")
+			
+			body = element.find('tbody') or element
+			for tr in body.find_all('tr'):
+				cells = [td.get_text().strip() or th.get_text().strip() for td in tr.find_all(['td', 'th'])]
+				if cells:
+					custom_markup.append(f"[text]* {' | '.join(cells)}")
+
+	# Obtener el contenido final en formato de marcado interno
+	texto_contenido = '\n'.join(custom_markup)
 	lines = texto_contenido.strip().split('\n')
-	
+
 	# -----------------------------------------------------
-	# 1. Procesamiento de Líneas con Marcado Personalizado
+	# FASE 2: PROCESAMIENTO de MARCADO INTERNO (Sin cambios)
 	# -----------------------------------------------------
 	
-	# Bandera para saber si estamos procesando la sección de URLs Sugeridas
+	document = Document()
+	inferred_keyword = name_file.replace(".docx", "").replace("_", " ").title()
 	in_url_section = False
 	
 	for line in lines:
@@ -466,110 +624,130 @@ def crear_docx(texto_contenido, name_file):
 				document.add_heading(title_text, level=3)
 				in_url_section = True
 			else:
-				# Título principal del artículo (H1 en el HTML, H2 en el DOCX)
 				document.add_heading(title_text, level=1)
 				in_url_section = False
 
 		elif line.startswith('[intro]'):
 			intro_text = line.replace('[intro]', '').strip()
-			# La introducción va como un párrafo destacado o con sangría
-			# Nota: Si 'Intense Quote' tampoco existe, deberás usar style=None o 'Quote'.
-			document.add_paragraph(intro_text, style='Intense Quote') 
+			document.add_paragraph(intro_text, style='Intense Quote')
 
 		elif line.startswith('[subtitle]'):
 			subtitle_text = line.replace('[subtitle]', '').strip()
-			# Subtítulo de sección (H2 en el HTML, H3 en el DOCX)
 			document.add_heading(subtitle_text, level=3)
 			in_url_section = False
 
 		elif line.startswith('[text]'):
 			text_content = line.replace('[text]', '').strip()
 			
-			# ⚠️ Manejo de Enlaces (Link) dentro del [text]
-			# Patrón: [link=URL]TEXTO DEL ENLACE[/link]
+			# Detectar si es un ítem de lista (del procesamiento de UL/OL)
+			is_list_item = text_content.startswith('* ')
+			if is_list_item:
+				text_content = text_content[2:].strip()
+				style = 'List Bullet'
+			else:
+				style = None
+			
+			# Manejo de Enlaces (Link)
 			link_regex = re.compile(r'\[link=(.*?)\](.*?)\[\/link\]')
 			
-			p = document.add_paragraph()
+			p = document.add_paragraph(style=style)
 			last_idx = 0
 			
-			# Buscar y reemplazar todos los enlaces
 			for match in link_regex.finditer(text_content):
 				url = match.group(1)
 				link_text = match.group(2)
 				
-				# Agregar el texto que está ANTES del enlace
 				p.add_run(text_content[last_idx:match.start()])
-				
-				# Agregar el enlace usando la función auxiliar (¡CORRECCIÓN AQUÍ!)
-				# Asumimos que add_hyperlink(p, url, link_text) ya está definida e implementada.
+				# Se llama a la función corregida
 				add_hyperlink(p, url, link_text)
-				
 				last_idx = match.end()
 			
-			# Agregar el texto que queda DESPUÉS del último enlace
 			p.add_run(text_content[last_idx:])
 			in_url_section = False
 
 		elif line.startswith('[item-link='):
 			if in_url_section:
-				# Patrón: [item-link=URL_AQUI]
-				match = re.search(r'\[item-link=(.*?)\]', line)
-				if match and match.group(1):
+				# Patrón: [item-link=URL_AQUI]TEXTO
+				match = re.search(r'\[item-link=(.*?)\](.*)', line)
+				if match:
 					url = match.group(1)
+					link_text = match.group(2).strip() or url
 					
-					# Añadir URL como un elemento de lista con Hyperlink
 					p = document.add_paragraph(style='List Bullet')
-					
-					# 💥 CORRECCIÓN CRÍTICA: Se reemplaza la línea con error por la auxiliar
-					add_hyperlink(p, url, url) # Texto del link es la URL misma
+					# Se llama a la función corregida
+					add_hyperlink(p, url, link_text)
 	
 	# -----------------------------------------------------
-	# 2. Guardar y Devolver el Buffer
+	# FASE 3: Guardar y Devolver el Buffer
 	# -----------------------------------------------------
-
-	# Opcional: Añadir un pie de página o metadatos de generación si es necesario
+	
+	# 🌟 CORRECCIÓN DEL ERROR DE DATETIME
+	# Cambiado de datetime.datetime.now() a datetime.now()
+	fecha_doc = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	
 	document.add_page_break()
 	document.add_heading("Metadatos de Generación", level=4)
 	document.add_paragraph(f"Keyword: {inferred_keyword}")
-	document.add_paragraph(f"Fecha de Generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+	document.add_paragraph(f"Fecha de Generación: {fecha_doc}")
 
 	buffer = BytesIO()
 	document.save(buffer)
 	buffer.seek(0)
 	return buffer
-def add_hyperlink(paragraph, url, text, color=None, underline=True):
-	"""
-	Agrega un hipervínculo a un objeto Paragraph sin depender del estilo 'Hyperlink'.
-	"""
-	# 1. Relacionar la URL externa con el documento (parte del XML de Word)
-	part = paragraph.part
-	r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
-
-	# 2. Crear el elemento XML <w:hyperlink>
-	hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
-	hyperlink.set(qn('r:id'), r_id, )
 	
-	# 3. Crear el Run (el texto visible)
-	new_run = docx.text.run.Run(
-		docx.oxml.shared.OxmlElement('w:r'), paragraph
-	)
-	new_run.text = text
-
-	# 4. Aplicar formato (azul y subrayado)
-	new_run.font.underline = underline
-	if not color:
-		# Usar color azul por defecto de hipervínculo
-		new_run.font.color.theme_color = MSO_THEME_COLOR.HYPERLINK
-	else:
-		new_run.font.color.rgb = color
+def add_hyperlink(paragraph, url, text, color="0000FF", underline=True):
+	"""
+	Implementación alternativa más robusta de add_hyperlink.
+	"""
+	from docx.oxml.ns import qn
+	from docx.oxml import OxmlElement
+	from docx.opc.constants import RELATIONSHIP_TYPE as RT
+	from docx.shared import RGBColor # Necesario para la corrección visual (asumiendo que está importado)
 	
-	# 5. Insertar el Run dentro del Hyperlink, e insertar el Hyperlink en el párrafo
-	hyperlink.append(new_run.element)
+	# 1. Crear la relación externa (rId)
+	rId = paragraph.part.relate_to(url, RT.HYPERLINK, is_external=True)
+
+	# 2. Crear el elemento w:hyperlink
+	hyperlink = OxmlElement('w:hyperlink')
+	hyperlink.set(qn('r:id'), rId)
+	
+	# 3. Crear el elemento w:r (Run) dentro del hipervínculo
+	new_run = OxmlElement('w:r')
+	
+	# 4. APLICACIÓN DE ESTILO CRÍTICA (w:rPr para subrayado y color)
+	# Se debe crear y configurar el XML de las propiedades del Run
+	rPr = OxmlElement('w:rPr')
+	
+	# a. Subrayado
+	if underline:
+		u = OxmlElement('w:u')
+		u.set(qn('w:val'), 'single')
+		rPr.append(u)
+
+	# b. Color (Para que se vea azul como un enlace)
+	c = OxmlElement('w:color')
+	c.set(qn('w:val'), color)
+	rPr.append(c)
+
+	new_run.append(rPr) # Añadir las propiedades al Run
+	
+	# 5. Crear w:t (Text) dentro del Run
+	text_element = OxmlElement('w:t')
+	text_element.text = text
+	new_run.append(text_element)
+	
+	# 6. Agregar el Run al Hyperlink
+	hyperlink.append(new_run)
+	
+	# 7. Agregar el Hyperlink al Párrafo
 	paragraph._p.append(hyperlink)
-	
-	return new_run
-@cltarticle_bp.route('/proyectos/colecciones/article/download-generated-article', methods=['POST'])
-def download_generated_article():
+
+	# ELIMINAR EL CÓDIGO FALLIDO DE APLICACIÓN DE FORMATO
+	# Ya no es necesario el bloque original de aplicación de estilo.
+	return new_run # Retornar el elemento XML creado.
+
+@cltarticle_bp.route('download-generated-article', methods=['POST'])
+def download_generated_article(brand_id, proyecto_id):
 	# Recuperar el contenido guardado en la sesión
 	texto_plain_for_docx = request.values.get('content')
 	keyword_for_docx = request.values.get('keyword')
@@ -584,6 +762,26 @@ def download_generated_article():
 	return send_file(
 		docx_buffer,
 		mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		as_attachment=True,
+		download_name=name_file
+	)
+
+@cltarticle_bp.route('download-html', methods=['POST'])
+def download_generated_html(brand_id, proyecto_id):
+	# Recuperar el contenido guardado en la sesión
+	texto_plain_for_docx = request.values.get('content')
+	keyword_for_docx = request.values.get('keyword')
+	data_titulo = request.values.get('titulo')
+	if not texto_plain_for_docx or not keyword_for_docx:
+		# Si no hay contenido en la sesión, redirigir o mostrar un error
+		return "No hay artículo para descargar. Por favor, genera un artículo primero.", 400
+	name_file = f"{keyword_for_docx}_articulo.html"
+	# Llamar a crear_docx con los datos recuperados de la sesión
+	docx_buffer = crear_html(texto_plain_for_docx, name_file)
+	# Retornar el archivo como una respuesta de Flask
+	return send_file(
+		docx_buffer,
+		mimetype="text/plain", 
 		as_attachment=True,
 		download_name=name_file
 	)

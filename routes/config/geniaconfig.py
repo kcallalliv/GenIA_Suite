@@ -78,10 +78,15 @@ class config_postgres:
 
 		@staticmethod
 		def _getconn():
-			icn = os.getenv("INSTANCE_CONNECTION_NAME")
-			user = os.getenv("DB_USER")
-			pwd = os.getenv("DB_PASS")
-			db = os.getenv("DB_NAME")
+			#icn = os.getenv("INSTANCE_CONNECTION_NAME")
+			#user = os.getenv("DB_USER")
+			#pwd = os.getenv("DB_PASS")
+			#db = os.getenv("DB_NAME")
+
+			icn = "prd-claro-mktg-data-storage:us-central1:genia-suite-db"
+			user = "postgres"
+			pwd = "Genia_suite2025"
+			db = "postgres"
 			
 			missing = [k for k, v in [("INSTANCE_CONNECTION_NAME", icn), ("DB_USER", user), ("DB_PASS", pwd), ("DB_NAME", db)] if not v]
 			if missing:

@@ -15,7 +15,7 @@ function generaImagen() {
 	if (total == 0) {
 		const $inputTitle = $("#txt_titulo");
 		const $loadContainer = $("#load-image");
-		const loadingHtml = "<div class='loading' id='loader-temp'><div class='lds-ellipsis'><div></div><div></div><div></div><div></div></div></div>";
+		const loadingHtml = "<div class='loading loader-temp-image' id='loader-temp'><div class='lds-ellipsis'><div></div><div></div><div></div><div></div></div></div>";
 		$loadContainer.append(loadingHtml);
 		//Datos
 		var data_tipo = $("#cbo_tipo_articulo").val();
@@ -51,8 +51,10 @@ function generaImagen() {
 					},
 					success: function (data) {
 						const imageUrl = data.imagen_temporal;
+						$("#txt_image").val(imageUrl);
+						$("#txt_photo-descarga").attr("href",imageUrl);
 						$("#ia_img").css("background-image", "url(" + imageUrl + ")");
-						$("#loader-temp").remove();
+						$(".loader-temp-image").remove();
 					},
 					error: function (xhr, status, error) {
 						console.error('Error al obtener el contenido AJAX:', error);
@@ -67,6 +69,45 @@ function generaImagen() {
 		});
 	}
 }
+function descargarImagen(e) {
+	// Previene la navegación por defecto del botón/enlace si existe (crucial)
+	e.preventDefault(); 
+	
+	// Obtener el elemento 'a' más cercano que contiene el href y download
+	// (Asume que el botón está dentro o es el <a>)
+	var $link = $(this).closest('a');
+	
+	// Extraer los atributos clave
+	var data_photo_url = $link.attr('href');
+	var default_filename = $link.attr('download'); // Usa el nombre que ya definiste ("imageia.jpg")
+
+	// Verificar si existe la URL
+	if (data_photo_url && data_photo_url.trim().length > 0) {
+		
+		// 1. Crear un nuevo elemento de enlace <a> temporal en memoria
+		var a = document.createElement('a');
+		
+		// 2. Asignar los atributos extraídos
+		a.href = data_photo_url;
+		
+		// 3. Asignar el nombre de archivo sugerido para el diálogo "Guardar como..."
+		// Si ya definiste download="imageia.jpg" en el HTML, lo usa.
+		a.download = default_filename || 'imagen_descargada.png'; 
+		
+		// 4. Simular el clic en el enlace temporal para forzar la descarga
+		document.body.appendChild(a);
+		a.click();
+		
+		// 5. Limpiar el elemento del DOM
+		document.body.removeChild(a);
+
+		console.log(`Descarga iniciada para: ${a.download}`);
+		
+	} else {
+		console.warn("Error: No se encontró la URL de la imagen en el enlace.");
+	}
+}
+$(".btn-descargar-image").on('click', descargarImagen); 
 function generaTitle() {
 	var v01 = validaSelect("#cbo_tipo_articulo");
 	//var v02 = validaSelect("#txt_tema");
@@ -144,9 +185,8 @@ function generaContenido() {
 }
 function descargarContenido() {
 	var v01 = validaSelect("#cbo_tipo_articulo");
-	var v02 = validaSelect("#txt_tema");
-	var v03 = validaSelect("#txt_titulo");
-	var total = v01 + v02 + v03;
+	var v02 = validaSelect("#txt_titulo");
+	var total = v01 + v02;
 
 	if (total == 0) {
 		// Datos
@@ -208,6 +248,115 @@ function descargarContenido() {
 		});
 	}
 }
+function descargarContenidoHTML() {
+	var v01 = validaSelect("#cbo_tipo_articulo");
+	var v02 = validaSelect("#txt_titulo");
+	var total = v01 + v02;
+
+	if (total == 0) {
+		// Datos
+		var data_tipo = $("#cbo_tipo_articulo").val();
+		var data_tema = $("#txt_tema").val();
+		var data_titulo = $("#txt_titulo").val();
+		var data_keyword = $("#txt_keyword").val();
+		var data_content = $("#txt_content").val();
+
+		// ⚠️ INICIAMOS LA CARGA VISUAL AQUÍ SI ES NECESARIO
+
+		$.ajax({
+			url: "download-html",
+			type: 'POST',
+			data: {
+				tipo: data_tipo,
+				tema: data_tema,
+				titulo: data_titulo,
+				content: data_content,
+				keyword: data_keyword
+			},
+			// 🛠️ CONFIGURACIÓN CLAVE PARA DESCARGA DE ARCHIVOS BINARIOS
+			xhrFields: {
+				responseType: 'blob' // Indica a jQuery que espere una respuesta binaria (archivo)
+			},
+			success: function (blob, status, xhr) {
+				// El backend debe enviar el Content-Disposition header con el nombre del archivo.
+
+				// 1. Obtener el nombre del archivo (si el backend lo proporciona)
+				// Usaremos un nombre por defecto si no se puede extraer.
+				var fileName = "articulo.html";
+				var disposition = xhr.getResponseHeader('Content-Disposition');
+				if (disposition && disposition.indexOf('attachment') !== -1) {
+					var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+					var matches = filenameRegex.exec(disposition);
+					if (matches != null && matches[1]) fileName = matches[1].replace(/['"]/g, '');
+				}
+
+				// 2. Crear una URL de descarga temporal para el Blob
+				var url = window.URL.createObjectURL(blob);
+
+				// 3. Crear un enlace oculto y simular un clic
+				var a = document.createElement('a');
+				a.href = url;
+				a.download = fileName; // Nombre del archivo
+				document.body.appendChild(a);
+				a.click();
+
+				// 4. Limpiar
+				window.URL.revokeObjectURL(url);
+				a.remove();
+
+				// ⚠️ QUITAR LA CARGA VISUAL AQUÍ SI ES NECESARIO
+			},
+			error: function (xhr, status, error) {
+				console.error('Error al descargar el archivo Word:', error);
+				// ⚠️ QUITAR LA CARGA VISUAL AQUÍ SI ES NECESARIO
+			}
+		});
+	}
+}
+function descargarImagen() {
+	// Obtener la URL firmada de Google Cloud Storage
+	var data_photo = $("#txt_image").val();
+	
+	// Verificar si la URL existe y no está vacía
+	if (data_photo && data_photo.trim().length > 0) {
+		
+		// 1. Crear un elemento de enlace <a>
+		var a = document.createElement('a');
+		a.href = data_photo;
+		
+		// 2. LÓGICA PARA UN NOMBRE DE ARCHIVO PREDETERMINADO INTELIGENTE
+		try {
+			// Creamos un objeto URL para analizar la cadena
+			var urlObj = new URL(data_photo);
+			
+			// Obtenemos el componente de ruta (pathname)
+			var path = urlObj.pathname;
+			
+			// Extraemos el nombre del archivo después del último '/'
+			var defaultName = path.substring(path.lastIndexOf('/') + 1);
+			
+			// Asignamos el nombre extraído. Si falla, usamos un nombre genérico.
+			a.download = defaultName || 'imagen_descargada.png'; 
+			
+		} catch (e) {
+			// Si new URL falla (raro con URLs válidas), usamos un nombre genérico
+			a.download = 'imagen_descargada.png';
+			console.error("Fallo al parsear la URL, usando nombre por defecto.", e);
+		}
+		
+		// 3. Simular el clic para iniciar la descarga (Guardar como...)
+		document.body.appendChild(a);
+		a.click();
+		
+		// 4. Limpiar el elemento del DOM
+		document.body.removeChild(a);
+
+		console.log("Descarga de URL iniciada con sugerencia de 'Guardar como...'.");
+		
+	} else {
+		console.warn("No se encontraron datos válidos de imagen para descargar.");
+	}
+}
 function guardarContenido() {
 
 }
@@ -215,7 +364,8 @@ $("#select-tipo-articulo").html("<div class='loading'><div class='lds-ellipsis'>
 $("#select-tipo-articulo").load("select-tipo-contenido");
 $("#main").on("click", "#btn-generar-title", generaTitle);
 $("#main").on("click", "#btn-generar", generaContenido);
-$("#main").on("click", "#btn-descargar", descargarContenido);
+$("#main").on("click", ".btn-descargar-word", descargarContenido);
+$("#main").on("click", ".btn-descargar-html", descargarContenidoHTML);
 $("#main").on("click", "#btn-save", guardarContenido);
 /*popup*/
 // Función para abrir el popup
@@ -301,11 +451,13 @@ window.addEventListener('DOMContentLoaded', function () {
 	const demoButton = document.querySelector('.popup-btn-open');
 	demoButton.addEventListener('click', function () {
 		var data_keyword = $("#txt_keyword").val();
+		var data_photo = $("#txt_image").val();
 		var data_content = $("#txt_content").val();
 		//var data_content = exampleContent;
 		console.log(data_keyword);
 		console.log(data_content);
 		$("#article-container").html(data_content);
+		$("#article-photo").css("background-image", "url(" + data_photo + ")");
 		/*$.ajax({
 			url: "generated-html",
 			type: 'POST',
@@ -370,13 +522,6 @@ document.addEventListener('keydown', function (e) {
 		if (popup.classList.contains('active')) {
 			closeGallery();
 		}
-	}
-});
-
-// Buscar con Enter
-document.getElementById('search-input').addEventListener('keypress', function (e) {
-	if (e.key === 'Enter') {
-		searchImages();
 	}
 });
 
