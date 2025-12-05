@@ -790,7 +790,7 @@ def download_generated_html(brand_id, proyecto_id):
 
 @cltarticle_bp.route('generated-image', methods=["GET", "POST"])
 def generateImageIA(brand_id,proyecto_id):
-	data_prompt = request.args.get('promt', '')
+	data_prompt = request.values.get('promt', '')
 	data_bytes, mime_type = generar_imagen_imagen4(data_prompt)
 
 	if data_bytes is None:
@@ -844,7 +844,7 @@ def generateImageIA(brand_id,proyecto_id):
 		# Esto captura errores de GCS (conexión, permisos, etc.)
 		return jsonify({"error": f"Error al guardar o firmar la URL: {str(e)}"}), 500
 
-@cltarticle_bp.route('generated-promt', methods=["GET"])
+@cltarticle_bp.route('generated-promt', methods=["GET","POST"])
 def generatePromtImageIA(brand_id, proyecto_id):
 	# 1. RECUPERAR PARÁMETROS DE LA SOLICITUD GET
 	# 'request' debe estar importado y disponible aquí.

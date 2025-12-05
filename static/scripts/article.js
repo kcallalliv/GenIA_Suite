@@ -27,7 +27,7 @@ function generaImagen() {
 		//genera promt
 		$.ajax({
 			url: "generated-promt",
-			type: 'GET',
+			type: 'POST',
 			data: {
 				tipo: data_tipo,
 				description: data_description,
@@ -42,7 +42,7 @@ function generaImagen() {
 				//Genera Imagen
 				$.ajax({
 					url: "generated-image",
-					type: 'GET',
+					type: 'POST',
 					data: {
 						tipo: data_tipo,
 						tema: data_tema,
