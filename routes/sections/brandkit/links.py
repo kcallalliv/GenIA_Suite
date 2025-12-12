@@ -29,9 +29,10 @@ import traceback # Asume que pandas está importado
 import uuid
 #llamar a config
 from routes.models import db, Configuracion, Links
-from routes.config.geniaconfig import bq_client, bq_table_config, bq_table_assets, bucket_name, storage_client, validar_sesion
+from routes.config.geniaconfig import bq_client, bq_table_config, bq_table_assets, bucket_name, storage_client, validar_sesion, generarCodigo
 
 links_bp = Blueprint('links_bp', __name__, url_prefix='/brand/<string:brand_id>/proyectos/<string:proyecto_id>/brandkit/links/')
+base_api_url = "https://backend-api-1079186964678.us-central1.run.app"
 
 #===Listado===
 @links_bp.route('/')
@@ -105,6 +106,15 @@ def links_edit(brand_id,proyecto_id):
 		return render_template('sections/brandkit/links/editar.html', data=data,selectPermiso=selectPermiso,pid=pid)
 	else:
 		return 'No se encontraron usuarios con los criterios especificados.'
+
+#===Test===
+@links_bp.route('/test')
+@validar_sesion
+def bklinks_test(brand_id,proyecto_id):
+	url_a_analizar = "https://elcomercio.pe/publirreportaje/viajar-conectado-con-claro-es-un-buen-plan-noticia/"
+	resultado_api = procesar_noticia_web(url_a_analizar)
+	return jsonify(resultado_api)
+
 #===Save===
 @links_bp.route('save', methods=['POST'])
 @validar_sesion
@@ -113,16 +123,29 @@ def links_save(brand_id,proyecto_id):
 		link_name = request.form.get('link_name')
 		link_url = request.form.get('link_url')
 		link_estado = 1
+		link_json_string = ""
+		link_tipo = detectar_tipo_url(link_url)
+		if link_tipo == "youtube":
+			link_json = procesar_youtube_video(link_url)
+			link_json_string = json.dumps(link_json)
+		elif link_tipo == "articulo":
+			link_json = procesar_noticia_web(link_url)
+			link_json_string = json.dumps(link_json)
+		else:
+			link_json_string = ""
+
 		pid = request.values.get('txt_pid')
 
 		if linkExiste(link_url):
 			session['mensaje'] = "El link ya existe. Por favor, usa otro email."
-			return redirect('/usuarios/agregar')
+			return redirect('../links/agregar')
 		else:
 			new_data = Links(
 				link_name=link_name,
 				link_url=link_url,
 				link_estado=link_estado,
+				link_json=link_json_string,
+				link_tipo=link_tipo,
 				proyecto_id = pid
 			)
 			db.session.add(new_data)
@@ -138,13 +161,23 @@ def links_update(brand_id,proyecto_id):
 		link_id = request.form.get('link_id')
 		link_name = request.form.get('link_name')
 		link_url = request.form.get('link_url')
-		pid = request.values.get('txt_pid')
+		link_tipo = detectar_tipo_url(link_url)
+		if link_tipo == "youtube":
+			link_json = procesar_youtube_video(link_url)
+			link_json_string = json.dumps(link_json)
+		elif link_tipo == "articulo":
+			link_json = procesar_noticia_web(link_url)
+			link_json_string = json.dumps(link_json)
+		else:
+			link_json_string = ""
 
 		if not linkExiste(link_url, link_id):
 			link = Links.query.filter_by(link_id=link_id).first()
 			if link:
 				link.link_name = link_name
 				link.link_url = link_url
+				link.link_json = link_json_string
+				link.link_tipo = link_tipo
 				db.session.commit()
 			session['mensaje'] = "Se actualizaron los datos"
 			#return redirect('/brandkit/links')
@@ -208,3 +241,38 @@ def verEstado(valor):
 	else:
 		result = "desconocido"  # O el valor que prefieras para casos no manejados
 	return result
+
+def procesar_youtube_video(youtube_url: str):
+	endpoint = f"{base_api_url}/ingest/youtube"
+	headers = {"Content-Type": "application/json"}
+	payload = {"url": youtube_url}
+	
+	try:
+		response = requests.post(endpoint, headers=headers, json=payload)
+		response.raise_for_status() 
+		return response.json()
+	except requests.exceptions.RequestException:
+		return {"status": "error", "message": "Fallo al procesar YouTube"}
+
+def procesar_noticia_web(web_url: str):
+	endpoint = f"{base_api_url}/ingest/web"
+	headers = {"Content-Type": "application/json"}
+	payload = {"url": web_url}
+	try:
+		response = requests.post(endpoint, headers=headers, json=payload)
+		response.raise_for_status() 
+		return response.json()
+	except requests.exceptions.RequestException as e:
+		if 'response' in locals() and response is not None:
+			 print(f"Respuesta de la API (código {response.status_code}): {response.text}")
+		return None
+
+def detectar_tipo_url(url: str) -> str:
+	patron_youtube = r"^(https?://)?(www\.|m\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)"
+	patron_url_web = r"^(https?://)"
+	if re.search(patron_youtube, url, re.IGNORECASE):
+		return "youtube"
+	elif re.search(patron_url_web, url, re.IGNORECASE):
+		return "articulo"
+	else:
+		return "desconocido"

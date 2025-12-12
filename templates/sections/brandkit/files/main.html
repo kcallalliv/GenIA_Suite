@@ -186,7 +186,7 @@ const uploadTile = document.querySelector('.tile-upload');
 				}
 			});
 			
-			fetch('/brandkit/files/save', {
+			fetch('save', {
 				method: 'POST',
 				body: formData,
 			})

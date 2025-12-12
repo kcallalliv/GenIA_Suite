@@ -18,6 +18,8 @@ class Links(db.Model):
 	link_name = db.Column(db.String(255), nullable=False)
 	link_url = db.Column(db.String(255), nullable=False)
 	link_estado = db.Column(db.Integer, nullable=True)
+	link_json = db.Column(db.Text, nullable=False)
+	link_tipo = db.Column(db.String(255), nullable=False)
 	proyecto_id = db.Column(db.String(255), primary_key=False)
 
 class Configuracion(db.Model):
@@ -38,6 +40,7 @@ class Assets(db.Model):
 	asset_type = db.Column(db.String(255), nullable=False)
 	asset_ext = db.Column(db.String(255), nullable=False)
 	asset_fecha = db.Column(db.DateTime, nullable=False)
+	asset_tags = db.Column(db.Text, nullable=False)
 	asset_estado = db.Column(db.Integer, nullable=True)
 	proyecto_id = db.Column(db.String(255), nullable=False)
 

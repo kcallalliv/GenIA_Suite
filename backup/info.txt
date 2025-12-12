@@ -1,4 +1,7 @@
 tener en cuentas agreagar fuente de datos en en proyecto(brandkit)
+Routes
+Cambiar el boton
+bordes negros, texto
 
 localhost
 gcloud auth application-default login

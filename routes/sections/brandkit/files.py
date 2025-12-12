@@ -29,23 +29,23 @@ import uuid
 from routes.models import db, Assets, Configuracion
 from routes.config.geniaconfig import bq_client, bq_table_config, bq_table_assets, bucket_name, storage_client, validar_sesion, fechaActual
 
-bkfiles_bp = Blueprint('bkfiles_bp', __name__)
+bkfiles_bp = Blueprint('bkfiles_bp', __name__, url_prefix='/brand/<string:brand_id>/proyectos/<string:proyecto_id>/brandkit/files/')
+base_api_url = "https://backend-api-1079186964678.us-central1.run.app"
 
 #===Listado===
-@bkfiles_bp.route('/brandkit/files')
+@bkfiles_bp.route('/')
 @validar_sesion
-def bkimages_main():
-	pid = request.values.get('pid')
-	lista = listarFiles(pid)
-	return render_template('sections/brandkit/files/main.html',lista= lista,generar_url_firmada=generar_url_firmada,pid=pid)
+def bkfiles_main(brand_id,proyecto_id):
+	lista = listarFiles(proyecto_id)
+	return render_template('sections/brandkit/files/main.html',lista= lista,generar_url_firmada=generar_url_firmada,pid=proyecto_id)
 
 #===User Save===
-@bkfiles_bp.route("/brandkit/files/save", methods=["GET", "POST"])
+@bkfiles_bp.route("/save", methods=["GET", "POST"])
 @validar_sesion
-def bkimages_save():
+def bkfiles_save(brand_id,proyecto_id):
 	if request.method == 'POST':
 		existe_cambios = 0
-		pid = request.form.get('pid')
+		pid = proyecto_id
 		data_info = request.form.get('data_info')
 		uploaded_files = request.files.getlist("photos[]")
 		# Proceso de actualización
@@ -113,10 +113,20 @@ def gsfile_upload(file, uploader,pid):
 		name_archivo = f"{fecha}_{uploader}_{uuid.uuid4().hex}"
 		name_fileext = f"{name_archivo}.{ext}"
 		nombre_archivo = f"files/{name_fileext}"
-		# Subir a Cloud Storage
+		# 1. Subir a Cloud Storage
 		bucket = storage_client.bucket(bucket_name)
 		blob = bucket.blob(nombre_archivo)
+		file.seek(0)
 		blob.upload_from_file(file)
+		# 2. Llamar a la API de análisis
+		api_result = procesar_file_ingest(file)
+		# 3. Serializar el resultado para guardar en la DB
+		if api_result.get('status') == 'success':
+			asset_json_string = json.dumps(api_result)
+			message = f"Archivo {nombre_archivo} subido y analizado."
+		else:
+			asset_json_string = json.dumps(api_result)
+			message = f"Archivo subido, pero falló el análisis de la API."
 		#datos
 		asset_name = file.filename
 		asset_value = name_archivo
@@ -135,6 +145,7 @@ def gsfile_upload(file, uploader,pid):
 			asset_ext = asset_ext,
 			asset_fecha = asset_fecha,
 			asset_estado = asset_estado,
+			asset_tags = asset_json_string,
 			proyecto_id = session_id
 		)
 		db.session.add(new_data)
@@ -142,6 +153,27 @@ def gsfile_upload(file, uploader,pid):
 		return {"status": "success", "message": f"Archivo {nombre_archivo} subido correctamente"}
 	except Exception as e:
 		return {"status": "error", "message": f"Error al subir el archivo: {e}"}
-def generate_cod_id():
-	new_uuid = uuid.uuid4()
-	return new_uuid.hex
+
+def procesar_file_ingest(file_object):
+	endpoint = f"{base_api_url}/ingest/file"
+	if not file_object.filename:
+		return {"status": "error", "message": "Objeto de archivo inválido."}
+		
+	file_name = file_object.filename
+
+	try:
+		content_type = file_object.content_type if hasattr(file_object, 'content_type') else 'application/octet-stream'
+		file_object.seek(0) 
+		files = {'file': (file_name, file_object.stream, content_type)} 
+		
+		response = requests.post(endpoint, files=files)
+		response.raise_for_status() 
+		return response.json()
+		
+	except requests.exceptions.RequestException as e:
+		error_detail = str(e)
+		if 'response' in locals() and response is not None:
+			 error_detail = f"Código {response.status_code}"
+		return {"status": "error", "message": "Fallo al subir archivo", "detail": error_detail}
+	except Exception as e:
+		return {"status": "error", "message": f"Error inesperado: {str(e)}"}

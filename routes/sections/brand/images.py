@@ -30,7 +30,6 @@ from routes.models import db, Assets, Assetsbrand, Configuracion
 from routes.config.geniaconfig import bq_client, bq_table_config, bq_table_assets, bucket_name, storage_client, validar_sesion, fechaActual, generarCodigo
 
 bimages_bp = Blueprint('bimages_bp', __name__, url_prefix='/brand')
-
 #===Main===
 @bimages_bp.route('/<string:brand_id>/images/')
 @validar_sesion
