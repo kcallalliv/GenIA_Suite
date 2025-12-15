@@ -52,6 +52,7 @@ class Assetsbrand(db.Model):
 	asset_value = db.Column(db.String(255), nullable=False)
 	asset_type = db.Column(db.String(255), nullable=False)
 	asset_ext = db.Column(db.String(255), nullable=False)
+	asset_tags = db.Column(db.Text, nullable=False)
 	asset_fecha = db.Column(db.DateTime, nullable=False)
 	asset_estado = db.Column(db.Integer, nullable=True)
 	brand_id = db.Column(db.String(255), nullable=False)

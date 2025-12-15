@@ -30,6 +30,7 @@ from routes.models import db, Assets, Assetsbrand, Configuracion
 from routes.config.geniaconfig import bq_client, bq_table_config, bq_table_assets, bucket_name, storage_client, validar_sesion, fechaActual, generarCodigo
 
 bfiles_bp = Blueprint('bfiles_bp', __name__, url_prefix='/brand')
+base_api_url = "https://backend-api-1079186964678.us-central1.run.app"
 
 #===Listado===
 @bfiles_bp.route('/<string:brand_id>/files/')
@@ -119,7 +120,17 @@ def gsfile_upload(file, uploader, brand_id):
 		# Subir a Cloud Storage
 		bucket = storage_client.bucket(bucket_name)
 		blob = bucket.blob(nombre_archivo)
+		file.seek(0)
 		blob.upload_from_file(file)
+		# 2. Llamar a la API de análisis
+		api_result = procesar_file_ingest(file)
+		# 3. Serializar el resultado para guardar en la DB
+		if api_result.get('status') == 'success':
+			asset_json_string = json.dumps(api_result)
+			message = f"Archivo {nombre_archivo} subido y analizado."
+		else:
+			asset_json_string = json.dumps(api_result)
+			message = f"Archivo subido, pero falló el análisis de la API."
 		#datos
 		asset_id = generarCodigo("AST")
 		asset_name = file.filename
@@ -139,6 +150,7 @@ def gsfile_upload(file, uploader, brand_id):
 			asset_ext = asset_ext,
 			asset_fecha = asset_fecha,
 			asset_estado = asset_estado,
+			asset_tags = asset_json_string,
 			brand_id=brand_id
 		)
 		db.session.add(new_data)
@@ -146,3 +158,27 @@ def gsfile_upload(file, uploader, brand_id):
 		return {"status": "success", "message": f"Archivo {nombre_archivo} subido correctamente"}
 	except Exception as e:
 		return {"status": "error", "message": f"Error al subir el archivo: {e}"}
+
+def procesar_file_ingest(file_object):
+	endpoint = f"{base_api_url}/ingest/file"
+	if not file_object.filename:
+		return {"status": "error", "message": "Objeto de archivo inválido."}
+		
+	file_name = file_object.filename
+
+	try:
+		content_type = file_object.content_type if hasattr(file_object, 'content_type') else 'application/octet-stream'
+		file_object.seek(0) 
+		files = {'file': (file_name, file_object.stream, content_type)} 
+		
+		response = requests.post(endpoint, files=files)
+		response.raise_for_status() 
+		return response.json()
+		
+	except requests.exceptions.RequestException as e:
+		error_detail = str(e)
+		if 'response' in locals() and response is not None:
+			 error_detail = f"Código {response.status_code}"
+		return {"status": "error", "message": "Fallo al subir archivo", "detail": error_detail}
+	except Exception as e:
+		return {"status": "error", "message": f"Error inesperado: {str(e)}"}
