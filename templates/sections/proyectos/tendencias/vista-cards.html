@@ -1,0 +1,43 @@
+<section class="trend-grid">
+	{% for grupo in listado %}
+	{% set valores_grafico = grupo.dias | map(attribute='metrica_value') | list | tojson %}
+	<div class="card-trend" data-chart-values="{{ grupo.valores_linea | tojson }}">
+		<div class="card-top">
+			<div class="card-header">
+				<h2>{{ grupo.keyword }}</h2>
+			</div>
+		</div>
+		<div class="card-body">
+			<div class="card-sidebar">
+				<div class="card-stats">
+					<div>
+						<p class="card-pos-label">{{grupo.max_metrica_type}}</p>
+						<div class="card-pos-value">
+							<p class="card-pos-number">{{grupo.max_metrica_value}}</p>
+							<span class="card-pos-trend">▲</span>
+						</div>
+					</div>
+					<div class="card-source">
+						<div class="card-source-dot"><img src="{{ url_for('static', filename='images/icon-' + grupo.fuente + '.png') }}" alt="Icono"></div>
+						<p class="card-source-name">{{ grupo.fuente }}</p>
+					</div>
+				</div>
+			</div>
+			<div class="card-main">
+				<div class="card-chart-wrapper">
+					<div class="card-tooltip"></div>
+					<canvas class="card-canvas"></canvas>
+				</div>
+				<div class="card-footer">
+					<span class="card-footer-text">{{ fecini}}</span></span>
+					<span class="card-footer-text">{{ fecfin }}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+</section>
+<script>
+const allCards = document.querySelectorAll('.card-trend');
+allCards.forEach(card => initEvolutionCard(card));
+</script>

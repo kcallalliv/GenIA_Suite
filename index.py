@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, g
 from routes.sections.sistema import register_sistema_bp
 from routes.sections.brand import register_brand_bp
 from routes.sections.brandkit import register_brandkit_bp
+from routes.sections.proyectos import register_proyectos_bp
 from routes.sections.colecciones import register_colecciones_bp
 from routes.sections.geniaauth import geniaauth_bp
 from routes.geniatext import geniatext_bp
@@ -55,6 +56,7 @@ app.register_blueprint(geniausers_bp)
 register_brand_bp(app)
 register_brandkit_bp(app)
 register_colecciones_bp(app)
+register_proyectos_bp(app)
 register_sistema_bp(app)
 
 if __name__ == '__main__':

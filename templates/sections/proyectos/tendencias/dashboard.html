@@ -1,0 +1,191 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<input type="hidden" id="txt_pid" name="txt_pid" value="{{ proyecto_id }}">
+	<div class="dashboard-container">
+		<!-- Top Controls -->
+		<div class="top-controls">
+			<div class="form-group">
+				<label class="form-label">Fuente</label>
+				<div class="form-select">
+					<div>
+						<select id="cbo_fuente" name="cbo_fuente">
+							<option value="">Selecciona fuente</option>
+							<option value="semrush">Semrush</option>
+							<option value="console">Seach Console</option>
+						</select>
+					</div>
+					<i class="dropdown-icon"></i>
+				</div>							
+			</div>
+			<div class="form-group">
+				<label class="form-label">Keyword Personalizada</label>
+				<div id="load-keyword" class="form-input-ia">
+					<input type="text" class="search-input" placeholder="Palabra clave" id="txt_keyword" name="txt_keyword">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="form-label">&nbsp;</label>
+				<button class="add-button" id="btn_addkeyword">
+					<span>Buscar</span>
+					<span class="material-icons">search</span>
+				</button>
+			</div>
+		</div>
+
+		<section class="dashboard-controls">
+			<div class="filters">
+				<label class="source-tag">
+					<input type="checkbox" value="semrush" checked>
+					<span>Semrush</span>
+				</label>
+				<label class="source-tag">
+					<input type="checkbox" value="console" checked>
+					<span>Google Search</span>
+				</label>
+				<label class="source-tag">
+					<input type="checkbox" value="trends" checked>
+					<span>Google Trends</span>
+				</label>
+			</div>
+		</section>
+
+		<div id="lst-tendencias">
+			
+		</div>
+</section>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/tendencias.css') }}">
+<script src="{{ url_for('static', filename='scripts/tendencias.js') }}"></script>
+<script>
+		/**
+		 * Renderiza el gráfico de forma estática (sin bucle de animación) para máximo rendimiento.
+		 */
+		function renderStaticChart(container) {
+			if (container.dataset.rendered === "true") return;
+			
+			const canvas = container.querySelector('.card-canvas');
+			if (!canvas) return;
+
+			const ctx = canvas.getContext('2d', { alpha: true });
+			const rawData = container.getAttribute('data-chart-values');
+			const data = rawData ? JSON.parse(rawData) : [0];
+			
+			// Configuración de dimensiones
+			const dpr = window.devicePixelRatio || 1;
+			const rect = canvas.getBoundingClientRect();
+			canvas.width = rect.width * dpr;
+			canvas.height = rect.height * dpr;
+			ctx.scale(dpr, dpr);
+
+			const width = rect.width;
+			const height = rect.height;
+			const paddingX = 15;
+			const chartWidth = width - (paddingX * 2);
+			const maxValue = Math.max(...data, 10) * 1.1;
+
+			const points = data.map((val, i) => ({
+				x: paddingX + (chartWidth / (data.length - 1)) * i,
+				y: (height - 15) - (val / maxValue) * (height - 30),
+				value: val
+			}));
+
+			// 1. Dibujar Área (Gradiente)
+			const grad = ctx.createLinearGradient(0, 0, 0, height);
+			grad.addColorStop(0, 'rgba(255, 165, 0, 0.15)');
+			grad.addColorStop(1, 'rgba(255, 165, 0, 0)');
+			
+			ctx.beginPath();
+			ctx.moveTo(points[0].x, height - 15);
+			points.forEach(p => ctx.lineTo(p.x, p.y));
+			ctx.lineTo(points[points.length - 1].x, height - 15);
+			ctx.fillStyle = grad;
+			ctx.fill();
+
+			// 2. Dibujar Línea
+			ctx.beginPath();
+			ctx.strokeStyle = '#ffa500';
+			ctx.lineWidth = 2.5;
+			ctx.lineCap = 'round';
+			ctx.lineJoin = 'round';
+			points.forEach((p, i) => {
+				if (i === 0) ctx.moveTo(p.x, p.y);
+				else ctx.lineTo(p.x, p.y);
+			});
+			ctx.stroke();
+
+			// 3. Dibujar Nodos finales (pequeños puntos blancos con borde naranja)
+			points.forEach(p => {
+				ctx.beginPath();
+				ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+				ctx.fillStyle = '#ffa500';
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+				ctx.fillStyle = '#ffffff';
+				ctx.fill();
+			});
+
+			// Marcar como renderizado y mostrar con CSS
+			container.dataset.rendered = "true";
+			container.classList.add('is-visible');
+
+			// Lógica de Tooltip integrada
+			const tooltip = container.querySelector('.card-tooltip');
+			canvas.onmousemove = (e) => {
+				const mouseX = e.offsetX;
+				let closest = points.reduce((prev, curr) => 
+					Math.abs(curr.x - mouseX) < Math.abs(prev.x - mouseX) ? curr : prev
+				);
+
+				if (Math.abs(closest.x - mouseX) < 20) {
+					tooltip.style.opacity = 1;
+					tooltip.style.left = closest.x + 'px';
+					tooltip.style.top = closest.y + 'px';
+					tooltip.textContent = closest.value;
+				} else {
+					tooltip.style.opacity = 0;
+				}
+			};
+			canvas.onmouseleave = () => tooltip.style.opacity = 0;
+		}
+
+		/**
+		 * INTERSECTION OBSERVER:
+		 * Solo renderiza las tarjetas cuando entran en el viewport.
+		 */
+		const appearanceObserver = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					renderStaticChart(entry.target);
+					// Una vez renderizada, dejamos de observar este elemento
+					appearanceObserver.unobserve(entry.target);
+				}
+			});
+		}, { threshold: 0.1 });
+
+		/**
+		 * MUTATION OBSERVER:
+		 * Vigila nuevas tarjetas inyectadas por AJAX/Python.
+		 */
+		const domObserver = new MutationObserver((mutations) => {
+			mutations.forEach(mutation => {
+				mutation.addedNodes.forEach(node => {
+					if (node.nodeType === 1) {
+						const cards = node.classList.contains('card-trend') ? [node] : node.querySelectorAll('.card-trend');
+						cards.forEach(card => appearanceObserver.observe(card));
+					}
+				});
+			});
+		});
+
+		// Inicialización
+		document.addEventListener('DOMContentLoaded', () => {
+			// Observar las tarjetas actuales
+			document.querySelectorAll('.card-trend').forEach(card => appearanceObserver.observe(card));
+			// Observar inyecciones futuras (AJAX)
+			domObserver.observe(document.body, { childList: true, subtree: true });
+		});
+	</script>
+{% endblock %}

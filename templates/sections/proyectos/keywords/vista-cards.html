@@ -1,0 +1,59 @@
+<section class="trend-grid">
+	{% if 'semrush' in listas and 'lista' in listas['semrush'] %}
+		{% set semlista = listas['semrush']['lista'] %} 
+		{% set semtipo = listas['semrush']['tipo'] %} 
+		{% for item in semlista %}
+			{% set myname = item['Keyword'] %}
+			{% set myposition = item['Posicion'] %}
+			{% set mymetrcia = item['Search_Volume'] %}
+			{% set myquery = semtipo+" "+myname %}
+			{% set myid = convierteBase64(myquery) %}
+			<div class="trend-card">
+				<a href="/proyectos/colecciones?id={{myid}}">
+				<div class="card-header">
+					<p>{{ myname }}</p>
+					<span class="lightning-icon"><img src="{{ url_for('static', filename='images/icon-semrush.png') }}"></span>
+				</div>
+				<div class="left">
+					<div class="card-stats">
+						<span class="percentage up">Posición ▲{{ myposition }}</span>
+					</div>
+					<p class="source-name">{{semtipo}}</p>
+				</div>
+				<div class="right">
+					<div class="card-number">{{ mymetrcia }}</div>
+				</div>
+				</a>				
+			</div>
+		{% endfor %}
+	{% endif %}
+	<!---Search Console-->
+	{% if 'google-search' in listas and 'lista' in listas['google-search'] %}
+		{% set searchlista = listas['google-search']['lista'] %} 
+		{% set searchtipo = listas['google-search']['tipo'] %} 
+		{% for item in searchlista %}
+			{% set myname = item['query'] %}
+			{% set myposition = item['avg_position_int'] %}
+			{% set mymetrcia = item['total_impressions'] %}
+			{% set myquery = searchtipo+" "+myname %}
+			{% set myid = convierteBase64(myquery) %}
+			<div class="trend-card">
+				<a href="/proyectos/colecciones?id={{myid}}">
+				<div class="card-header">
+					<p>{{ myname }}</p>
+					<span class="lightning-icon"><img src="{{ url_for('static', filename='images/icon-google.png') }}"></span>
+				</div>
+				<div class="left">
+					<div class="card-stats">
+						<span class="percentage up">Posición ▲{{ myposition }}</span>
+					</div>
+					<p class="source-name">{{searchtipo}}</p>
+				</div>
+				<div class="right">
+					<div class="card-number">{{ mymetrcia }}</div>
+				</div>
+				</a>
+			</div>
+		{% endfor %}
+	{% endif %}
+</section>

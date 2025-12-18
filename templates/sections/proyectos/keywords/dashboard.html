@@ -1,0 +1,112 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<input type="hidden" id="txt_pid" name="txt_pid" value="{{ proyecto_id }}">
+	<div class="dashboard-container">
+		<!-- Top Controls -->
+		<div class="top-controls">
+			<div class="form-group">
+				<label class="form-label">Fuente</label>
+				<div class="form-select">
+					<div>
+						<select id="cbo_fuente" name="cbo_fuente">
+							<option value="">Selecciona fuente</option>
+							<option value="semrush">Semrush</option>
+							<option value="search-console">Seach Console</option>
+						</select>
+					</div>
+					<i class="dropdown-icon"></i>
+				</div>							
+			</div>
+			<div class="form-group">
+				<label class="form-label">Keyword</label>
+				<div class="form-select">
+					<div id="load-selectkeyword">
+						<div id="load-cbo-keyword">
+							<select id="cbo_keyword" name="cbo_keyword">
+								<option value="">Selecciona una palabra</option>							
+							</select>
+						</div>
+					</div>
+					<i class="dropdown-icon"></i>
+				</div>							
+			</div>
+			<div class="form-group">
+				<label class="form-label">Keyword Personalizada</label>
+				<div id="load-keyword" class="form-input-ia">
+					<input type="text" class="search-input" placeholder="Palabra clave" id="txt_keyword" name="txt_keyword">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="form-label">&nbsp;</label>
+				<button class="add-button" id="btn_addkeyword">
+					<span>Agregar</span>
+					<span class="material-icons">add_circle_outline</span>
+				</button>
+			</div>
+		</div>
+
+		<section class="dashboard-controls">
+			<div class="filters">
+				<label class="source-tag">
+					<input type="checkbox" value="semrush" checked>
+					<span>Semrush</span>
+				</label>
+				<label class="source-tag">
+					<input type="checkbox" value="google search" checked>
+					<span>Google Search</span>
+				</label>
+				<label class="source-tag">
+					<input type="checkbox" value="custom" checked>
+					<span>Otros</span>
+				</label>
+			</div>
+		</section>
+
+		<!-- Table -->
+		<div class="table-container-view">
+			<div class="table-wrapper">
+				<table>
+					<thead>
+						<tr>
+							<th>
+								<div class="header-content">
+									<span class="material-icons">tag</span>
+									Keyword
+								</div>
+							</th>
+							<th>
+								<div class="header-content">
+									<span class="material-icons">analytics</span>
+									Fuente
+								</div>
+							</th>
+							<th>
+								<div class="header-content">
+									<span class="material-icons">emoji_events</span>
+									Posición
+								</div>
+							</th>
+							<th>
+								<div class="header-content">
+									<span class="material-icons">trending_up</span>
+									Metrica
+								</div>
+							</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id="load_keywords_rows">
+
+						<!-- Row 2 -->
+						
+					</tbody>
+				</table>
+			</div>
+		</div>
+</section>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/brandkit/keywords.css') }}">
+<script src="{{ url_for('static', filename='scripts/keywords.js') }}"></script>
+{% endblock %}

@@ -8,7 +8,6 @@ from .images import bkimages_bp
 from .info import bkdash_bp, bkinfo_bp
 from .links import links_bp
 from .proyectos import proyectos_bp
-from .tendencias import tendencias_bp
 from .colecciones import colecciones_bp
 from .integraciones import integraciones_bp
 
@@ -23,6 +22,5 @@ def register_brandkit_bp(app):
 	app.register_blueprint(bkinfo_bp)
 	app.register_blueprint(links_bp)
 	app.register_blueprint(proyectos_bp)
-	app.register_blueprint(tendencias_bp)
 	app.register_blueprint(colecciones_bp)
 	app.register_blueprint(integraciones_bp)

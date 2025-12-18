@@ -28,13 +28,13 @@ function updateProyecto(){
 		return false;
 	}
 }
-function loadCards(){
+function loadLista(){
 	var fuentes = [];
 	$('.source-tag input[type="checkbox"]:checked').each(function(){
-		fuentes.push($(this).val()); 
+		fuentes.push($(this).next('span').text().trim());
 	});
 	$("#lst-tendencias").html("<div class='loading'>cargando</div>");
-	$("#lst-tendencias").load("view-cards",{fuentes: fuentes});
+	$("#lst-tendencias").load("/proyectos/view-cards",{fuentes: fuentes});
 }
 function loadPapelera(){
 	var buscar = $("#txt_buscar").val();
@@ -115,9 +115,8 @@ function addKeyword(){
 		});
 	}
 }
-//loadListaKeywords();
-loadCards();
-$(".source-tag").click(loadCards);
+loadListaKeywords();
+$(".source-tag").click(loadListaKeywords);
 $("#btn-filtrar-papelera").click(loadPapelera);
 $("#form-proyecto-save").on("submit",saveProyecto);
 $("#form-proyecto-update").on("submit",updateProyecto);

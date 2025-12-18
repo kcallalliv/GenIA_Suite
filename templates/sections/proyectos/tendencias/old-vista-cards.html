@@ -1,0 +1,98 @@
+<section class="trend-grid">
+	{% if 'semrush' in listas and 'lista' in listas['semrush'] %}
+		{% set semlista = listas['semrush']['lista'] %} 
+		{% set semtipo = listas['semrush']['tipo'] %} 
+		{% for item in semlista %}
+			{% set myname = item['Keyword'] %}
+			{% set myposition = item['Posicion'] %}
+			{% set mymetrcia = item['Search_Volume'] %}
+			{% set myquery = semtipo+" "+myname %}
+			{% set myid = convierteBase64(myquery) %}
+			<div class="card-fixed bg-white rounded-2xl shadow-sm border border-gray-100 flex">
+				<!-- Sección Izquierda: Indicadores (Aprox 40% del ancho) -->
+				<div class="w-[130px] p-4 flex flex-col justify-between border-r border-gray-50">
+					<div>
+						<h3 class="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-1">Rendimiento</h3>
+						<h2 class="text-sm font-black text-gray-800 leading-tight">Visibilidad Digital</h2>
+					</div>
+
+					<div class="space-y-3">
+						<!-- Indicador Posición -->
+						<div>
+							<p class="text-[9px] text-gray-400 font-medium uppercase">Posición</p>
+							<div class="flex items-baseline gap-1">
+								<span class="text-2xl font-black text-gray-900">10</span>
+								<span class="text-[10px] text-emerald-500 font-bold">▲ 2</span>
+							</div>
+						</div>
+
+						<!-- Fuente -->
+						<div class="flex items-center gap-1.5">
+							<div class="w-2 h-2 rounded-full bg-orange-400"></div>
+							<p class="text-[10px] font-bold text-gray-600">Semrush</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Sección Derecha: Gráfico (Aprox 60% del ancho) -->
+				<div class="flex-grow flex flex-col relative bg-gray-50/30">
+					<div class="chart-container" id="container">
+						<div id="tooltip" class="tooltip"></div>
+						<canvas id="evolutionChart"></canvas>
+					</div>
+					<!-- Labels de tiempo sutiles al pie del gráfico -->
+					<div class="absolute bottom-2 left-0 w-full px-4 flex justify-between">
+						<span class="text-[8px] font-bold text-gray-300 uppercase">Inicio</span>
+						<span class="text-[8px] font-bold text-gray-300 uppercase">Actual</span>
+					</div>
+				</div>
+			</div>
+			<!--<div class="card-trend">
+				<a href="/proyectos/colecciones?id={{myid}}">
+				<div class="card-header">
+					<p>{{ myname }}</p>
+					<span class="lightning-icon"><img src="{{ url_for('static', filename='images/icon-semrush.png') }}"></span>
+				</div>
+				<div class="left">
+					<div class="card-stats">
+						<span class="percentage up">Posición ▲{{ myposition }}</span>
+					</div>
+					<p class="source-name">{{semtipo}}</p>
+				</div>
+				<div class="right">
+					<div class="card-number">{{ mymetrcia }}</div>
+				</div>
+				</a>				
+			</div>-->
+		{% endfor %}
+	{% endif %}
+	<!---Search Console-->
+	{% if 'google-search' in listas and 'lista' in listas['google-search'] %}
+		{% set searchlista = listas['google-search']['lista'] %} 
+		{% set searchtipo = listas['google-search']['tipo'] %} 
+		{% for item in searchlista %}
+			{% set myname = item['query'] %}
+			{% set myposition = item['avg_position_int'] %}
+			{% set mymetrcia = item['total_impressions'] %}
+			{% set myquery = searchtipo+" "+myname %}
+			{% set myid = convierteBase64(myquery) %}
+			<div class="trend-card">
+				<a href="/proyectos/colecciones?id={{myid}}">
+				<div class="card-header">
+					<p>{{ myname }}</p>
+					<span class="lightning-icon"><img src="{{ url_for('static', filename='images/icon-google.png') }}"></span>
+				</div>
+				<div class="left">
+					<div class="card-stats">
+						<span class="percentage up">Posición ▲{{ myposition }}</span>
+					</div>
+					<p class="source-name">{{searchtipo}}</p>
+				</div>
+				<div class="right">
+					<div class="card-number">{{ mymetrcia }}</div>
+				</div>
+				</a>				
+			</div>
+		{% endfor %}
+	{% endif %}
+</section>

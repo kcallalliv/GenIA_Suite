@@ -1,0 +1,29 @@
+{% extends "sections/template-proyectos.html" %}
+{% block title %}GenIA{% endblock %}
+{% block content %}
+<section class="content">
+	<section class="dashboard-controls">
+		<div class="filters">
+			<label>Fuentes disponibles</label>
+			<label class="source-tag">
+				<input type="checkbox" checked>
+				<span>Semrush</span>
+			</label>
+			<label class="source-tag">
+				<input type="checkbox" checked>
+				<span>Google Search</span>
+			</label>
+			<label class="source-tag">
+				<input type="checkbox" checked>
+				<span>Google Trends</span>
+			</label>
+			<button class="add-button">
+				<span>Crear</span>
+				<span class="material-icons">add</span>
+			</button>
+		</div>
+	</section>
+	<div id="lst-tendencias"></div>
+</section>
+<script src="{{ url_for('static', filename='scripts/keywords.js') }}"></script>
+{% endblock %}
