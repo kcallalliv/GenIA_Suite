@@ -41,7 +41,7 @@ from routes.config.geniaconfig import bq_client, bucket_name, storage_client, bq
 
 client = bigquery.Client(project="prd-claro-mktg-data-storage")
 
-cltarticle_bp = Blueprint('cltarticle_bp', __name__, url_prefix='/brand/<string:brand_id>/proyectos/<string:proyecto_id>/colecciones/article/')
+cltarticle_bp = Blueprint('cltarticle_bp', __name__, url_prefix='/brand/<string:brand_id>/proyectos/<string:proyecto_id>/keywords/article/')
 
 @cltarticle_bp.route('/')
 @validar_sesion

@@ -1,7 +1,7 @@
 <section class="trend-grid">
 	{% for grupo in listado %}
 	{% set valores_grafico = grupo.dias | map(attribute='metrica_value') | list | tojson %}
-	<div class="card-trend" data-chart-values="{{ grupo.valores_linea | tojson }}">
+	<div class="card-trend" data-chart-values="{{ grupo.valores_linea }}">
 		<div class="card-top">
 			<div class="card-header">
 				<h2>{{ grupo.keyword }}</h2>
@@ -14,8 +14,16 @@
 						<p class="card-pos-label">{{grupo.max_metrica_type}}</p>
 						<div class="card-pos-value">
 							<p class="card-pos-number">{{grupo.max_metrica_value}}</p>
-							<span class="card-pos-trend">▲</span>
+							<!--<span class="card-pos-trend">▲</span>-->
 						</div>
+						<div class="card-pos-value">
+							<p class="card-pos-metrica"><strong>{{grupo.max_metrica2_type}}:</strong> {{grupo.max_metrica2_value}}</p>
+						</div>
+						{% if grupo.max_metrica3_type != None %}
+						<div class="card-pos-value">
+							<p class="card-pos-metrica"><strong>{{grupo.max_metrica3_type}}:</strong> {{grupo.max_metrica3_value}}</p>
+						</div>
+						{% endif %}
 					</div>
 					<div class="card-source">
 						<div class="card-source-dot"><img src="{{ url_for('static', filename='images/icon-' + grupo.fuente + '.png') }}" alt="Icono"></div>
@@ -38,6 +46,5 @@
 	{% endfor %}
 </section>
 <script>
-const allCards = document.querySelectorAll('.card-trend');
-allCards.forEach(card => initEvolutionCard(card));
+redimensionaTexto(".card-header h2");
 </script>

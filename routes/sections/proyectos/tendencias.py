@@ -196,8 +196,8 @@ def tendencias_listarCardsAjaxTest(brand_id, proyecto_id):
 		dict_fuente_api = {f: "on" for f in fuentes_enviadas}
 		print("Objeto dict_fuente_api enviado:", dict_fuente_api)
 
-		fecini = request.form.get('fecini') or "2025-12-10"
-		fecfin = request.form.get('fecfin') or "2025-12-16"
+		fecini = request.form.get('fecini') or "2025-12-13"
+		fecfin = request.form.get('fecfin') or "2025-12-18"
 
 		
 		if keyword: payload['keyword'] = keyword
@@ -205,9 +205,8 @@ def tendencias_listarCardsAjaxTest(brand_id, proyecto_id):
 		if fecfin: payload['fecfin'] = fecfin
 		if dict_fuente_api: payload["fuente"] = dict_fuente_api
 
-		payload['keyword'] = ""
-		payload['fecini'] = "2025-12-10"
-		payload['fecfin'] = "2025-12-16"
+		payload['fecini'] = "2025-12-13"
+		payload['fecfin'] = "2025-12-18"
 
 	data_estructurada = []
 
@@ -234,9 +233,12 @@ def tendencias_listarCardsAjaxTest(brand_id, proyecto_id):
 					valor_numerico = int(valor_limpio) if valor_limpio else 0
 					valor_limpio02 = item.get('metrica2_value', '0')
 					valor_numerico02 = int(valor_limpio02) if valor_limpio02 else 0
+					valor_limpio03 = item.get('metrica3_value', '0')
+					valor_numerico03 = int(valor_limpio03) if valor_limpio03 else 0
 				except ValueError:
 					valor_numerico = 0
 					valor_numerico02 = 0
+					valor_numerico03 = 0
 
 				if key not in temp_dict:
 					temp_dict[key] = {
@@ -244,6 +246,10 @@ def tendencias_listarCardsAjaxTest(brand_id, proyecto_id):
 						'fuente': item.get('fuente'),
 						'max_metrica_value': valor_numerico,
 						'max_metrica_type': item.get('metrica_type'),
+						'max_metrica2_value': valor_numerico02,
+						'max_metrica2_type': item.get('metrica2_type'),
+						'max_metrica3_value': valor_numerico03,
+						'max_metrica3_type': item.get('metrica3_type'),
 						'dias': [] # Aquí enterán los objetos {date, otros campos}
 					}
 				else:
@@ -451,25 +457,42 @@ def lista_grafico(dias_array, fecini_str, fecfin_str):
 		print(f"Error en formato de fechas: {e}")
 		return []
 
+	# Diccionario de traducción para los nombres de los días
+	dias_semana = {
+		'Monday': 'Lun',
+		'Tuesday': 'Mar',
+		'Wednesday': 'Mié',
+		'Thursday': 'Jue',
+		'Friday': 'Vie',
+		'Saturday': 'Sáb',
+		'Sunday': 'Dom'
+	}
+
 	# 2. Crear un diccionario para búsqueda rápida { '2025-12-16': 24 }
-	# Forzamos a entero (int) para eliminar las comillas en el JSON
 	mapeo_datos = {}
 	for d in dias_array:
 		try:
-			# Convertimos primero a float por si viene "24.0" y luego a int
 			valor_numerico = int(float(d.get('metrica_value', 0)))
 			mapeo_datos[d['date']] = valor_numerico
 		except (ValueError, TypeError):
 			continue
 
-	# 3. Generar la lista completa día por día rellenando con 0
-	valores_completos = []
+	# 3. Generar la lista completa día por día con [NombreDía, Valor]
+	datos_grafico = []
 	fecha_actual = fecini
-	
+
 	while fecha_actual <= fecfin:
 		str_fecha = fecha_actual.strftime('%Y-%m-%d')
-		# Si la fecha no existe en los datos de la API, insertamos un 0
-		valores_completos.append(mapeo_datos.get(str_fecha, 0))
+		# Obtener el nombre del día en inglés y traducirlo
+		nombre_dia_en = fecha_actual.strftime('%A')
+		nombre_dia_es = dias_semana.get(nombre_dia_en, nombre_dia_en)
+		
+		# Obtener el valor o 0 si no existe
+		valor = mapeo_datos.get(str_fecha, 0)
+		
+		# Agregar el par [Día, Valor] a la lista final
+		datos_grafico.append([nombre_dia_es, valor])
+		
 		fecha_actual += timedelta(days=1)
 
-	return valores_completos
+	return datos_grafico

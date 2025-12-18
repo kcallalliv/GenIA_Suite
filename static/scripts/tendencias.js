@@ -29,12 +29,15 @@ function updateProyecto(){
 	}
 }
 function loadCards(){
+	var txt_keyword = $("#txt_keyword").val();
+	var txt_fecini = $("#txt_fecini").val();
+	var txt_fecfin = $("#txt_fecfin").val();
 	var fuentes = [];
 	$('.source-tag input[type="checkbox"]:checked').each(function(){
 		fuentes.push($(this).val()); 
 	});
 	$("#lst-tendencias").html("<div class='loading'>cargando</div>");
-	$("#lst-tendencias").load("view-cards",{fuentes: fuentes});
+	$("#lst-tendencias").load("view-cards",{fuentes: fuentes,keyword:txt_keyword,fecini:txt_fecini,fecfin:txt_fecfin});
 }
 function loadPapelera(){
 	var buscar = $("#txt_buscar").val();
@@ -50,6 +53,21 @@ function loadListaKeywords(){
 	});
 	$("#load_keywords_rows").html("<div class='loading'>cargando</div>");
 	$("#load_keywords_rows").load("view-table",{fuentes: fuentes,pid:pid});
+}
+function redimensionaTexto(selector) {
+	const titulos = document.querySelectorAll(selector);
+
+	titulos.forEach(titulo => {
+		const caracteres = titulo.innerText.length;
+		let fontSize = 16; // Tamaño base
+
+		if (caracteres > 42) {
+			fontSize = 11; // Muy largo
+		}else if (caracteres > 36) {
+			fontSize = 13; // Muy largo
+		}
+		titulo.style.fontSize = fontSize + "px";
+	});
 }
 function selectKeyword() {
 	var v01 = validaSelect("#cbo_keyword");
@@ -117,10 +135,39 @@ function addKeyword(){
 }
 //loadListaKeywords();
 loadCards();
-$(".source-tag").click(loadCards);
+//$(".source-tag").click(loadCards);
 $("#btn-filtrar-papelera").click(loadPapelera);
 $("#form-proyecto-save").on("submit",saveProyecto);
 $("#form-proyecto-update").on("submit",updateProyecto);
 $("#main").on("change","#cbo_fuente",selectFuente);
 $("#main").on("change","#cbo_keyword",selectKeyword);
-$("#main").on("click","#btn_addkeyword",addKeyword);
+$("#main").on("click","#btn_buscar",loadCards);
+$(function() {
+	var dateFormat = "yy-mm-dd",
+		from = $( "#txt_fecini" ).datepicker({
+			defaultDate: "+1w",
+			dateFormat: dateFormat,
+			changeMonth: true,
+			numberOfMonths: 1
+		}).on( "change", function() {
+			to.datepicker( "option", "minDate", getDate( this ) );
+		}),
+		to = $( "#txt_fecfin" ).datepicker({
+			defaultDate: "+1w",
+			dateFormat: dateFormat,
+			changeMonth: true,
+			numberOfMonths: 1
+		}).on( "change", function() {
+			from.datepicker( "option", "maxDate", getDate( this ) );
+		});
+ 
+	function getDate( element ) {
+		var date;
+		try {
+			date = $.datepicker.parseDate( dateFormat, element.value );
+		} catch( error ) {
+			date = null;
+		}
+		return date;
+	}
+});

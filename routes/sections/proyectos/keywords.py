@@ -45,7 +45,7 @@ def keywords_keywords(brand_id,proyecto_id):
 	if request.method == 'GET':
 		return render_template('sections/proyectos/keywords/dashboard.html', proyecto_id=proyecto_id)
 #===Save===
-@pkeywords_bp.route('keywords/addkeyword', methods=['POST'])
+@pkeywords_bp.route('addkeyword', methods=['POST'])
 @validar_sesion
 def keyword_save(brand_id,proyecto_id):
 	if request.method == 'POST':
@@ -240,7 +240,7 @@ def listarSearcConsole():
 #===============
 #===Table Add===
 #===============
-@pkeywords_bp.route('keywords/agregar', methods=['GET', 'POST'])
+@pkeywords_bp.route('agregar', methods=['GET', 'POST'])
 def addKeyword(brand_id,proyecto_id):
 	keyword_buscado = request.values.get('keyword')
 	try:
@@ -304,7 +304,7 @@ def addKeyword(brand_id,proyecto_id):
 #============
 #===Select===
 #============
-@pkeywords_bp.route('keywords/select-fuente', methods=['GET', 'POST'])
+@pkeywords_bp.route('select-fuente', methods=['GET', 'POST'])
 def selectKeyword(brand_id,proyecto_id):
 	fuente = request.values.get('fuente')
 	contenido_list = []
