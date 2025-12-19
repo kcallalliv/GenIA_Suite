@@ -319,7 +319,7 @@ td {
 
 /* Columna Izquierda (Stats) */
 .card-sidebar {
-	width: 135px;
+	width: 150px;
 	padding: 8px 16px 42px 16px;
 	display: flex;
 	flex-direction: column;
@@ -457,3 +457,8 @@ td {
 	color: #196fcb;
 	text-transform: uppercase;
 }
+
+.table-icon{width: 50px;height: 50px;display: inline-block;}
+.table-icon img{width: 100%;height: auto;}
+.table-name{display: inline-block;vertical-align: top;line-height: 3.4em;}
+.grafico-canvas{width: 150px;height: 40px;}

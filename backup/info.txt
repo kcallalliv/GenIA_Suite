@@ -1,4 +1,17 @@
 tener en cuentas agreagar fuente de datos en en proyecto(brandkit)
+semrush
+position(1 es mayor 1/100, menor a mayor),volumen(mayor a menor)
+===============
+console
+clics(mayor a menor), position(1 es mayor 1/100, menor a mayor)
+clics>0 & impresiones>0
+===============
+trends
+rank(mayor a menor), trafic (mayor a menor)
+mostrar 20 por fuente y consulta
+trafic >0
+filtar en base a las metrcias
+vista tabla
 Routes
 Cambiar el boton
 bordes negros, texto

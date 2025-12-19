@@ -1,71 +1,73 @@
-{% for lista in lista %}
-{% set myid = lista['keyword_id'] %}
-{% set myname = lista['keyword_name'] %}
-{% set mymetrica_name = lista['keyword_metrica_name'] %}
-{% set mymetrica_value = lista['keyword_metrica_value'] %}
-{% set myindicador_name = lista['keyword_indicador_name'] %}
-{% set myindicador_value = lista['keyword_indicador_value'] %}
-{% set myfuente = lista['keyword_fuente'] %}
-{% set myestado = lista['keyword_estado'] %}
-<tr>
-	<td>
-		<div style="display: flex; align-items: center; gap: 12px;">
-			<span class="keyword-tag">
-				{{ myname }}
-				<span class="material-icons">close</span>
-			</span>
-		</div>
-	</td>
-	<td>
-		<div class="metric-cell">
-			{% if myfuente == 'semrush' %}
-			<span class="material-icons" style="color: #ff7f50;">analytics</span>
-			{% endif %}
-			{% if myfuente == 'google search' %}
-			<i class="fab fa-google" style="color: #4285F4;"></i>
-			{% endif %}
-			{% if myfuente == 'custom' %}
-			<span class="material-icons">tag</span>
-			{% endif %}
-			{{ myfuente }}
-		</div>
-	</td>
-	<td>
-		<div class="metric-cell">
-			<span class="material-icons">arrow_upward</span>
-			{{ myindicador_name }}:
-			<span class="metric-value">{{ myindicador_value }}</span>
-			<div class="mini-chart">
-				<svg viewBox="0 0 80 30" preserveAspectRatio="none">
-					<polyline 
-						points="0,16 10,12 20,18 30,14 40,20 50,12 60,16 70,14 80,18" 
-						fill="none" 
-						stroke="#0077b6" 
-						stroke-width="2"/>
-				</svg>
-			</div>
-		</div>
-	</td>
-	<td>
-		<div class="metric-cell">
-			<span class="material-icons">trending_up</span>
-			{{ mymetrica_name }}:
-			<span class="metric-value">{{ mymetrica_value }}</span>
-			<div class="mini-chart">
-				<svg viewBox="0 0 80 30" preserveAspectRatio="none">
-					<polyline 
-						points="0,16 10,12 20,18 30,14 40,20 50,12 60,16 70,14 80,18" 
-						fill="none" 
-						stroke="#519e2b" 
-						stroke-width="2"/>
-				</svg>
-			</div>
-		</div>
-	</td>
-	<td>
-		<a class="arrow-button boton" href="../../colecciones/article?keyid={{myid}}">
-			<span class="material-icons">article</span><span class="texto">generar articulo</span>
-		</a>
-	</td>
-</tr>
-{% endfor %}
+<table>
+	<thead>
+		<tr>
+			<th>
+				<div class="header-content">
+					<span class="material-icons">tag</span>
+					Keyword
+				</div>
+			</th>
+			<th>
+				<div class="header-content">
+					<span class="material-icons">analytics</span>
+					Metrica 1
+				</div>
+			</th>
+			<th></th>
+			<th>
+				<div class="header-content">
+					<span class="material-icons">emoji_events</span>
+					Metrica 2
+				</div>
+			</th>
+			<th></th>
+			<th>
+				<div class="header-content">
+					<span class="material-icons">trending_up</span>
+					Metrica 3
+				</div>
+			</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody id="load_keywords_rows">
+		{% for grupo in listado %}
+		{% set valores_grafico = grupo.dias | map(attribute='metrica_value') | list | tojson %}
+		<tr>
+			<td>
+				<div class="table-icon"><img src="{{ url_for('static', filename='images/icon-' + grupo.fuente + '.png') }}" alt="Icono"></div>
+				<div class="table-name">{{ grupo.keyword }}</div>
+			</td>
+			<td><strong>{{grupo.max_metrica_type}}:</strong> {{grupo.max_metrica_value}}</td>
+			<td>
+				<div class="contenedor-grafico">
+					<!-- El atributo data-datos recibe el array de números -->
+					<canvas class="grafico-canvas" data-datos="{{ grupo.valores_linea }}" data-color="#3b82f6"></canvas>
+				</div>
+			</td>
+			<td><strong>{{grupo.max_metrica2_type}}:</strong> {{grupo.max_metrica2_value}}</td>
+			<td>
+				<div class="contenedor-grafico">
+					<!-- El atributo data-datos recibe el array de números -->
+					<canvas class="grafico-canvas" data-datos="{{ grupo.valores_linea2 }}" data-color="#14c981"></canvas>
+				</div>
+			</td>
+			<td>
+				{% if grupo.max_metrica3_type != None %}
+				<strong>{{grupo.max_metrica3_type}}:</strong> {{grupo.max_metrica3_value}}</td>
+				{% endif %}
+			<td>
+				{% if grupo.max_metrica3_type != None %}
+				<div class="contenedor-grafico">
+					<!-- El atributo data-datos recibe el array de números -->
+					<canvas class="grafico-canvas" data-datos="{{ grupo.valores_linea3 }}" data-color="#f5b342"></canvas>
+				</div>
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<script>
+	miGrafico(".grafico-canvas");
+</script>

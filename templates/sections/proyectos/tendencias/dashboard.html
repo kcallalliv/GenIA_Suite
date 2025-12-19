@@ -15,13 +15,13 @@
 			<div class="form-group">
 				<label class="form-label">Fecha Inicial</label>
 				<div id="load-keyword" class="form-input-ia">
-					<input type="text" class="search-input" placeholder="Palabra clave" id="txt_fecini" name="txt_fecini" autocomplete="off">
+					<input type="text" class="search-input" placeholder="Fecha Inicio" id="txt_fecini" name="txt_fecini" autocomplete="off">
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="form-label">Fecha Final</label>
 				<div id="load-keyword" class="form-input-ia">
-					<input type="text" class="search-input" placeholder="Palabra clave" id="txt_fecfin" name="txt_fecfin" autocomplete="off">
+					<input type="text" class="search-input" placeholder="Fecha Final" id="txt_fecfin" name="txt_fecfin" autocomplete="off">
 				</div>
 			</div>
 			<div class="form-group">
@@ -34,7 +34,7 @@
 					</label>
 					<label class="source-tag">
 						<input type="checkbox" value="console">
-						<span>Google Search</span>
+						<span>Search Console</span>
 					</label>
 					<label class="source-tag">
 						<input type="checkbox" value="trends">
@@ -187,5 +187,71 @@ document.addEventListener('DOMContentLoaded', () => {
 	document.querySelectorAll('.card-trend').forEach(card => appearanceObserver.observe(card));
 	domObserver.observe(document.body, { childList: true, subtree: true });
 });
+</script>
+<script>
+function miGrafico(selector) {
+	const canvasElements = document.querySelectorAll(selector);
+	const dpr = window.devicePixelRatio || 1;
+
+	canvasElements.forEach(canvas => {
+		const ctx = canvas.getContext('2d');
+		const rawData = canvas.getAttribute('data-datos');
+		const color = canvas.getAttribute('data-color') || '#3b82f6';
+		
+		let rawParsed;
+		try {
+			rawParsed = JSON.parse(rawData.replace(/'/g, '"'));
+		} catch (e) {
+			console.error("Error al parsear datos", e);
+			return;
+		}
+
+		// Normalizar datos: si es un array de arrays, extraer el segundo elemento (el valor numérico)
+		const data = rawParsed.map(item => Array.isArray(item) ? item[1] : item);
+
+		// Ajustar resolución y tamaño
+		const rect = canvas.getBoundingClientRect();
+		canvas.width = rect.width * dpr;
+		canvas.height = rect.height * dpr;
+		ctx.scale(dpr, dpr);
+
+		const w = rect.width;
+		const h = rect.height;
+		const p = 4; // Padding
+		const max = Math.max(...data);
+		const min = Math.min(...data);
+		const range = (max - min) || 1;
+
+		ctx.clearRect(0, 0, w, h);
+		
+		// Dibujar línea y relleno en un solo flujo
+		ctx.beginPath();
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 2;
+		ctx.lineJoin = 'round';
+		ctx.lineCap = 'round';
+
+		data.forEach((val, i) => {
+			const x = (i / (data.length - 1)) * (w - p * 2) + p;
+			const y = h - ((val - min) / range * (h - p * 2) + p);
+			if (i === 0) ctx.moveTo(x, y);
+			else ctx.lineTo(x, y);
+		});
+		
+		// Aplicar trazo de la línea
+		ctx.stroke();
+
+		// Crear degradado y cerrar área para relleno
+		ctx.lineTo((w - p), h);
+		ctx.lineTo(p, h);
+		ctx.closePath();
+		
+		const grd = ctx.createLinearGradient(0, 0, 0, h);
+		grd.addColorStop(0, color + '44');
+		grd.addColorStop(1, color + '00');
+		ctx.fillStyle = grd;
+		ctx.fill();
+	});
+}
 </script>
 {% endblock %}

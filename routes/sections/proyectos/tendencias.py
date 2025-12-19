@@ -262,22 +262,28 @@ def tendencias_listarCardsAjaxTest(brand_id, proyecto_id):
 					'metrica_value': valor_numerico,
 					'metrica_type': item.get('metrica_type'),
 					'brand_type': item.get('brand_type'),
-					'metrica2_value': valor_numerico02
+					'metrica2_type': item.get('metrica2_type'),
+					'metrica2_value': valor_numerico02,
+					'metrica3_type': item.get('metrica3_type'),
+					'metrica3_value': valor_numerico03
 				})
 
 			# 2. Convertir el diccionario a una lista limpia
 			data_estructurada = list(temp_dict.values())
 
 			# 3. Ordenar: Primero por Keyword alfabéticamente y luego cada subarray por fecha
-			data_estructurada.sort(key=lambda x: x['keyword'])
+			#data_estructurada.sort(key=lambda x: x['keyword'])
+			data_estructurada.sort(key=lambda x: (x['fuente'], x['max_metrica_value']))
 			for grupo in data_estructurada:
 				grupo['dias'].sort(key=lambda d: d['date']) # Orden ascendente de fecha
-				grupo['valores_linea'] = lista_grafico(grupo['dias'], fecini, fecfin)
+				grupo['valores_linea'] = lista_grafico(grupo['dias'], "metrica_value", fecini, fecfin)
+				grupo['valores_linea2'] = lista_grafico(grupo['dias'], "metrica2_value", fecini, fecfin)
+				grupo['valores_linea3'] = lista_grafico(grupo['dias'], "metrica3_value", fecini, fecfin)
 
 	except requests.exceptions.RequestException as e:
 		print(f"Error de conexión: {e}")
 	return render_template(
-		'sections/proyectos/tendencias/vista-cards.html',
+		'sections/proyectos/tendencias/vista-table.html',
 		listado=data_estructurada,fecini=fecini,fecfin=fecfin
 	)
 
@@ -442,55 +448,43 @@ def selectKeyword(brand_id,proyecto_id):
 def convierteBase64(text: str) -> str:
 	return base64.urlsafe_b64encode(text.encode('utf-8')).decode('ascii')
 
-def lista_grafico(dias_array, fecini_str, fecfin_str):
+def lista_grafico(dias_array, metrica_name, fecini_str, fecfin_str):
 	"""
-	Transforma datos parciales en una serie completa de enteros para el gráfico.
-	Ejemplo: Si el rango es de 5 días y solo hay dato el día 5, devuelve [0, 0, 0, 0, valor].
+	Transforma datos parciales en una serie completa para el gráfico.
+	metrica_name: puede ser 'metrica_value', 'metrica2_value', etc.
 	"""
 	try:
-		# 1. Convertir los límites del rango a objetos datetime
-		# Usamos los parámetros fecini y fecfin que enviaste en el POST
 		fecini = datetime.strptime(fecini_str, '%Y-%m-%d')
 		fecfin = datetime.strptime(fecfin_str, '%Y-%m-%d')
-			
 	except Exception as e:
 		print(f"Error en formato de fechas: {e}")
 		return []
 
-	# Diccionario de traducción para los nombres de los días
 	dias_semana = {
-		'Monday': 'Lun',
-		'Tuesday': 'Mar',
-		'Wednesday': 'Mié',
-		'Thursday': 'Jue',
-		'Friday': 'Vie',
-		'Saturday': 'Sáb',
-		'Sunday': 'Dom'
+		'Monday': 'Lun', 'Tuesday': 'Mar', 'Wednesday': 'Mié',
+		'Thursday': 'Jue', 'Friday': 'Vie', 'Saturday': 'Sáb', 'Sunday': 'Dom'
 	}
 
-	# 2. Crear un diccionario para búsqueda rápida { '2025-12-16': 24 }
+	# 1. Crear el mapeo dinámico usando la métrica especificada
 	mapeo_datos = {}
 	for d in dias_array:
 		try:
-			valor_numerico = int(float(d.get('metrica_value', 0)))
+			# Usamos metrica_name en lugar de la llave fija
+			valor_numerico = int(float(d.get(metrica_name, 0)))
 			mapeo_datos[d['date']] = valor_numerico
 		except (ValueError, TypeError):
 			continue
 
-	# 3. Generar la lista completa día por día con [NombreDía, Valor]
+	# 2. Generar la lista completa día por día
 	datos_grafico = []
 	fecha_actual = fecini
 
 	while fecha_actual <= fecfin:
 		str_fecha = fecha_actual.strftime('%Y-%m-%d')
-		# Obtener el nombre del día en inglés y traducirlo
 		nombre_dia_en = fecha_actual.strftime('%A')
 		nombre_dia_es = dias_semana.get(nombre_dia_en, nombre_dia_en)
 		
-		# Obtener el valor o 0 si no existe
 		valor = mapeo_datos.get(str_fecha, 0)
-		
-		# Agregar el par [Día, Valor] a la lista final
 		datos_grafico.append([nombre_dia_es, valor])
 		
 		fecha_actual += timedelta(days=1)
