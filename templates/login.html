@@ -18,28 +18,71 @@
 		<script src="http://vjs.zencdn.net/6.6.3/video.js"></script>
 		<!--<script src="scripts/flat-ui.js"></script>-->
 	</head>
-	<body>
-		<div class="panel">
-			<div class="align-father">
-				<div class="align-chidren">
-					<div class="login-vertical">
-						<div class="login-container">
-							<form id="form-login" method="post" action="/procesar">
-								<fieldset>
-									<legend style="text-align: center;">Genia Suite</legend>
-									<div>
-									  <input type="email" class="form-control" id="txt_usuario" name="txt_usuario" aria-describedby="emailHelp" placeholder="Enter email">
-									</div>
-									<div>
-									  <input type="password" class="form-control" id="txt_password" name="txt_password" placeholder="Password" autocomplete="off">
-									</div>
-									<button type="submit" class="btn btn-danger">Ingresar</button>
-								</fieldset>
-							</form>
+	<body class="login-page">
+		<div class="login-wrapper">
+			<div class="login-card">
+				<img
+					class="login-logo login-logo--claro"
+					src="https://storage.cloud.google.com/genia_suite_pictures/Claro%20Peru.jpg"
+					alt="Claro"
+				>
+				<p class="login-welcome">Bienvenido a</p>
+				<img
+					class="login-logo login-logo--genia"
+					src="https://storage.cloud.google.com/genia_suite_pictures/ChatGPT%20Image%209%20ene%202026%2C%2012_27_03%20p.m..png"
+					alt="GenIA Suite"
+				>
+				<form id="form-login" method="post" action="/procesar">
+					<div class="login-field">
+						<label for="txt_usuario">Usuario</label>
+						<input
+							type="email"
+							class="login-input"
+							id="txt_usuario"
+							name="txt_usuario"
+							autocomplete="username"
+							placeholder="Usuario"
+						>
+					</div>
+					<div class="login-field">
+						<label for="txt_password">Contraseña</label>
+						<div class="login-password">
+							<input
+								type="password"
+								class="login-input"
+								id="txt_password"
+								name="txt_password"
+								autocomplete="current-password"
+								placeholder="Contraseña"
+							>
+							<button class="password-toggle" type="button" aria-label="Mostrar contraseña">
+								<i class="bi bi-eye"></i>
+							</button>
 						</div>
 					</div>
-				</div>
+					<div class="login-options">
+						<label class="login-remember">
+							<input type="checkbox" name="remember_me">
+							<span>Recordarme</span>
+						</label>
+						<a class="login-forgot" href="#">¿Olvidaste tu contraseña?</a>
+					</div>
+					<button type="submit" class="login-submit">Ingresar</button>
+				</form>
 			</div>
 		</div>
-  </body>
+		<script>
+			const toggleButton = document.querySelector(".password-toggle");
+			const passwordInput = document.querySelector("#txt_password");
+			if (toggleButton && passwordInput) {
+				toggleButton.addEventListener("click", () => {
+					const isPassword = passwordInput.type === "password";
+					passwordInput.type = isPassword ? "text" : "password";
+					toggleButton.innerHTML = isPassword
+						? '<i class="bi bi-eye-slash"></i>'
+						: '<i class="bi bi-eye"></i>';
+				});
+			}
+		</script>
+	</body>
 </html>
