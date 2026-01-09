@@ -11,16 +11,16 @@
 		{% for lista in lista %}
 		{% set myid = lista['proyecto_id'] %}
 		{% set myname = lista['proyecto_name'] %}
-		{% set mydesc = lista['proyecto_name'] %}
+		{% set mydesc = lista['proyecto_description'] %}
 		{% set myestado = lista['proyecto_estado'] %}
 		<tr>
 			<td style="text-align:center;"><label for="checkbox_url_{{ loop.index }}">{{ loop.index }}</label></td>
-			<td><label for="checkbox_url_{{ loop.index }}">{{ myname }}</label></label></td>
-			<td><label for="checkbox_url_{{ loop.index }}">{{ mydesc }}</label></label></td>
+			<td><label for="checkbox_url_{{ loop.index }}">{{ myname }}</label></td>
+			<td><label for="checkbox_url_{{ loop.index }}">{{ mydesc }}</label></td>
 			<td style="text-align:center;">
-				<a href="{{myid}}/tendencias/" class="btn btn-secondary" style="width:100px;">Ver tendencias</a>
-				<a href="editar/{{myid}}" class="btn btn-secondary" style="width:50px;">Editar</a>
-				<a href="delete/{{myid}}" class="btn btn-danger" style="width:50px;">Borrar</a>
+				<a href="{{ url_for('ptendencias_bp.tendencias_dashboard', brand_id=brand_id, proyecto_id=myid) }}" class="btn btn-secondary" style="width:100px;">Ver tendencias</a>
+				<a href="{{ url_for('proyectos_bp.proyectos_edit', brand_id=brand_id, proyecto_id=myid) }}" class="btn btn-secondary" style="width:50px;">Editar</a>
+				<a href="{{ url_for('proyectos_bp.proyectos_delete', brand_id=brand_id, id=myid) }}" class="btn btn-danger" style="width:50px;">Borrar</a>
 			</td>
 		</tr>
 		{% endfor %}

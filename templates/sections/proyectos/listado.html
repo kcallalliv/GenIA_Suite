@@ -31,5 +31,10 @@
 
 			</main>
 		</section>
+{% if mensaje %}
+<script>
+	alert("{{ mensaje }}");
+</script>
+{% endif %}
 <script src="{{ url_for('static', filename='scripts/proyectos.js') }}"></script>
 {% endblock %}

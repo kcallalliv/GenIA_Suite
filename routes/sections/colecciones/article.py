@@ -20,6 +20,7 @@ import difflib
 import requests
 import random
 import string
+import base64
 from io import BytesIO
 import mimetypes
 from bs4 import BeautifulSoup
@@ -40,6 +41,8 @@ from routes.models import db, Assets, Keywords, Imagesia, Configuracion
 from routes.config.geniaconfig import bq_client, bucket_name, storage_client, bq_table_config, genai_client, bq_table_brands, validar_sesion, fechaActual, generarCodigo
 
 client = bigquery.Client(project="prd-claro-mktg-data-storage")
+IMAGE_API_URL = os.getenv("IMAGE_API_URL", "https://backend-api-1079186964678.us-central1.run.app/generate/image")
+IMAGE_API_MODEL_ID = os.getenv("IMAGE_API_MODEL_ID", "gemini-2.5-flash-image")
 
 cltarticle_bp = Blueprint('cltarticle_bp', __name__, url_prefix='/brand/<string:brand_id>/proyectos/<string:proyecto_id>/keywords/article/')
 
@@ -142,13 +145,18 @@ def generaContenidoIA(brand_id, proyecto_id):
 	tema = request.values.get('tema')
 	title = request.values.get('titulo')
 	keyword = request.values.get('keyword')
+	usar_contexto_google = request.values.get('usar_contexto_google') == "1"
 
 	# --- 2. Configuración y Contexto ---
 	json_contenido = get_json_tipo_contenido()
 	detalles_tipo = json_contenido.get(tipo_contenido, {})
 	intencion = detalles_tipo.get("intencion", "Contratar o mejorar servicio")
 	
-	contexto_vertex = obtener_contexto_vertex(keyword)
+	contexto_vertex = ""
+	contexto_label = "INFORMACIÓN DE BASE"
+	if usar_contexto_google:
+		contexto_vertex = obtener_contexto_google_search(keyword)
+		contexto_label = "INFORMACIÓN DE BASE (Google Search)"
 	urls_df = get_urls_existentes()
 	similares_df = get_urls_similares_por_keyword(keyword, urls_df)
 	sugerencias_urls = elegir_urls_relevantes_con_gemini(keyword, similares_df)
@@ -236,7 +244,7 @@ def generaContenidoIA(brand_id, proyecto_id):
 
 			f"{instruccion_producto}\n\n"
 
-			f"**INFORMACIÓN DE BASE (Vertex AI):**\n{contexto_vertex}\n\n"
+			f"**{contexto_label}:**\n{contexto_vertex}\n\n"
 
 			"**REGLAS DE REDACCIÓN Y ESTILO (ESTRICTAS):**\n"
 			"1. **CAPITALIZACIÓN (Sentence Case):** Está prohibido usar MAYÚSCULAS SOSTENIDAS en títulos<h1> o subtítulos<h2>. Usa siempre 'Tipo oración' (Ej: 'Internet en casa: Lo que necesitas saber'). Solo la primera letra va en mayúscula.\n"
@@ -428,6 +436,27 @@ def obtener_contexto_vertex(keyword):
 		
 		print(f"ERROR: obtener_contexto_vertex falló con: {e}")
 		return f"Error al obtener contexto: {e}"
+
+def obtener_contexto_google_search(keyword):
+	print(f"INFO: Obtener contexto con Google Search tool para keyword: '{keyword}'")
+	try:
+		tools = [types.Tool(google_search=types.GoogleSearch())]
+		prompt = (
+			"Usa Google Search para encontrar contexto reciente y relevante en español. "
+			f"Keyword: {keyword}. Resume en 3-5 viñetas con datos útiles y concretos."
+		)
+		response = genai_client.models.generate_content(
+			model="gemini-2.0-flash-001",
+			contents=prompt,
+			config=types.GenerateContentConfig(
+				tools=tools,
+				temperature=0.2
+			)
+		)
+		return response.text.strip()
+	except Exception as e:
+		print(f"ERROR: obtener_contexto_google_search falló con: {e}")
+		return f"Error al obtener contexto (Google Search): {e}"
 #Html Select json
 @cltarticle_bp.route('select-tipo-contenido', methods=['GET', 'POST'])
 def get_tipo_contenido(brand_id,proyecto_id):
@@ -469,13 +498,15 @@ def get_tipo_contenido(brand_id,proyecto_id):
 		return f"Error interno del servidor: {e}", 500
 
 #Crear Documento HTML
-def crear_html(texto_contenido, name_file):
+def crear_html(texto_contenido, name_file, image_url=None):
 	"""
 	Crea un buffer BytesIO conteniendo el texto de entrada (texto_contenido)
 	sin ninguna modificación, simulando la generación de un archivo .txt.
 	"""
 	# 1. Crear un buffer en memoria para el archivo.
 	buffer = BytesIO()
+	if image_url:
+		texto_contenido = f"<img src=\"{image_url}\" alt=\"imagen\" />\n" + texto_contenido
 	
 	# 2. Escribir el texto de entrada (HTML/Texto) tal cual.
 	# Es esencial codificar la cadena de texto (str) a bytes para escribir en BytesIO.
@@ -487,7 +518,7 @@ def crear_html(texto_contenido, name_file):
 	return buffer
 
 #Crear Documento Word
-def crear_docx(texto_contenido, name_file):
+def crear_docx(texto_contenido, name_file, image_url=None):
 	# -----------------------------------------------------
 	# FASE 1: CONVERSIÓN de HTML a MARCADO INTERNO (CORREGIDA)
 	# -----------------------------------------------------
@@ -611,6 +642,7 @@ def crear_docx(texto_contenido, name_file):
 	document = Document()
 	inferred_keyword = name_file.replace(".docx", "").replace("_", " ").title()
 	in_url_section = False
+	image_inserted = False
 	
 	for line in lines:
 		line = line.strip()
@@ -626,6 +658,15 @@ def crear_docx(texto_contenido, name_file):
 			else:
 				document.add_heading(title_text, level=1)
 				in_url_section = False
+				if image_url and not image_inserted:
+					try:
+						response = requests.get(image_url, timeout=20)
+						response.raise_for_status()
+						image_stream = BytesIO(response.content)
+						document.add_picture(image_stream, width=Inches(6))
+						image_inserted = True
+					except Exception as e:
+						print(f"ERROR al insertar imagen en docx: {e}")
 
 		elif line.startswith('[intro]'):
 			intro_text = line.replace('[intro]', '').strip()
@@ -751,13 +792,14 @@ def download_generated_article(brand_id, proyecto_id):
 	# Recuperar el contenido guardado en la sesión
 	texto_plain_for_docx = request.values.get('content')
 	keyword_for_docx = request.values.get('keyword')
+	image_url = request.values.get('image_url')
 	data_titulo = request.values.get('titulo')
 	if not texto_plain_for_docx or not keyword_for_docx:
 		# Si no hay contenido en la sesión, redirigir o mostrar un error
 		return "No hay artículo para descargar. Por favor, genera un artículo primero.", 400
 	name_file = f"{keyword_for_docx}_articulo.docx"
 	# Llamar a crear_docx con los datos recuperados de la sesión
-	docx_buffer = crear_docx(texto_plain_for_docx, name_file)
+	docx_buffer = crear_docx(texto_plain_for_docx, name_file, image_url=image_url)
 	# Retornar el archivo como una respuesta de Flask
 	return send_file(
 		docx_buffer,
@@ -771,13 +813,14 @@ def download_generated_html(brand_id, proyecto_id):
 	# Recuperar el contenido guardado en la sesión
 	texto_plain_for_docx = request.values.get('content')
 	keyword_for_docx = request.values.get('keyword')
+	image_url = request.values.get('image_url')
 	data_titulo = request.values.get('titulo')
 	if not texto_plain_for_docx or not keyword_for_docx:
 		# Si no hay contenido en la sesión, redirigir o mostrar un error
 		return "No hay artículo para descargar. Por favor, genera un artículo primero.", 400
 	name_file = f"{keyword_for_docx}_articulo.html"
 	# Llamar a crear_docx con los datos recuperados de la sesión
-	docx_buffer = crear_html(texto_plain_for_docx, name_file)
+	docx_buffer = crear_html(texto_plain_for_docx, name_file, image_url=image_url)
 	# Retornar el archivo como una respuesta de Flask
 	return send_file(
 		docx_buffer,
@@ -791,7 +834,15 @@ def download_generated_html(brand_id, proyecto_id):
 @cltarticle_bp.route('generated-image', methods=["GET", "POST"])
 def generateImageIA(brand_id,proyecto_id):
 	data_prompt = request.values.get('promt', '')
-	data_bytes, mime_type = generar_imagen_imagen4(data_prompt)
+	model_label = request.values.get('model_label', 'Standard')
+	aspect_ratio = request.values.get('aspect_ratio', '16:9')
+	reference_files = request.files.getlist('files')
+	data_bytes, mime_type = generar_imagen_via_api(
+		data_prompt,
+		model_label=model_label,
+		aspect_ratio=aspect_ratio,
+		reference_files=reference_files
+	)
 
 	if data_bytes is None:
 		return jsonify({"error": "Fallo al generar la imagen.", "details": "El modelo no devolvió datos."}), 500
@@ -833,9 +884,12 @@ def generateImageIA(brand_id,proyecto_id):
 		db.session.add(new_data)
 		db.session.commit()
 		# 5. Devolver la URL
+		image_base64 = base64.b64encode(data_bytes).decode('ascii')
 		return jsonify({
 			"success": True,
 			"message": "Imagen generada y guardada en GCS.",
+			"imagen_base64": image_base64,
+			"imagen_mime_type": mime_type,
 			"imagen_temporal": url_firmada,
 			"nombre_archivo": name_fileext
 		})
@@ -844,16 +898,55 @@ def generateImageIA(brand_id,proyecto_id):
 		# Esto captura errores de GCS (conexión, permisos, etc.)
 		return jsonify({"error": f"Error al guardar o firmar la URL: {str(e)}"}), 500
 
+def generar_imagen_via_api(prompt: str, model_label="Standard", aspect_ratio="16:9", reference_files=None):
+	model_label = (model_label or "").lower()
+	if "standard" in model_label:
+		model_id = "gemini-2.5-flash-image"
+	elif "pro" in model_label:
+		model_id = "gemini-3-pro-image-preview"
+	else:
+		model_id = "gemini-2.5-flash-image"
+	payload = {
+		"prompt": prompt,
+		"model_id": model_id,
+		"aspect_ratio": aspect_ratio or "16:9",
+		"output_format": "png",
+	}
+	files = []
+	if reference_files:
+		for file in reference_files[:3]:
+			if file and file.filename:
+				files.append(("files", (file.filename, file.stream, file.mimetype)))
+	try:
+		response = requests.post(IMAGE_API_URL, data=payload, files=files, timeout=60)
+		response.raise_for_status()
+		data = response.json()
+		if data.get("status") != "success":
+			print(f"Respuesta inválida de la API de imágenes: {data}")
+			return None, None
+		image_base64 = data.get("image_base64")
+		mime_type = data.get("mime_type", "image/png")
+		if not image_base64:
+			print("La API de imágenes no devolvió datos base64.")
+			return None, None
+		return base64.b64decode(image_base64), mime_type
+	except requests.RequestException as e:
+		print(f"Error al llamar la API de imágenes: {e}")
+		return None, None
+	except (ValueError, TypeError) as e:
+		print(f"Error al procesar la respuesta de la API de imágenes: {e}")
+		return None, None
+
 @cltarticle_bp.route('generated-promt', methods=["GET","POST"])
 def generatePromtImageIA(brand_id, proyecto_id):
 	# 1. RECUPERAR PARÁMETROS DE LA SOLICITUD GET
 	# 'request' debe estar importado y disponible aquí.
-	tipo_articulo = request.args.get('tipo', '')
-	tipo_description = request.args.get('description', '') # Variable no usada en el prompt final, pero mantenida.
-	tema_articulo = request.args.get('tema', '')
-	keyword_articulo = request.args.get('keyword', '')
-	titulo_articulo = request.args.get('titulo', '') 
-	motivo_articulo = request.args.get('motivo', '')
+	tipo_articulo = request.values.get('tipo', '')
+	tipo_description = request.values.get('description', '') # Variable no usada en el prompt final, pero mantenida.
+	tema_articulo = request.values.get('tema', '')
+	keyword_articulo = request.values.get('keyword', '')
+	titulo_articulo = request.values.get('titulo', '') 
+	motivo_articulo = request.values.get('motivo', '')
 	
 	# Parámetros Fijos o Base
 	render_calidad = 'Render 8K'
@@ -881,14 +974,13 @@ def generatePromtImageIA(brand_id, proyecto_id):
 	if motivo_articulo:
 		motivo_enfoque_contenido = motivo_articulo
 	else:
-		motivo_enfoque_contenido = "Familia tradicional (padres hombre y mujer) en casa usando dispositivos conectados."
+		motivo_enfoque_contenido = "Escena general relacionada al tema del artículo."
 		
 	motivo_enfoque = f"Image theme and focus: the image is generated for: {motivo_enfoque_contenido}"
 
 
 	# A4. Lógica de Fondo (Background/Setting) - Anti-Borde Blanco
-	background_setting_base = f"If the keyword '{keyword_articulo}' refers to a specific place, set it as the background using a modern and premium filter. Otherwise, use a modern and warm home living room setting."
-	background_setting = f"Background/Setting: {background_setting_base}, seamless background, image must occupy the entire viewport."
+	background_setting = "Background/Setting: use the setting explicitly described in the motivo, ensuring a seamless, full-bleed background that occupies the entire viewport with no empty margins."
 	
 	# B. DETALLES DE COMPOSICIÓN Y TÉCNICOS
 	# El tono emocional ya se ha resuelto en el punto 2.
@@ -909,7 +1001,8 @@ def generatePromtImageIA(brand_id, proyecto_id):
 	# Se condensa en una sola línea para evitar problemas de formato.
 	critical_instructions = (
 		"ULTRA CRITICAL: ABSOLUTELY NO TEXT, NO LOGOS, NO WATERMARKS, NO UI CHROME, NO DEBUG ARTIFACTS, NO BOUNDING BOXES, "
-		"NO black bars cinema, NO ANNOTATIONS, NO GUIDES, AND NO WIFI/SIGNAL ICONS ARE PERMITTED ANYWHERE."
+		"NO letterboxing, NO black bars cinema, NO ANNOTATIONS, NO GUIDES, AND NO WIFI/SIGNAL ICONS ARE PERMITTED ANYWHERE. "
+		"Use the reference image as the primary subject. Preserve identity and facial features. "
 		"NO extra limbs, NO mutated hands, NO deformed fingers, NO extra arms. PURE IMAGE OUTPUT ONLY."
 	)
 	
