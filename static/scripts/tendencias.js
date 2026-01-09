@@ -142,6 +142,7 @@ $("#form-proyecto-update").on("submit",updateProyecto);
 $("#main").on("change","#cbo_fuente",selectFuente);
 $("#main").on("change","#cbo_keyword",selectKeyword);
 $("#main").on("click","#btn_buscar",loadCards);
+$("#main").on("click","#btn_addkeyword",addKeyword);
 $(function() {
 	var dateFormat = "yy-mm-dd",
 		from = $( "#txt_fecini" ).datepicker({
