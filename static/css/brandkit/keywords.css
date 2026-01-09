@@ -29,7 +29,7 @@
 	box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.add-button {
+.top-controls .add-button {
 	padding: 14px 24px;
 	background: #4a5568;
 	color: white;
@@ -44,13 +44,13 @@
 	transition: all 0.2s;
 }
 
-.add-button:hover {
+.top-controls .add-button:hover {
 	background: #2d3748;
 	transform: translateY(-1px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.add-button .material-icons {
+.top-controls .add-button .material-icons {
 	font-size: 20px;
 }
 

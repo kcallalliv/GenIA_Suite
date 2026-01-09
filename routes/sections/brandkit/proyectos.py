@@ -72,8 +72,8 @@ def proyectos_save(brand_id):
 		proyecto_estado = 1
 
 		if proyectoExiste(proyecto_name):
-			session['mensaje'] = "El proyecto ya existe. Por favor, usa otro email."
-			return redirect('agregar')
+			session['mensaje'] = "El proyecto ya existe. Por favor, usa otro nombre."
+			return redirect(url_for('proyectos_bp.proyectos_add', brand_id=brand_id))
 		else:
 			new_data = Proyectos(
 				proyecto_id=proyecto_id,
@@ -83,7 +83,8 @@ def proyectos_save(brand_id):
 			)
 			db.session.add(new_data)
 			db.session.commit()
-			return redirect('/proyectos')
+			session['mensaje'] = "Proyecto creado correctamente."
+			return redirect(url_for('proyectos_bp.proyectos_main', brand_id=brand_id))
 	return 'Error en el método de solicitud'
 #===Update===
 @proyectos_bp.route('update', methods=['POST'])
@@ -132,7 +133,8 @@ def proyectos_recovery(brand_id):
 @proyectos_bp.route('/')
 @validar_sesion
 def proyectos_main(brand_id):
-	return render_template('sections/proyectos/listado.html')
+	mensaje = session.pop('mensaje', None)
+	return render_template('sections/proyectos/listado.html', mensaje=mensaje)
 #===Listado Ajax===
 @proyectos_bp.route('listado-ajax', methods=['GET', 'POST'])
 @validar_sesion
@@ -150,7 +152,7 @@ def proyectos_listarAjax(brand_id):
 			query = query.order_by(Proyectos.proyecto_id)
 			lista = query.all()
 			if lista:
-				return render_template('sections/proyectos/listado-ajax.html', lista=lista)
+				return render_template('sections/proyectos/listado-ajax.html', lista=lista, brand_id=brand_id)
 			else:
 				return 'No se encontraron campañas con los criterios especificados.'
 		return 'Error en el método de solicitud'

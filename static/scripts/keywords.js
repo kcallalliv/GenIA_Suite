@@ -93,21 +93,23 @@ function selectFuente() {
 	}
 }
 function addKeyword(){
+	var keywordValue = $("#txt_keyword").val().trim();
+	$("#txt_keyword").val(keywordValue);
 	var v01 = validaSelect("#txt_keyword");
 	var total = v01;
 	if(total==0){
 		//Datos
 		var data_pid = $("#txt_pid").val();
-		var data_keyword = $("#txt_keyword").val();
 		$.ajax({
 			url: "addkeyword",
 			type: 'POST',
 			data: {
 				pid: data_pid,
-				keyword: data_keyword
+				keyword: keywordValue
 			},
 			success: function(data) {
 				loadListaKeywords();
+				$("#txt_keyword").val("");
 			},
 			error: function(xhr, status, error) {
 				console.error('Error al obtener el contenido AJAX:', error);
@@ -122,4 +124,7 @@ $("#form-proyecto-save").on("submit",saveProyecto);
 $("#form-proyecto-update").on("submit",updateProyecto);
 $("#main").on("change","#cbo_fuente",selectFuente);
 $("#main").on("change","#cbo_keyword",selectKeyword);
-$("#main").on("click","#btn_addkeyword",addKeyword);
+$("#main").on("click","#btn_addkeyword",function(event){
+	event.preventDefault();
+	addKeyword();
+});

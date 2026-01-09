@@ -100,10 +100,10 @@ def keyword_save(brand_id,proyecto_id):
 		if encontrado:
 			# Usamos el diccionario 'encontrado' que ya está normalizado
 			keyword = encontrado.get('keyword', 'N/A')
-			keyword_metrica_name = encontrado.get('keyword_metrica_name', ''),
-			keyword_metrica_value = encontrado.get('keyword_metrica_value', ''),
-			keyword_indicador_name = encontrado.get('keyword_indicador_name', ''),
-			keyword_indicador_value = encontrado.get('keyword_indicador_value', ''), 
+			keyword_metrica_name = encontrado.get('keyword_metrica_name', '')
+			keyword_metrica_value = encontrado.get('keyword_metrica_value', '')
+			keyword_indicador_name = encontrado.get('keyword_indicador_name', '')
+			keyword_indicador_value = encontrado.get('keyword_indicador_value', '')
 			keyword_fuente = encontrado.get('keyword_fuente', 'custom')
 			# Creamos el HTML con los datos encontrados
 			#html = f'\tKeyword: {keyword} | Posición: {posicion} | Métrica: {metrica} | Fuente: {fuente}\n'

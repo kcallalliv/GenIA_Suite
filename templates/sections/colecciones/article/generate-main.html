@@ -130,6 +130,15 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label class="form-label">Usar contexto de Google Search</label>
+							<div class="form-input-ia">
+								<label class="source-tag">
+									<input type="checkbox" id="chk_google_context" checked>
+									<span>Incluir contexto en el artículo</span>
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
 							<label class="form-label">Título</label>
 							<div id="load-titulo" class="form-input-ia">
 								<input type="text" id="txt_titulo" placeholder="" value="">
@@ -147,6 +156,41 @@
 								<span class="material-icons">auto_awesome</span>
 							</button>
 						</div>
+						<div class="form-group">
+							<label class="form-label">Modelo de imagen</label>
+							<div class="form-select">
+								<select id="cbo_image_model" name="cbo_image_model">
+									<option value="Standard">Standard (gemini-2.5-flash-image)</option>
+									<option value="Pro">Pro (gemini-3-pro-image-preview)</option>
+									<option value="Flash">Flash (gemini-2.5-flash-image)</option>
+								</select>
+								<i class="dropdown-icon"></i>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Aspect ratio</label>
+							<div class="form-select">
+								<select id="cbo_image_aspect" name="cbo_image_aspect">
+									<option value="1:1">1:1</option>
+									<option value="3:2">3:2</option>
+									<option value="2:3">2:3</option>
+									<option value="3:4">3:4</option>
+									<option value="4:3">4:3</option>
+									<option value="4:5">4:5</option>
+									<option value="5:4">5:4</option>
+									<option value="9:16">9:16</option>
+									<option value="16:9" selected>16:9</option>
+									<option value="21:9">21:9</option>
+								</select>
+								<i class="dropdown-icon"></i>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Imágenes de referencia (máx. 3)</label>
+							<div class="form-input-ia">
+								<input type="file" id="image_reference_files" name="image_reference_files" accept="image/*" multiple>
+							</div>
+						</div>
 						<div class="preview-area" id="ia_img">
 							<div id="load-image"></div>
 							<!--<a href="/images/image-name.jpg" target="_blank" download="imageia.jpg" rel="noopener noreferrer" id="txt_photo-descarga">
@@ -163,6 +207,10 @@
 							<button class="generate-button" id="btn-generar-imagen" onclick="generaImagen()">
 								<span>Generar Imagen</span>
 								<span class="material-icons">image</span>
+							</button>
+							<button class="generate-button btn-descargar-image">
+								<span>Descargar Imagen</span>
+								<span class="material-icons">download</span>
 							</button>
 							<button class="preview-button popup-btn-open" onclick="openPopup()">
 								<span>Preview</span>
